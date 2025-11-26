@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addons>
-<addon id="plugin.video.fstream" name="fStream" version="3.6.3" provider-name="Lomixxx">
+<addon id="plugin.video.fstream" name="fStream" version="1.0.0" provider-name="Lomixxx">
     <requires>
 
         <trycatch>
