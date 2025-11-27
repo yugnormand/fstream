@@ -57,17 +57,26 @@ def login(username=None, password=None):
     if not username or not password:
         return False, "Identifiants manquants"
 
-    url = s["api_base"] + "/auth/login"
+    url = s["api_base"] + "/login"
     payload = {"email": username, "password": password}
+    api_key = "14102209"
 
     try:
         if HAS_REQUESTS:
-            r = requests.post(url, json=payload)
+            headers = {
+                'Content-Type': 'application/json',
+                'X-API-KEY': api_key
+            }
+            r = requests.post(url, json=payload, headers=headers)
             code = r.status_code
             text = r.text
         else:
             data = json.dumps(payload).encode("utf-8")
-            req = urlrequest.Request(url, data=data, headers={'Content-Type': 'application/json'})
+            req = urlrequest.Request(
+                url,
+                data=data,
+                headers={'Content-Type': 'application/json', 'X-API-KEY': api_key}
+            )
             resp = urlrequest.urlopen(req)
             code = resp.getcode()
             text = resp.read().decode()
@@ -88,12 +97,14 @@ def login(username=None, password=None):
     except Exception as e:
         return False, str(e)
 
+
 def logout():
     set_token("")
     notify("Fstream", "Déconnecté")
 
 def api_headers(extra=None):
-    headers = {"Accept": "application/json"}
+    headers = {"Accept": "application/json",
+               "X-API-KEY": "14102209"}
     token = get_token()
     if token:
         headers["Authorization"] = "Bearer " + token

@@ -9,9 +9,9 @@
      
      <category label="Connexion">
     <!-- Authentification API -->
-    <setting id="api_base_url" type="text" label="API Base URL" default="https://example.com/api" />
-    <setting id="auth_username" type="text" label="Nom d'utilisateur (API)" default="" />
-    <setting id="auth_password" type="text" label="Mot de passe (API)" default="" option="hidden"/>
+    <setting id="api_base_url" type="text" label="API Base URL" default="https://dev.studitaf.com/api" />
+    <setting id="auth_username" type="text" label="Nom d'utilisateur" default="" />
+    <setting id="auth_password" type="text" label="Mot de passe" default="" option="hidden"/>
     <setting id="auth_token" type="text" label="Token API" default="" visible="false" />
     <setting id="auth_autologin" type="bool" label="Connexion automatique" default="false" />
      </category>

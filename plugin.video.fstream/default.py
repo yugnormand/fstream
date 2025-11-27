@@ -170,7 +170,7 @@ class main:
                             sitename = '[COLOR red][OFF] ' + sitename + '[/COLOR]'
 
                         oOutputParameterHandler = cOutputParameterHandler()
-                        oOutputParameterHandler.addParameter('siteUrl', 'http://venom')
+                        oOutputParameterHandler.addParameter('siteUrl', 'http://dev.studitaf.com')
                         icon = 'sites/%s.png' % (aPlugin[1])
                         oGui.addDir(aPlugin[1], 'load', sitename, icon, oOutputParameterHandler)
 

@@ -38,23 +38,44 @@ class cHome:
         oGui.addDir(SITE_IDENTIFIER, 'doLogin', 'Se connecter', 'login.png', oOutputParameterHandler)
         oGui.setEndOfDirectory()
    
-        
     def doLogin(self):
-        email = self.addons.getSetting("api_email")
-        password = self.addons.getSetting("api_password")
-
+        """
+        Tente une connexion avec les identifiants sauvegardés dans les paramètres
+        """
+        from resources.lib.comaddon import VSlog
+    
+        VSlog("[HOME] Fonction doLogin() appelée")
+    
+        # Récupération des identifiants depuis settings.xml
+        email = self.addons.getSetting("auth_username")
+        password = self.addons.getSetting("auth_password")
+    
+        VSlog(f"[HOME] Email récupéré : {email}")
+        VSlog(f"[HOME] Password présent : {bool(password)}")
+    
+        # Vérification que les champs ne sont pas vides
         if not email or not password:
-            xbmcgui.Dialog().ok("Fstream", "Veuillez entrer email et mot de passe dans les paramètres")
+            VSlog("[HOME] Identifiants manquants")
+            xbmcgui.Dialog().ok("Fstream", "Veuillez entrer votre email et mot de passe dans les paramètres")
             self.addons.openSettings()
             return
-
-        if auth.login(email, password):
-            xbmcgui.Dialog().ok("Fstream", "Connexion réussie")
+    
+        # Tentative de connexion (login retourne un tuple: success, message)
+        VSlog("[HOME] Appel de auth.login()...")
+        success, message = auth.login(email, password)
+    
+        VSlog(f"[HOME] Résultat login : success={success}, message={message}")
+    
+        if success:
+            VSlog("[HOME] Login réussi, rechargement de l'interface")
+            xbmcgui.Dialog().ok("Fstream", "Connexion réussie !")
+            # Rafraîchir l'interface
+            self.load()
         else:
-            xbmcgui.Dialog().ok("Fstream", "Erreur : identifiants invalides")
-
-        # rafraîchir home
-        self.load()
+            VSlog(f"[HOME] Login échoué : {message}")
+            # Afficher l'erreur retournée par l'API
+            xbmcgui.Dialog().ok("Fstream", f"Erreur de connexion :\n{message}")
+            
 
     def doLogout(self):
         auth.logout()
