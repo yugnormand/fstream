@@ -11,7 +11,7 @@
                 <import addon="xbmc.python" version="2.24.0"/>
             </catch>
         </trycatch>
-        <!--<import addon="repository.fstream"/>-->
+        <import addon="repository.fstream"/>
         <import addon="script.module.pyqrcode"/>
         <import addon="script.module.requests"/>
         <import addon="script.module.dnspython" optional="true"/>
