@@ -5,9 +5,9 @@
         provider-name="Lomixxx">
     <extension point="xbmc.addon.repository" name="fStream Repository">
     <dir>
-        <info compressed="false">https://raw.githubusercontent.com/yugnormand/fstream/master/addons.xml</info>
-        <checksum>https://raw.githubusercontent.com/yugnormand/fstream/master/addons.xml.md5</checksum>
-        <datadir zip="true">https://github.com/yugnormand/fstream/raw/master/repo</datadir>
+        <info compressed="false">https://raw.githubusercontent.com/yugnormand/fstream/refs/heads/master/addons.xml</info>
+        <checksum>https://raw.githubusercontent.com/yugnormand/fstream/refs/heads/master/addons.xml.md5</checksum>
+        <datadir zip="true">https://raw.githubusercontent.com/yugnormand/fstream/refs/heads/master/repo</datadir>
     </dir>
    </extension>
 
