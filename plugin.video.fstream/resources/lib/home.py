@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# vStream https://github.com/Kodi-vStream/lomixx-xbmc-addons
 # Venom.
 import xbmcaddon
 import xbmcgui
@@ -115,7 +115,7 @@ class cHome:
         oGui.addDir(SITE_IDENTIFIER, 'showMenuSearch', self.addons.VSlang(30135), 'search_direct.png')
 
         # ininteressant
-        # oOutputParameterHandler.addParameter('siteUrl', 'http://venom')
+        # oOutputParameterHandler.addParameter('siteUrl', 'http://lomixx')
         # oGui.addDir(SITE_IDENTIFIER, 'showNets', self.addons.VSlang(30114), 'buzz.png', oOutputParameterHandler)
 
         oGui.setEndOfDirectory()
@@ -143,7 +143,7 @@ class cHome:
 
         oOutputParameterHandler = cOutputParameterHandler()
 
-        # oOutputParameterHandler.addParameter('siteUrl', 'http://venom')
+        # oOutputParameterHandler.addParameter('siteUrl', 'http://lomixx')
         # oGui.addDir('themoviedb_org', 'load', self.addons.VSlang(30088), 'searchtmdb.png', oOutputParameterHandler)
 
         oOutputParameterHandler.addParameter('sCat', '1')
@@ -162,7 +162,7 @@ class cHome:
         oGui.addDir(SITE_IDENTIFIER, 'showSearchText', self.addons.VSlang(30112), 'search-divers.png', oOutputParameterHandler)
 
         if self.addons.getSetting('history-view') == 'true':
-            oOutputParameterHandler.addParameter('siteUrl', 'http://venom')
+            oOutputParameterHandler.addParameter('siteUrl', 'http://Lomixxx')
             oGui.addDir('cHome', 'showHistory', self.addons.VSlang(30308), 'history.png', oOutputParameterHandler)
 
         oGui.setEndOfDirectory()
@@ -614,7 +614,7 @@ class cHome:
             if int(sCat) not in (1, 2, 3, 5, 9):
                 continue 
 
-            oOutputParameterHandler.addParameter('siteUrl', 'http://venom')
+            oOutputParameterHandler.addParameter('siteUrl', 'http://lomixx')
             oOutputParameterHandler.addParameter('searchtext', sTitle)
 
             oGuiElement = cGuiElement()
@@ -633,7 +633,7 @@ class cHome:
             oGui.addFolder(oGuiElement, oOutputParameterHandler)
 
         if row:
-            oOutputParameterHandler.addParameter('siteUrl', 'http://venom')
+            oOutputParameterHandler.addParameter('siteUrl', 'http://lomixx')
             oGui.addDir(SITE_IDENTIFIER, 'delSearch', self.addons.VSlang(30413), 'trash.png', oOutputParameterHandler)
 
         oGui.setEndOfDirectory()
