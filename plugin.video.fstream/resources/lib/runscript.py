@@ -49,7 +49,7 @@ class cClear:
             return
 
         elif (env == 'changelog_old'):
-            sUrl = 'https://raw.githubusercontent.com/yugnormand/fstream/master/plugin.video.fstream/changelog.txt'
+            sUrl = 'https://yugnormand.github.io/fstream/plugin.video.fstream/changelog.txt'
             try:
                 oRequest = urllib2.Request(sUrl)
                 oResponse = urllib2.urlopen(oRequest)
