@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# https://github.com/Kodi-vStream/venom-xbmc-addons
+# https://github.com/yugnormand/fstream
 from setuptools import setup, find_packages
 
 setup(

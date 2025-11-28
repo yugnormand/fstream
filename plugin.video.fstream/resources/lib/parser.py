@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fStream https://github.com/yugnormand/fstream
 from operator import itemgetter
 import re
 
@@ -36,7 +36,7 @@ class cParser:
         sHtmlContent = self.__replaceSpecialCharacters(str(sHtmlContent))
         aMatches = re.compile(sPattern, re.IGNORECASE).findall(sHtmlContent)
 
-        # extrait la page html après retraitement vStream
+        # extrait la page html après retraitement fStream
         # fh = open('c:\\test.txt', "w")
         # fh.write(sHtmlContent)
         # fh.close()

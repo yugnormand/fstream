@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fStream https://github.com/yugnormand/fstream
 # import xbmc
 import xbmcaddon
 import xbmcgui
@@ -24,7 +24,7 @@ from resources.lib.search import cSearch
 #  Permet de debuguer avec Eclipse
 #
 # Tuto ici :
-# https://github.com/Kodi-vStream/venom-xbmc-addons/wiki
+# https://github.com/yugnormand/fstream/wiki
 #
 ####################
 

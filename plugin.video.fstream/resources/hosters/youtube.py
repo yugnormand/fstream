@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fStream https://github.com/yugnormand/fstream
 # type
 # https://www.youtube.com/embed/etc....
 # https://www.youtube.com/watch?v=etc...

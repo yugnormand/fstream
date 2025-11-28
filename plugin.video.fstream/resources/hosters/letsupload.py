@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fStream https://github.com/yugnormand/fstream
 # https://letsupload.co/plugins/mediaplayer/site/_embed.php?u=1r0c1&w=770&h=320
 from resources.lib.handler.requestHandler import cRequestHandler
 from resources.hosters.hoster import iHoster

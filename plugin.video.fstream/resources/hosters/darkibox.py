@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fStream https://github.com/yugnormand/fstream
 # http://cloudvid.co/embed-xxxx.html
 # https://clipwatching.com/embed-xxx.html
 

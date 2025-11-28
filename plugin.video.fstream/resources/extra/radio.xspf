@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <playlist xmlns="http://xspf.org/ns/0/" xmlns:vlc="http://www.videolan.org/vlc/playlist/ns/0/" version="1">
-	<title>vStream Radio</title>
+	<title>fStream Radio</title>
 	<trackList>
 		<track>
 			<location>http://listen.shoutcast.com/4u-70s.m3u</location>

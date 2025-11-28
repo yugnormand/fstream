@@ -1,6 +1,6 @@
-# Addon Name: vStream
+# Addon Name: fStream
 # Addon id: plugin.video.fStream
-# Addon Provider: vStream
+# Addon Provider: fStream
 msgid ""
 msgstr ""
 
@@ -57,8 +57,8 @@ msgid "Downloads already started"
 msgstr "Téléchargements déjà démarrés"
 
 msgctxt "#30013"
-msgid "vStream update"
-msgstr "Mise à jour vStream"
+msgid "fStream update"
+msgstr "Mise à jour fStream"
 
 msgctxt "#30014"
 msgid "Update complete"
@@ -229,8 +229,8 @@ msgid "Import/Export the BDD (Bookmark, History, etc.)"
 msgstr "Importer/Exporter la BDD (Marque-Page, Historique, etc..)"
 
 msgctxt "#30056"
-msgid "Remove BDD from vStream"
-msgstr "Supprime les BDD de vStream"
+msgid "Remove BDD from fStream"
+msgstr "Supprime les BDD de fStream"
 
 msgctxt "#30057"
 msgid "Delete a database"
@@ -277,8 +277,8 @@ msgid "Configure UrlResolver"
 msgstr "Configurer UrlResolver"
 
 msgctxt "#30068"
-msgid "WARNING: vStream does not manage this part,[CR] remember to deactivate it if the videos no longer work."
-msgstr "ATTENTION: vStream ne gère pas cette partie,[CR] pensez à le désactiver si les vidéos ne marchent plus."
+msgid "WARNING: fStream does not manage this part,[CR] remember to deactivate it if the videos no longer work."
+msgstr "ATTENTION: fStream ne gère pas cette partie,[CR] pensez à le désactiver si les vidéos ne marchent plus."
 
 msgctxt "#30069"
 msgid "Unless you have a premium link generator,[CR] checking this box will bring you more problems than advantages."
@@ -341,16 +341,16 @@ msgid "Download Started"
 msgstr "Téléchargement démarré"
 
 msgctxt "#30087"
-msgid "Clear Cache vStream, Error"
-msgstr "Nettoyage du cache vStream, Erreur"
+msgid "Clear Cache fStream, Error"
+msgstr "Nettoyage du cache fStream, Erreur"
 
 msgctxt "#30088"
 msgid "Visual search"
 msgstr "Recherche thématique"
 
 msgctxt "#30089"
-msgid "Clear vStream Cache, Successful"
-msgstr "Nettoyage du cache vStream, Réussi"
+msgid "Clear fStream Cache, Successful"
+msgstr "Nettoyage du cache fStream, Réussi"
 
 msgctxt "#30090"
 msgid "Suppression Database, Successful"
@@ -501,8 +501,8 @@ msgid "Tools"
 msgstr "Outils"
 
 msgctxt "#30128"
-msgid "Clear Cache vStream"
-msgstr "Vider le Cache de vStream"
+msgid "Clear Cache fStream"
+msgstr "Vider le Cache de fStream"
 
 msgctxt "#30129"
 msgid "Clear Cache Kodi"
@@ -1025,8 +1025,8 @@ msgid "Enable/Disable sources"
 msgstr "Activer/Désactiver des sources"
 
 msgctxt "#30421"
-msgid "Go to [COLOR teal]%s[CR]%s[/COLOR][CR],Valid vStream, only then click YES"
-msgstr "Rendez vous sur [COLOR teal]%s[CR]%s[/COLOR][CR] Approuver vStream, puis seulement ensuite cliquez OUI"
+msgid "Go to [COLOR teal]%s[CR]%s[/COLOR][CR],Valid fStream, only then click YES"
+msgstr "Rendez vous sur [COLOR teal]%s[CR]%s[/COLOR][CR] Approuver fStream, puis seulement ensuite cliquez OUI"
 
 msgctxt "#30422"
 msgid "Enable log records"

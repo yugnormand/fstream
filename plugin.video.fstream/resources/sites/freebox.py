@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fStream https://github.com/yugnormand/fstream
 import re
 import string
 
@@ -20,8 +20,8 @@ SITE_NAME = 'Free Télévision/Radio'
 SITE_DESC = 'Regarder la télévision'
 
 URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)
-URL_WEB = 'https://raw.githubusercontent.com/Kodi-vStream/venom-xbmc-addons/Beta/repo/resources/webtv2.m3u'
-URL_RADIO = 'https://raw.githubusercontent.com/Kodi-vStream/venom-xbmc-addons/master/repo/resources/radio.m3u'
+URL_WEB = 'https://raw.githubusercontent.com/Kodi-fStream/venom-xbmc-addons/Beta/repo/resources/webtv2.m3u'
+URL_RADIO = 'https://raw.githubusercontent.com/Kodi-fStream/venom-xbmc-addons/master/repo/resources/radio.m3u'
 
 TV_TV = (True, 'showMenuTV')
 CHAINE_TV = (URL_WEB, 'showWeb')

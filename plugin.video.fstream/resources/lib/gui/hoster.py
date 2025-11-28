@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# https://github.com/Kodi-vStream/venom-xbmc-addons
+# https://github.com/yugnormand/fstream
 # Venom.
 from resources.lib.gui.gui import cGui
 from resources.lib.gui.guiElement import cGuiElement

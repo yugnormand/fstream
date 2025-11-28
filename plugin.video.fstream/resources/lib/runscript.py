@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fStream https://github.com/yugnormand/fstream
 
-# vstream = xbmcaddon.Addon('plugin.video.fstream')
-# sLibrary = VSPath(vstream.getAddonInfo("path")).decode("utf-8")
+# fStream = xbmcaddon.Addon('plugin.video.fstream')
+# sLibrary = VSPath(fStream.getAddonInfo("path")).decode("utf-8")
 # sys.path.append (sLibrary)
 import json
 import xbmcvfs
@@ -60,7 +60,7 @@ class cClear:
                 else:
                     sContent = oResponse.read()
 
-                self.TextBoxes('vStream Changelog', sContent)
+                self.TextBoxes('fStream Changelog', sContent)
             except:
                 self.DIALOG.VSerror("%s, %s" % (self.ADDON.VSlang(30205), sUrl))
             return
@@ -139,7 +139,7 @@ class cClear:
                 else:
                     sContent = oResponse.read()
 
-                self.TextBoxes('vStream Soutient', sContent)
+                self.TextBoxes('fStream Soutient', sContent)
             except:
                 self.DIALOG.VSerror("%s, %s" % (self.ADDON.VSlang(30205), sUrl))
             return

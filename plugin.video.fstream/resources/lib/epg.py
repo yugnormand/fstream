@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fStream https://github.com/yugnormand/fstream
 # Venom.
 from resources.lib.comaddon import dialog, isMatrix
 from datetime import datetime

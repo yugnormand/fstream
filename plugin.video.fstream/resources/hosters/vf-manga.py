@@ -1,5 +1,5 @@
 #-*- coding: utf-8 -*-
-#Vstream https://github.com/Kodi-vStream/venom-xbmc-addons
+#fStream https://github.com/yugnormand/fstream
 # import base64
 import codecs
 

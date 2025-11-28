@@ -65,8 +65,8 @@
         <disclaimer lang="en_US">fStream is a video streaming addon</disclaimer>
         <platform>all</platform>
         <license>GNU GENERAL PUBLIC LICENSE</license>
-        <forum>https://github.com/Kodi-fStream/venom-xbmc-addons/issues</forum>
-        <source>https://github.com/Kodi-fStream/venom-xbmc-addons/</source>
+        <forum>https://github.com/yugnormand/fstream/issues</forum>
+        <source>https://github.com/yugnormand/fstream/</source>
         <assets>
             <icon>icon.png</icon>
             <fanart>fanart.jpg</fanart>

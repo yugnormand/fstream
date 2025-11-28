@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fStream https://github.com/yugnormand/fstream
 # Ovni-crea
 import json
 
@@ -22,7 +22,7 @@ class cHoster(iHoster):
         if token_Alldebrid:
             sUrl_Bypass = addon().getSetting('hoster_alldebrid_url')
             if not sUrl_Bypass:
-                sUrl_Bypass = "https://api.alldebrid.com/v4/link/unlock?agent=vStream&apikey=%s&link=%s"
+                sUrl_Bypass = "https://api.alldebrid.com/v4/link/unlock?agent=fStream&apikey=%s&link=%s"
             sUrl_Bypass %= (token_Alldebrid, self._url)
         else:
             return False, False

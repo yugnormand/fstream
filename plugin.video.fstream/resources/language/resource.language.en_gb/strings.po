@@ -1,6 +1,6 @@
-# Addon Name: vStream
+# Addon Name: fStream
 # Addon id: plugin.video.fStream
-# Addon Provider: vStream
+# Addon Provider: fStream
 msgid ""
 msgstr ""
 
@@ -57,7 +57,7 @@ msgid "Downloads already started"
 msgstr ""
 
 msgctxt "#30013"
-msgid "vStream update"
+msgid "fStream update"
 msgstr ""
 
 msgctxt "#30014"
@@ -229,7 +229,7 @@ msgid "Import/Export the BDD (Bookmark, History, etc.)"
 msgstr ""
 
 msgctxt "#30056"
-msgid "Remove BDD from vStream"
+msgid "Remove BDD from fStream"
 msgstr ""
 
 msgctxt "#30057"
@@ -277,7 +277,7 @@ msgid "Configure UrlResolver"
 msgstr ""
 
 msgctxt "#30068"
-msgid "WARNING: vStream does not manage this part,[CR] remember to deactivate it if the videos no longer work."
+msgid "WARNING: fStream does not manage this part,[CR] remember to deactivate it if the videos no longer work."
 msgstr ""
 
 msgctxt "#30069"
@@ -341,7 +341,7 @@ msgid "Download Started"
 msgstr ""
 
 msgctxt "#30087"
-msgid "Clear Cache vStream, Error"
+msgid "Clear Cache fStream, Error"
 msgstr ""
 
 msgctxt "#30088"
@@ -349,7 +349,7 @@ msgid "Visual search"
 msgstr ""
 
 msgctxt "#30089"
-msgid "Clear vStream Cache, Successful"
+msgid "Clear fStream Cache, Successful"
 msgstr ""
 
 msgctxt "#30090"
@@ -501,7 +501,7 @@ msgid "Tools"
 msgstr ""
 
 msgctxt "#30128"
-msgid "Clear Cache vStream"
+msgid "Clear Cache fStream"
 msgstr ""
 
 msgctxt "#30129"
@@ -1022,7 +1022,7 @@ msgid "Enable/Disable sources"
 msgstr ""
 
 msgctxt "#30421"
-msgid "Go to [COLOR teal]%s[CR]%s[/COLOR][CR] Valid vStream, only then click YES"
+msgid "Go to [COLOR teal]%s[CR]%s[/COLOR][CR] Valid fStream, only then click YES"
 msgstr ""
 
 msgctxt "#30422"

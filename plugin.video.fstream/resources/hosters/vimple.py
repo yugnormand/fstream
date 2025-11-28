@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fStream https://github.com/yugnormand/fstream
 # http://player.vimple.ru/iframe/XXXXXXXXXXXXXXXXXXXXX
 
 try:  # Python 2

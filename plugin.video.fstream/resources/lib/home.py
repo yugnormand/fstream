@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/lomixx-xbmc-addons
+# fStream https://github.com/Kodi-fStream/lomixx-xbmc-addons
 # Venom.
 import xbmcaddon
 import xbmcgui

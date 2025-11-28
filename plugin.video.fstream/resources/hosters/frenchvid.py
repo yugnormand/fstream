@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# https://github.com/Kodi-vStream/venom-xbmc-addons
+# https://github.com/yugnormand/fstream
 # french-stream /18117-la-frontire-verte-saison-1.html
 # liens FVS io
 from resources.lib.handler.requestHandler import cRequestHandler

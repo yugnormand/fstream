@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fStream https://github.com/yugnormand/fstream
 import copy
 import json
 import threading
@@ -836,7 +836,7 @@ class cGui:
 
     def setWatched(self):
         if True:
-            # Use vStream database
+            # Use fStream database
             oInputParameterHandler = cInputParameterHandler()
             sSite = oInputParameterHandler.getValue('sId')
             sSiteUrl = oInputParameterHandler.getValue('siteUrl')

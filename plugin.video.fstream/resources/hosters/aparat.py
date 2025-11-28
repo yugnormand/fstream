@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# https://github.com/Kodi-vStream/venom-xbmc-addons
+# https://github.com/yugnormand/fstream
 # https://aparat.cam/embed-xxxxx.html
 
 from resources.lib.handler.requestHandler import cRequestHandler

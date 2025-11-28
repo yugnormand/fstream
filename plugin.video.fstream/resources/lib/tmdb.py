@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Code de depart par AnthonyBloomer
-# Modif pour vStream
-# https://github.com/Kodi-vStream/venom-xbmc-addons/
+# Modif pour fStream
+# https://github.com/yugnormand/fstream/
 import re
 import string
 import xbmcvfs

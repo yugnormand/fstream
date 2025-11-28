@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fStream https://github.com/yugnormand/fstream
 
 import xbmcplugin
 import xbmc
@@ -253,7 +253,7 @@ class cPlayer(xbmc.Player):
 
                     if (pourcent > VALUE_WATCHTIME) or (pourcent == 0.0 and self.currentTime == self.totalTime):                    
 
-                        # Marquer VU dans la BDD Vstream
+                        # Marquer VU dans la BDD fStream
                         sTitleWatched = self.infotag.getOriginalTitle()
                         if sTitleWatched:
                             if sEpisode :   # changement d'épisode suite à un enchainement automatique, fin de l'épisode précédent

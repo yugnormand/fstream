@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fStream https://github.com/yugnormand/fstream
 from resources.lib.comaddon import addon, dialog, listitem
 from resources.lib.tmdb import cTMDb
 from datetime import date, datetime
@@ -104,7 +104,7 @@ class cConfig:
         # self.__sIcon = os.path.join(self.__oPath,'resources', 'art','icon.png')
         # self.__sFanart = os.path.join(self.__oPath,'resources','art','fanart.jpg')
         # self.__sFileFav = os.path.join(self.__oCache,'favourite.db').decode('utf-8')
-        # self.__sFileDB = os.path.join(self.__oCache,'vstream.db').decode('utf-8')
+        # self.__sFileDB = os.path.join(self.__oCache,'fStream.db').decode('utf-8')
         # self.__sFileCache = os.path.join(self.__oCache,'video_cache.db').decode('utf-8')
 
     def isDharma(self):
@@ -134,7 +134,7 @@ def WindowsBoxes(sTitle, siteUrl, metaType, year, sSite, sFav, sCat):
     ADDON = addon()
     DIALOG = dialog()
 
-    # Sinon on gere par vStream via la lib TMDB
+    # Sinon on gere par fStream via la lib TMDB
     sType = str(metaType).replace('1', 'movie').replace('2', 'tvshow').replace('3', 'collection').replace('4', 'anime')\
                          .replace('5', 'season').replace('6', 'episode')
 
@@ -148,7 +148,7 @@ def WindowsBoxes(sTitle, siteUrl, metaType, year, sSite, sFav, sCat):
             sType = 'tvshow'
         meta = cTMDb().get_meta(sType, sTitle, tmdb_id=tmdb_id, year=year, season=season, episode=episode)
     except:
-        DIALOG.VSok("Veuillez vider le cache des métadonnées Paramètre - outils - 'vider le cache de vStream'")
+        DIALOG.VSok("Veuillez vider le cache des métadonnées Paramètre - outils - 'vider le cache de fStream'")
         pass
 
     # si rien ne marche

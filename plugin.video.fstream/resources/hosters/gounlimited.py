@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fStream https://github.com/yugnormand/fstream
 # https://gounlimited.to/embed-xxx.html
 # top_replay robin des droits
 from resources.lib.handler.requestHandler import cRequestHandler

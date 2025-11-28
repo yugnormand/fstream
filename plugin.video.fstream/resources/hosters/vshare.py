@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fStream https://github.com/yugnormand/fstream
 # test sur http://vshare.eu/embed-wuqinr62cpn6-703x405.html
 #          http://vshare.eu/embed-cxmr4o8l2waa-703x405.html
 #          http://vshare.eu/embed-cxmr4o8l2waa703x405.html erreur code streambb

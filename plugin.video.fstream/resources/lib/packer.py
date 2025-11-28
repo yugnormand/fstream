@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fStream https://github.com/yugnormand/fstream
 
 #
-# Modified version From https://github.com/Kodi-vStream/venom-xbmc-addons
+# Modified version From https://github.com/yugnormand/fstream
 #
 #
 # Unpacker for Dean Edward's p.a.c.k.e.r, a part of javascript beautifier

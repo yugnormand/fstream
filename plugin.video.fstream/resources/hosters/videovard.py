@@ -1,5 +1,5 @@
 # coding: utf-8
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fStream https://github.com/yugnormand/fstream
 # https://abcvideo.cc/embed-xxxxx.html'
 # https://abcvideo.cc/xxxxx.html'
 # pour récuperer le token : https://github.com/addon-lab/addon-lab_resolver_Project adapté pour evoload

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fStream https://github.com/yugnormand/fstream
 
 import re
 
@@ -22,9 +22,9 @@ class cDb(object):
 
         # Le cas par defaut.
         if name == 'Master user':
-            DB = 'special://home/userdata/addon_data/plugin.video.fstream/vstream.db'
+            DB = 'special://home/userdata/addon_data/plugin.video.fstream/fStream.db'
         else:
-            DB = 'special://home/userdata/profiles/' + name + '/addon_data/plugin.video.fstream/vstream.db'
+            DB = 'special://home/userdata/profiles/' + name + '/addon_data/plugin.video.fstream/fStream.db'
 
         try:
             REALDB = VSPath(DB).decode('utf-8')
