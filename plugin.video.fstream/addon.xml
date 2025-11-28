@@ -10,7 +10,7 @@
                 <import addon="xbmc.python" version="2.24.0"/>
             </catch>
         </trycatch>
-        <!--<import addon="repository.fstream"/>-->
+        <import addon="repository.fstream"/>
         <import addon="script.module.pyqrcode"/>
         <import addon="script.module.requests"/>
         <import addon="script.module.dnspython" optional="true"/>
@@ -48,25 +48,25 @@
 
     <extension point="xbmc.service" library="service.py"/>
     <extension point="xbmc.addon.metadata">
-        <summary lang="fr_FR">vStream par Venom, TmpName, Arias800, Razorex, SiZaNiK, Yodidon.</summary>
-        <description lang="fr_FR">vStream est un module de streaming Francais, retrouvez tous vos films, series, japanimes, documentaires, reportages, concerts, sports,...</description>
-        <disclaimer lang="fr_FR">vStream est un addon de streaming videos. Obtenez du support auprès de notre partenaire [COLOR red]"les alKODIques"[/COLOR].</disclaimer>
-        <summary lang="fr_CA">vStream par Venom, TmpName, Arias800, Razorex, SiZaNiK, Yodidon.</summary>
-        <description lang="fr_CA">vStream est un module de streaming Francais, trouvez tous vos films, series et mangas.</description>
-        <disclaimer lang="fr_CA">vStream est un addon de streaming videos</disclaimer>
-        <summary lang="en_GB">vStream by Venom, TmpName, Arias800, Razorex, SiZaNiK, Yodidon.</summary>
-        <description lang="en_GB">vStream module and a French streaming, find all your movies, TV shows and mangas.</description>
-        <disclaimer lang="en_GB">vStream is a video streaming addon</disclaimer>
-        <summary lang="en_NZ">vStream by Venom, TmpName, Arias800, Razorex, SiZaNiK, Yodidon.</summary>
-        <description lang="en_NZ">vStream module and a French streaming, find all your movies, TV shows and mangas.</description>
-        <disclaimer lang="en_NZ">vStream is a video streaming addon</disclaimer>
-        <summary lang="en_US">vStream by Venom, TmpName, Arias800, Razorex, SiZaNiK, Yodidon.</summary>
-        <description lang="en_US">vStream module and a French streaming, find all your movies, TV shows and mangas.</description>
-        <disclaimer lang="en_US">vStream is a video streaming addon</disclaimer>
+        <summary lang="fr_FR">fStream par Venom, TmpName, Arias800, Razorex, SiZaNiK, Yodidon.</summary>
+        <description lang="fr_FR">fStream est un module de streaming Francais, retrouvez tous vos films, series, japanimes, documentaires, reportages, concerts, sports,...</description>
+        <disclaimer lang="fr_FR">fStream est un addon de streaming videos. Obtenez du support auprès de notre partenaire [COLOR red]"les alKODIques"[/COLOR].</disclaimer>
+        <summary lang="fr_CA">fStream par Venom, TmpName, Arias800, Razorex, SiZaNiK, Yodidon.</summary>
+        <description lang="fr_CA">fStream est un module de streaming Francais, trouvez tous vos films, series et mangas.</description>
+        <disclaimer lang="fr_CA">fStream est un addon de streaming videos</disclaimer>
+        <summary lang="en_GB">fStream by Venom, TmpName, Arias800, Razorex, SiZaNiK, Yodidon.</summary>
+        <description lang="en_GB">fStream module and a French streaming, find all your movies, TV shows and mangas.</description>
+        <disclaimer lang="en_GB">fStream is a video streaming addon</disclaimer>
+        <summary lang="en_NZ">fStream by Venom, TmpName, Arias800, Razorex, SiZaNiK, Yodidon.</summary>
+        <description lang="en_NZ">fStream module and a French streaming, find all your movies, TV shows and mangas.</description>
+        <disclaimer lang="en_NZ">fStream is a video streaming addon</disclaimer>
+        <summary lang="en_US">fStream by Venom, TmpName, Arias800, Razorex, SiZaNiK, Yodidon.</summary>
+        <description lang="en_US">fStream module and a French streaming, find all your movies, TV shows and mangas.</description>
+        <disclaimer lang="en_US">fStream is a video streaming addon</disclaimer>
         <platform>all</platform>
         <license>GNU GENERAL PUBLIC LICENSE</license>
-        <forum>https://github.com/Kodi-vStream/venom-xbmc-addons/issues</forum>
-        <source>https://github.com/Kodi-vStream/venom-xbmc-addons/</source>
+        <forum>https://github.com/Kodi-fStream/venom-xbmc-addons/issues</forum>
+        <source>https://github.com/Kodi-fStream/venom-xbmc-addons/</source>
         <assets>
             <icon>icon.png</icon>
             <fanart>fanart.jpg</fanart>
