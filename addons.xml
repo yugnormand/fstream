@@ -87,6 +87,10 @@
         <info compressed="false">https://raw.githubusercontent.com/yugnormand/fstream/refs/heads/master/addons.xml</info>
         <checksum>https://raw.githubusercontent.com/yugnormand/fstream/refs/heads/master/addons.xml.md5</checksum>
         <datadir zip="true">https://yugnormand.github.io/fstream/repo/plugin.video.fstream-0.0.1.zip</datadir>
+                <assets>
+    <icon>https://yugnormand.github.io/fstream/repo/icon.png</icon>
+    <fanart>https://yugnormand.github.io/fstream/repo/fanart.jpg</fanart>
+</assets>
     </dir>
    </extension>
 
