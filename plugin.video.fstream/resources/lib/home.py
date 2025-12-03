@@ -21,6 +21,33 @@ from resources.lib.trakt import SITE_IDENTIFIER as SITE_TRAKT
 
 SITE_IDENTIFIER = 'cHome'
 SITE_NAME = 'Home'
+IPTV_COUNTRIES = {
+    'FR': 'France',
+    'US': 'United States',
+    'GB': 'United Kingdom',
+    'DE': 'Germany',
+    'IT': 'Italy',
+    'ES': 'Spain',
+    'CA': 'Canada',
+    'AU': 'Australia',
+    'BR': 'Brazil',
+    'IN': 'India',
+    'JP': 'Japan',
+    'KR': 'South Korea',
+    'CN': 'China',
+    'RU': 'Russia',
+    'TR': 'Turkey',
+    'EG': 'Egypt',
+    'SA': 'Saudi Arabia',
+    'AE': 'United Arab Emirates',
+    'MX': 'Mexico',
+    'AR': 'Argentina',
+    'CM': 'Cameroon',
+    'NG': 'Nigeria',
+    'ZA': 'South Africa',
+    'CIV': 'Ivory Coast'
+}
+
 
 
 class cHome:
@@ -505,10 +532,15 @@ class cHome:
 
     def showDirect(self):
         oGui = cGui()
-        oOutputParameterHandler = cOutputParameterHandler()
-        oGui.addDir(SITE_IDENTIFIER, 'showSports', self.addons.VSlang(30113), 'sport.png', oOutputParameterHandler)
-#        oGui.addDir(SITE_IDENTIFIER, 'showMenuTV', self.addons.VSlang(30115), 'tv.png', oOutputParameterHandler)
-        oGui.addDir('radio', 'load', self.addons.VSlang(30203), 'radio.png', oOutputParameterHandler)
+        oGui.addText('fStream', 'Choisissez un pays')
+
+        for code, name in IPTV_COUNTRIES.items():
+            oOutput = cOutputParameterHandler()
+            oOutput.addParameter('country_code', code)
+            oOutput.addParameter('country_name', name)
+
+            oGui.addDir(SITE_IDENTIFIER, 'showIPTV_ByCountry', f"{name}", f"{code.lower()}.png", oOutput)
+
         oGui.setEndOfDirectory()
 
     def showMenuTV(self):
@@ -686,3 +718,19 @@ class cHome:
                 pass
 
         oGui.setEndOfDirectory()
+
+    def getCountryM3U(country_code):
+        return [f"https://iptv-org.github.io/iptv/countries/{country_code.lower()}.m3u"]
+    
+    def showIPTV_ByCountry(self):
+        oGui = cGui()
+        oInput = cInputParameterHandler()
+
+        code = oInput.getValue('country_code')
+        name = oInput.getValue('country_name')
+
+        # Charger M3U
+        urls = getCountryM3U(code)
+        data = loadM3U(urls, f"{code.lower()}_cache.m3u")
+
+        parseAndShowM3U(oGui, data)
