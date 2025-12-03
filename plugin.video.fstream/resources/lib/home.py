@@ -8,8 +8,6 @@ import os
 import xbmc
 from resources.lib import auth
 
-#addon = xbmcaddon.Addon()
-
 from resources.lib.gui.hoster import cHosterGui
 from resources.lib.gui.gui import cGui
 from resources.lib.gui.guiElement import cGuiElement
@@ -51,7 +49,7 @@ IPTV_COUNTRIES = {
     'CIV': 'Ivory Coast'
 }
 
-# ✅ CLASSE DE CACHE SIMPLE
+# ===== CLASSE DE CACHE =====
 class IPTVCache:
     """Classe simple pour gérer le cache des fichiers M3U"""
     
@@ -72,7 +70,6 @@ class IPTVCache:
         try:
             cache_file = os.path.join(IPTVCache.get_cache_dir(), cache_name)
             if os.path.exists(cache_file):
-                # Vérifier si le cache a moins de 24h
                 import time
                 file_time = os.path.getmtime(cache_file)
                 current_time = time.time()
@@ -101,7 +98,37 @@ class IPTVCache:
             VSlog(f"[CACHE] Erreur sauvegarde cache: {str(e)}")
 
 
-# ✅ Fonctions utilitaires
+# ===== FONCTIONS UTILITAIRES IPTV =====
+
+def extractCountriesFromAPI():
+    """Récupère la liste de tous les pays disponibles sur iptv-org"""
+    from resources.lib.comaddon import VSlog
+    
+    try:
+        # L'API iptv-org fournit un index des pays
+        url = "https://iptv-org.github.io/iptv/countries.json"
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        
+        countries_data = response.json()
+        VSlog(f"[IPTV] {len(countries_data)} pays trouvés via API")
+        
+        # Retourner un dictionnaire {code: name}
+        countries = {}
+        for country in countries_data:
+            code = country.get('code', '').upper()
+            name = country.get('name', '')
+            if code and name:
+                countries[code] = name
+        
+        return countries
+        
+    except Exception as e:
+        VSlog(f"[IPTV] Erreur récupération pays API: {str(e)}")
+        # Fallback sur la liste statique
+        return IPTV_COUNTRIES
+
+
 def getCountryM3U(country_code):
     """Retourne l'URL du fichier M3U pour un pays donné"""
     return [f"https://iptv-org.github.io/iptv/countries/{country_code.lower()}.m3u"]
@@ -139,40 +166,10 @@ def loadM3U(urls, cache_name):
     return data
 
 
-def extractCountriesFromAPI():
-    """Récupère la liste de tous les pays disponibles sur iptv-org"""
-    from resources.lib.comaddon import VSlog
-    import requests
-    
-    try:
-        # L'API iptv-org fournit un index des pays
-        url = "https://iptv-org.github.io/iptv/countries.json"
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-        
-        countries_data = response.json()
-        VSlog(f"[IPTV] {len(countries_data)} pays trouvés")
-        
-        # Retourner un dictionnaire {code: name}
-        countries = {}
-        for country in countries_data:
-            code = country.get('code', '').upper()
-            name = country.get('name', '')
-            if code and name:
-                countries[code] = name
-        
-        return countries
-        
-    except Exception as e:
-        VSlog(f"[IPTV] Erreur récupération pays: {str(e)}")
-        # Fallback sur la liste statique
-        return IPTV_COUNTRIES
-
-
-def parseAndShowM3U(oGui, data, show_categories=True, show_by='category'):
+def parseAndShowM3U(oGui, data, show_by='category'):
     """
     Parse le contenu M3U et affiche selon le mode choisi
-    show_by: 'category' ou 'country'
+    show_by: 'category', 'country' ou 'all'
     """
     import re
     from resources.lib.comaddon import VSlog
@@ -199,31 +196,33 @@ def parseAndShowM3U(oGui, data, show_categories=True, show_by='category'):
         
         if line.startswith('#EXTINF'):
             try:
-                # ===== EXTRACTION DU TITRE =====
-                # Méthode 1: Chercher tvg-name
-                name_match = re.search(r'tvg-name="([^"]+)"', line)
-                title = name_match.group(1) if name_match else None
+                # ===== EXTRACTION DU TITRE (AMÉLIORÉ) =====
+                title = None
                 
-                # Méthode 2: Texte après la virgule (le plus courant)
-                if not title or len(title.strip()) == 0:
-                    comma_parts = line.split(',', 1)
+                # Méthode 1: tvg-name
+                name_match = re.search(r'tvg-name="([^"]+)"', line)
+                if name_match:
+                    title = name_match.group(1).strip()
+                
+                # Méthode 2: Texte après la dernière virgule (le plus courant dans M3U)
+                if not title or len(title) == 0:
+                    comma_parts = line.split(',')
                     if len(comma_parts) > 1:
-                        # Nettoyer le titre (enlever les attributs avant)
-                        potential_title = comma_parts[1].strip()
-                        # Enlever les éventuels attributs qui traînent
-                        potential_title = re.sub(r'^.*?\s+([A-Za-z0-9])', r'\1', potential_title)
+                        potential_title = comma_parts[-1].strip()
+                        # Nettoyer des attributs qui traînent
+                        potential_title = re.sub(r'^\s*[\w-]+="[^"]*"\s*', '', potential_title)
                         if potential_title and len(potential_title) > 0:
                             title = potential_title
                 
-                # Méthode 3: tvg-id peut parfois donner un indice
-                if not title or len(title.strip()) == 0:
+                # Méthode 3: tvg-id
+                if not title or len(title) == 0:
                     id_match = re.search(r'tvg-id="([^"]+)"', line)
                     if id_match:
-                        title = id_match.group(1).replace('.', ' ').replace('-', ' ')
+                        title = id_match.group(1).replace('.', ' ').replace('-', ' ').strip()
                 
-                # Si vraiment rien trouvé
-                if not title or len(title.strip()) == 0:
-                    title = "Chaîne"
+                # Dernière chance: utiliser un compteur
+                if not title or len(title) == 0:
+                    title = f"Chaîne {total_parsed + 1}"
                 
                 # ===== EXTRACTION DES AUTRES INFOS =====
                 logo_match = re.search(r'tvg-logo="([^"]*)"', line)
@@ -243,14 +242,15 @@ def parseAndShowM3U(oGui, data, show_categories=True, show_by='category'):
                 
                 if stream_url and title:
                     logo = logo_match.group(1) if logo_match else "tv.png"
-                    category = group_match.group(1) if group_match else "Général"
-                    country = country_match.group(1) if country_match else "International"
+                    category = group_match.group(1).strip() if group_match else "Général"
+                    country = country_match.group(1).strip() if country_match else "International"
                     
                     # Nettoyer le titre
                     title = title.replace('[', '').replace(']', '').strip()
-                    # Enlever les balises HTML éventuelles
-                    title = re.sub(r'<[^>]+>', '', title)
-                    # Limiter la longueur si trop long
+                    title = re.sub(r'<[^>]+>', '', title)  # Enlever HTML
+                    title = re.sub(r'\s+', ' ', title)  # Normaliser espaces
+                    
+                    # Limiter longueur
                     if len(title) > 60:
                         title = title[:57] + "..."
                     
@@ -272,24 +272,23 @@ def parseAndShowM3U(oGui, data, show_categories=True, show_by='category'):
                     if country not in countries:
                         countries[country] = []
                     countries[country].append(channel)
-
+                    
                     # Liste globale
                     all_channels.append(channel)
                     
                     total_parsed += 1
                     
-                    if total_parsed <= 5:  # Debug: afficher les 5 premières
-                        VSlog(f"[M3U] Chaîne: '{title}' | Catégorie: {category} | Pays: {country}")
+                    if total_parsed <= 5:
+                        VSlog(f"[M3U] '{title}' | Cat: {category} | Pays: {country}")
                     
             except Exception as e:
                 VSlog(f"[M3U] Erreur parsing ligne {i}: {str(e)}")
         
         i += 1
     
-    VSlog(f"[M3U] Total parsé: {total_parsed} chaînes")
-    VSlog(f"[M3U] {len(categories)} catégories, {len(countries)} pays")
+    VSlog(f"[M3U] Total: {total_parsed} chaînes, {len(categories)} catégories, {len(countries)} pays")
     
-    # Affichage selon le mode
+    # ===== AFFICHAGE SELON LE MODE =====
     if show_by == 'category':
         if categories:
             sorted_categories = sorted(categories.keys())
@@ -324,7 +323,6 @@ def parseAndShowM3U(oGui, data, show_categories=True, show_by='category'):
                 oOutputParameterHandler.addParameter('filter_value', country)
                 oOutputParameterHandler.addParameter('m3u_data', data)
                 
-                # Essayer de trouver le code pays pour l'icône
                 country_code = get_country_code(country)
                 icon = f"{country_code.lower()}.png" if country_code else "tv.png"
                 
@@ -337,6 +335,7 @@ def parseAndShowM3U(oGui, data, show_categories=True, show_by='category'):
                 )
         else:
             oGui.addText('fStream', 'Aucun pays trouvé')
+    
     elif show_by == 'all':
         # Afficher toutes les chaînes
         for channel in all_channels:
@@ -356,7 +355,7 @@ def parseAndShowM3U(oGui, data, show_categories=True, show_by='category'):
         
         if len(all_channels) == 0:
             oGui.addText('fStream', 'Aucune chaîne trouvée')
-            
+
 
 def parseAndShowChannels(oGui, data, filter_type, filter_value):
     """Affiche les chaînes filtrées par catégorie ou pays"""
@@ -383,8 +382,8 @@ def parseAndShowChannels(oGui, data, filter_type, filter_value):
                 group_match = re.search(r'group-title="([^"]*)"', line)
                 country_match = re.search(r'tvg-country="([^"]*)"', line)
                 
-                category = group_match.group(1) if group_match else "Général"
-                country = country_match.group(1) if country_match else "International"
+                category = group_match.group(1).strip() if group_match else "Général"
+                country = country_match.group(1).strip() if country_match else "International"
                 
                 # Vérifier si correspond au filtre
                 match = False
@@ -395,21 +394,24 @@ def parseAndShowChannels(oGui, data, filter_type, filter_value):
                 
                 if match:
                     # Extraire le titre (même logique améliorée)
+                    title = None
+                    
                     name_match = re.search(r'tvg-name="([^"]+)"', line)
-                    title = name_match.group(1) if name_match else None
+                    if name_match:
+                        title = name_match.group(1).strip()
                     
-                    if not title or len(title.strip()) == 0:
-                        comma_parts = line.split(',', 1)
+                    if not title or len(title) == 0:
+                        comma_parts = line.split(',')
                         if len(comma_parts) > 1:
-                            title = comma_parts[1].strip()
-                            title = re.sub(r'^.*?\s+([A-Za-z0-9])', r'\1', title)
+                            title = comma_parts[-1].strip()
+                            title = re.sub(r'^\s*[\w-]+="[^"]*"\s*', '', title)
                     
-                    if not title or len(title.strip()) == 0:
+                    if not title or len(title) == 0:
                         id_match = re.search(r'tvg-id="([^"]+)"', line)
                         if id_match:
-                            title = id_match.group(1).replace('.', ' ').replace('-', ' ')
+                            title = id_match.group(1).replace('.', ' ').replace('-', ' ').strip()
                     
-                    if not title or len(title.strip()) == 0:
+                    if not title or len(title) == 0:
                         title = f"Chaîne {count + 1}"
                     
                     # Extraire logo et URL
@@ -429,6 +431,7 @@ def parseAndShowChannels(oGui, data, filter_type, filter_value):
                         logo = logo_match.group(1) if logo_match else "tv.png"
                         title = title.replace('[', '').replace(']', '').strip()
                         title = re.sub(r'<[^>]+>', '', title)
+                        title = re.sub(r'\s+', ' ', title)
                         
                         if len(title) > 60:
                             title = title[:57] + "..."
@@ -453,7 +456,7 @@ def parseAndShowChannels(oGui, data, filter_type, filter_value):
         
         i += 1
     
-    VSlog(f"[M3U] {count} chaînes affichées")
+    VSlog(f"[M3U] {count} chaînes affichées pour {filter_value}")
     
     if count == 0:
         oGui.addText('fStream', f'Aucune chaîne trouvée')
@@ -471,7 +474,7 @@ def get_country_code(country_name):
         'france': 'FR', 'united states': 'US', 'usa': 'US',
         'united kingdom': 'GB', 'uk': 'GB', 'germany': 'DE',
         'italy': 'IT', 'spain': 'ES', 'canada': 'CA',
-        'international': 'WORLD'
+        'international': 'WORLD', 'brasil': 'BR', 'brazil': 'BR'
     }
     
     return common_codes.get(country_name.lower(), None)
@@ -489,6 +492,7 @@ def get_category_icon(category):
         'films': 'films.png',
         'series': 'series.png',
         'documentary': 'doc.png',
+        'docs': 'doc.png',
         'kids': 'enfants.png',
         'music': 'genres.png',
         'general': 'tv.png',
@@ -504,6 +508,8 @@ def get_category_icon(category):
     
     return 'tv.png'
 
+
+# ===== CLASSE PRINCIPALE =====
 
 class cHome:
 
@@ -596,10 +602,6 @@ class cHome:
         oGui.addDir(SITE_TMDB, 'showMenuActeur', self.addons.VSlang(30466), 'actor.png')
         oGui.addDir(SITE_IDENTIFIER, 'showMenuSearch', self.addons.VSlang(30135), 'search_direct.png')
 
-        # ininteressant
-        # oOutputParameterHandler.addParameter('siteUrl', 'http://lomixx')
-        # oGui.addDir(SITE_IDENTIFIER, 'showNets', self.addons.VSlang(30114), 'buzz.png', oOutputParameterHandler)
-
         oGui.setEndOfDirectory()
 
     def showMyVideos(self):
@@ -609,14 +611,6 @@ class cHome:
         oGui.addDir('cWatched', 'showMenu', self.addons.VSlang(30321), 'annees.png')
         oGui.addDir(SITE_IDENTIFIER, 'showUsers', self.addons.VSlang(30455), 'profile.png')
         oGui.addDir('cDownload', 'getDownloadList', self.addons.VSlang(30229), 'download.png')
-
-        # les enregistrements de chaines TV ne sont plus opérationnelles
-        # folder = self.addons.getSetting('path_enregistrement')
-        # if not folder:
-        #     folder = 'special://userdata/addon_data/plugin.video.fstream/Enregistrement"/>'
-        # oOutputParameterHandler.addParameter('siteUrl', folder)
-        # oGui.addDir('cLibrary', 'openLibrary', self.addons.VSlang(30225), 'download.png', oOutputParameterHandler)
-
         oGui.addDir('globalSources', 'activeSources', self.addons.VSlang(30362), 'host.png')
         oGui.setEndOfDirectory()
 
@@ -624,9 +618,6 @@ class cHome:
         oGui = cGui()
 
         oOutputParameterHandler = cOutputParameterHandler()
-
-        # oOutputParameterHandler.addParameter('siteUrl', 'http://lomixx')
-        # oGui.addDir('themoviedb_org', 'load', self.addons.VSlang(30088), 'searchtmdb.png', oOutputParameterHandler)
 
         oOutputParameterHandler.addParameter('sCat', '1')
         oGui.addDir(SITE_IDENTIFIER, 'showSearchText', self.addons.VSlang(30120), 'search-films.png', oOutputParameterHandler)
@@ -674,7 +665,6 @@ class cHome:
     
         oGui.setEndOfDirectory()
 
-
     def showSeriesSearch(self):
         oGui = cGui()
         addons = self.addons
@@ -683,7 +673,7 @@ class cHome:
         oOutputParameterHandler.addParameter('siteUrl', 'search/tv')
         oGui.addDir(SITE_TMDB, 'showSearchSerie', addons.VSlang(30121), 'search-series.png', oOutputParameterHandler)
     
-            # Chercher une liste
+        # Chercher une liste
         oOutputParameterHandler.addParameter('sCat', '2')
         oGui.addDir(SITE_TRAKT, 'showSearchList', addons.VSlang(30123), 'search-list.png', oOutputParameterHandler)
         
@@ -693,677 +683,631 @@ class cHome:
     
         oGui.setEndOfDirectory()
 
-
     def showAnimesSearch(self):
         oGui = cGui()
+        addons = self.addons
+    
         oOutputParameterHandler = cOutputParameterHandler()
-
         # recherche directe
         oOutputParameterHandler.addParameter('sCat', '3')
         oGui.addDir(SITE_IDENTIFIER, 'showSearchText', self.addons.VSlang(30076), 'search-animes.png', oOutputParameterHandler)
-    
+
         if self.addons.getSetting('history-view') == 'true':
             oOutputParameterHandler.addParameter('sCat', '3')
             oGui.addDir(SITE_IDENTIFIER, 'showHistory', self.addons.VSlang(30308), 'history.png', oOutputParameterHandler)
-    
-    
+
         oGui.setEndOfDirectory()
 
-    def showDramasSearch(self):
-        oGui = cGui()
-        oOutputParameterHandler = cOutputParameterHandler()
+def showDramasSearch(self):
+    oGui = cGui()
+    oOutputParameterHandler = cOutputParameterHandler()
 
-        # recherche directe
+    # recherche directe
+    oOutputParameterHandler.addParameter('sCat', '9')
+    oGui.addDir(SITE_IDENTIFIER, 'showSearchText', self.addons.VSlang(30076), 'search-dramas.png', oOutputParameterHandler)
+
+    if self.addons.getSetting('history-view') == 'true':
+        oOutputParameterHandler.addParameter('sCat', '9')
+        oGui.addDir(SITE_IDENTIFIER, 'showHistory', self.addons.VSlang(30308), 'history.png', oOutputParameterHandler)
+
+    oGui.setEndOfDirectory()
+
+def showDocsSearch(self):
+    oGui = cGui()
+    oOutputParameterHandler = cOutputParameterHandler()
+
+    # recherche directe
+    oOutputParameterHandler.addParameter('sCat', '5')
+    oGui.addDir(SITE_IDENTIFIER, 'showSearchText', self.addons.VSlang(30076), 'search-divers.png', oOutputParameterHandler)
+
+    if self.addons.getSetting('history-view') == 'true':
+        oOutputParameterHandler.addParameter('sCat', '5')
+        oGui.addDir(SITE_IDENTIFIER, 'showHistory', self.addons.VSlang(30308), 'history.png', oOutputParameterHandler)
+
+    oGui.setEndOfDirectory()
+
+def showSearchText(self):
+    oGui = cGui()
+    oInputParameterHandler = cInputParameterHandler()
+    sSearchText = oGui.showKeyBoard(heading=self.addons.VSlang(30076))
+    if not sSearchText:
+        return False
+
+    oSearch = cSearch()
+    sCat = oInputParameterHandler.getValue('sCat')
+    oSearch.searchGlobal(sSearchText, sCat)
+    oGui.setEndOfDirectory()
+
+def showMovies(self):
+    oGui = cGui()
+    addons = self.addons
+
+    oOutputParameterHandler = cOutputParameterHandler()
+
+    oGui.addDir(SITE_IDENTIFIER, 'showMovieSearch', addons.VSlang(30076), 'search.png', oOutputParameterHandler)
+
+    # Nouveautés
+    oOutputParameterHandler.addParameter('siteUrl', 'discover/movie')
+    oGui.addDir(SITE_TMDB, 'showMoviesNews', addons.VSlang(30101), 'news.png', oOutputParameterHandler)
+
+    # Populaires
+    oOutputParameterHandler.addParameter('siteUrl', 'discover/movie')
+    oGui.addDir(SITE_TMDB, 'showMovies', addons.VSlang(30102), 'popular.png', oOutputParameterHandler)
+    
+    # Box office
+    oOutputParameterHandler.addParameter('siteUrl', 'movies/boxoffice')
+    oOutputParameterHandler.addParameter('sCat', '1')
+    oGui.addDir(SITE_TRAKT, 'getTrakt', addons.VSlang(30314), 'boxoffice.png', oOutputParameterHandler)
+    
+    # Genres
+    oOutputParameterHandler.addParameter('siteUrl', 'genre/movie/list')
+    oGui.addDir(SITE_TMDB, 'showGenreMovie', addons.VSlang(30105), 'genres.png', oOutputParameterHandler)
+    
+    # Années
+    oOutputParameterHandler.addParameter('siteUrl', 'discover/movie')
+    oGui.addDir(SITE_TMDB, 'showMoviesYears', self.addons.VSlang(30106), 'annees.png', oOutputParameterHandler)
+
+    # Top films TRAKT
+    oOutputParameterHandler.addParameter('siteUrl', 'movies/popular')
+    oOutputParameterHandler.addParameter('sCat', '1')
+    oGui.addDir(SITE_TRAKT, 'getTrakt', self.addons.VSlang(30104), 'notes.png', oOutputParameterHandler)
+
+    oOutputParameterHandler.addParameter('siteUrl', 'ANIM_ENFANTS')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30109), 'enfants.png', oOutputParameterHandler)
+
+    oOutputParameterHandler.addParameter('siteUrl', 'MOVIE_VOSTFR')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30108), 'vostfr.png', oOutputParameterHandler)
+
+    oOutputParameterHandler.addParameter('siteUrl', 'MOVIE_MOVIE')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30138), 'host.png', oOutputParameterHandler)
+
+    oGui.setEndOfDirectory()
+
+def showSeries(self):
+    oGui = cGui()
+    addons=self.addons
+
+    oOutputParameterHandler = cOutputParameterHandler()
+
+    if self.addons.getSetting('history-view') == 'true':
+        oOutputParameterHandler.addParameter('siteUrl', 'search/tv')
+        oGui.addDir(SITE_IDENTIFIER, 'showSeriesSearch', addons.VSlang(30076), 'search.png', oOutputParameterHandler)
+    else:
+        oOutputParameterHandler.addParameter('siteUrl', 'search/tv')
+        oGui.addDir(SITE_TMDB, 'showSearchSerie', addons.VSlang(30121), 'search-series.png', oOutputParameterHandler)
+
+    # Nouveautés
+    oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
+    oGui.addDir(SITE_TMDB, 'showSeriesNews', addons.VSlang(30101), 'news.png', oOutputParameterHandler)
+
+    # Populaires trakt
+    oOutputParameterHandler.addParameter('siteUrl', 'shows/trending')
+    oOutputParameterHandler.addParameter('sCat', '2')
+    oGui.addDir(SITE_TRAKT, 'getTrakt', addons.VSlang(30102), 'popular.png', oOutputParameterHandler)
+
+    # Par diffuseurs
+    oOutputParameterHandler.addParameter('siteUrl', 'genre/tv/list')
+    oGui.addDir(SITE_TMDB, 'showSeriesNetworks', addons.VSlang(30467), 'diffuseur.png', oOutputParameterHandler)
+
+    # Par genres
+    oOutputParameterHandler.addParameter('siteUrl', 'genre/tv/list')
+    oGui.addDir(SITE_TMDB, 'showGenreTV', addons.VSlang(30105), 'genres.png', oOutputParameterHandler)
+
+    # Les mieux notés TMDB
+    oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
+    oGui.addDir(SITE_TMDB, 'showSeriesTop', addons.VSlang(30104), 'notes.png', oOutputParameterHandler)
+
+    # Par années
+    oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
+    oGui.addDir(SITE_TMDB, 'showSeriesYears', self.addons.VSlang(30106), 'annees.png', oOutputParameterHandler)
+
+    oOutputParameterHandler.addParameter('siteUrl', 'SERIE_LIST')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30111), 'az.png', oOutputParameterHandler)
+
+    oOutputParameterHandler.addParameter('siteUrl', 'SERIE_VOSTFRS')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30108), 'vostfr.png', oOutputParameterHandler)
+
+    oOutputParameterHandler.addParameter('siteUrl', 'SERIE_SERIES')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30138), 'host.png', oOutputParameterHandler)
+
+    oGui.setEndOfDirectory()
+
+def showAnimes(self):
+    oGui = cGui()
+
+    oOutputParameterHandler = cOutputParameterHandler()
+
+    if self.addons.getSetting('history-view') == 'true':
+        oOutputParameterHandler.addParameter('siteUrl', 'search/tv')
+        oGui.addDir(SITE_IDENTIFIER, 'showAnimesSearch', self.addons.VSlang(30076), 'search.png', oOutputParameterHandler)
+    else:
+        oOutputParameterHandler.addParameter('sCat', '3')
+        oGui.addDir(SITE_IDENTIFIER, 'showSearchText', self.addons.VSlang(30076), 'search-animes.png', oOutputParameterHandler)
+
+    # Nouveautés
+    oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
+    oGui.addDir(SITE_TMDB, 'showAnimesNews', self.addons.VSlang(30101), 'news.png', oOutputParameterHandler)
+
+    # Populaires
+    oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
+    oGui.addDir(SITE_TMDB, 'showAnimes', self.addons.VSlang(30102), 'popular.png', oOutputParameterHandler)
+
+    # TOP
+    oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
+    oGui.addDir(SITE_TMDB, 'showAnimesTop', self.addons.VSlang(30104), 'notes.png', oOutputParameterHandler)
+
+    oOutputParameterHandler.addParameter('siteUrl', 'ANIM_GENRES')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30105), 'genres.png', oOutputParameterHandler)
+
+    oOutputParameterHandler.addParameter('siteUrl', 'ANIM_LIST')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30111), 'az.png', oOutputParameterHandler)
+
+    oOutputParameterHandler.addParameter('siteUrl', 'ANIM_VOSTFRS')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30108), 'vf.png', oOutputParameterHandler)
+
+    oOutputParameterHandler.addParameter('siteUrl', 'ANIM_ANIMS')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30138), 'host.png', oOutputParameterHandler)
+
+    oGui.setEndOfDirectory()
+
+def showDramas(self):
+    oGui = cGui()
+
+    # Affiche les Nouveautés Dramas
+    oOutputParameterHandler = cOutputParameterHandler()
+    if self.addons.getSetting('history-view') == 'true':
+        oOutputParameterHandler.addParameter('siteUrl', 'search/tv')
+        oGui.addDir(SITE_IDENTIFIER, 'showDramasSearch', self.addons.VSlang(30076), 'search.png', oOutputParameterHandler)
+    else:
         oOutputParameterHandler.addParameter('sCat', '9')
         oGui.addDir(SITE_IDENTIFIER, 'showSearchText', self.addons.VSlang(30076), 'search-dramas.png', oOutputParameterHandler)
-    
-        if self.addons.getSetting('history-view') == 'true':
-            oOutputParameterHandler.addParameter('sCat', '9')
-            oGui.addDir(SITE_IDENTIFIER, 'showHistory', self.addons.VSlang(30308), 'history.png', oOutputParameterHandler)
-    
-        oGui.setEndOfDirectory()
 
-    def showDocsSearch(self):
-        oGui = cGui()
-        oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('siteUrl', 'DRAMA_NEWS')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30101), 'news.png', oOutputParameterHandler)
 
-        # recherche directe
+    oOutputParameterHandler.addParameter('siteUrl', 'DRAMA_VIEWS')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30102), 'popular.png', oOutputParameterHandler)
+
+    # Affiche les Genres Dramas
+    oOutputParameterHandler.addParameter('siteUrl', 'DRAMA_GENRES')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30105), 'genres.png', oOutputParameterHandler)
+
+    oOutputParameterHandler.addParameter('siteUrl', 'DRAMA_ANNEES')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30106), 'annees.png', oOutputParameterHandler)
+
+    oOutputParameterHandler.addParameter('siteUrl', 'DRAMA_LIST')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30111), 'az.png', oOutputParameterHandler)
+
+    # Affiche les Sources Dramas
+    oOutputParameterHandler.addParameter('siteUrl', 'DRAMA_DRAMAS')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30138), 'host.png', oOutputParameterHandler)
+
+    oGui.setEndOfDirectory()
+
+def showDocs(self):
+    oGui = cGui()
+
+    # Affiche les Nouveautés Documentaires
+    oOutputParameterHandler = cOutputParameterHandler()
+    if self.addons.getSetting('history-view') == 'true':
+        oOutputParameterHandler.addParameter('siteUrl', 'search/tv')
+        oGui.addDir(SITE_IDENTIFIER, 'showDocsSearch', self.addons.VSlang(30076), 'search.png', oOutputParameterHandler)
+    else:
         oOutputParameterHandler.addParameter('sCat', '5')
         oGui.addDir(SITE_IDENTIFIER, 'showSearchText', self.addons.VSlang(30076), 'search-divers.png', oOutputParameterHandler)
+
+    oOutputParameterHandler.addParameter('siteUrl', 'DOC_NEWS')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30101), 'news.png', oOutputParameterHandler)
+
+    # Affiche les Genres Documentaires
+    oOutputParameterHandler.addParameter('siteUrl', 'DOC_GENRES')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30105), 'genres.png', oOutputParameterHandler)
+
+    # Affiche les Sources Documentaires
+    oOutputParameterHandler.addParameter('siteUrl', 'DOC_DOCS')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30138), 'host.png', oOutputParameterHandler)
+
+    oGui.setEndOfDirectory()
+
+def showSports(self):
+    oGui = cGui()
+
+    # Affiche les live Sportifs
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('siteUrl', 'SPORT_LIVE')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30119), 'replay.png', oOutputParameterHandler)
+
+    # Affiche les Genres Sportifs
+    oOutputParameterHandler.addParameter('siteUrl', 'SPORT_GENRES')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30105), 'genre_sport.png', oOutputParameterHandler)
+
+    # Chaines
+    oOutputParameterHandler.addParameter('siteUrl', 'SPORT_TV')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30200), 'tv.png', oOutputParameterHandler)
+
+    # Affiche les Sources Sportives
+    oOutputParameterHandler.addParameter('siteUrl', 'SPORT_SPORTS')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30138), 'host.png', oOutputParameterHandler)
+
+    oGui.setEndOfDirectory()
+
+# ===== MÉTHODES IPTV =====
+
+def showDirect(self):
+    """Menu principal IPTV avec choix de navigation"""
+    oGui = cGui()
+    oGui.addText('fStream', 'Chaînes TV en direct')
+
+    oOutputParameterHandler = cOutputParameterHandler()
     
-        if self.addons.getSetting('history-view') == 'true':
-            oOutputParameterHandler.addParameter('sCat', '5')
-            oGui.addDir(SITE_IDENTIFIER, 'showHistory', self.addons.VSlang(30308), 'history.png', oOutputParameterHandler)
+    # Option 1: Navigation par catégorie (tous pays confondus)
+    oGui.addDir(
+        SITE_IDENTIFIER, 
+        'showIPTV_AllCategories', 
+        '📂 Par catégorie (toutes chaînes)', 
+        'genres.png', 
+        oOutputParameterHandler
+    )
     
-        oGui.setEndOfDirectory()
+    # Option 2: Navigation par pays
+    oGui.addDir(
+        SITE_IDENTIFIER, 
+        'showIPTV_AllCountries', 
+        '🌍 Par pays', 
+        'flags.png', 
+        oOutputParameterHandler
+    )
 
+    oGui.setEndOfDirectory()
 
-    def showSearchText(self):
-        oGui = cGui()
-        oInputParameterHandler = cInputParameterHandler()
-        sSearchText = oGui.showKeyBoard(heading=self.addons.VSlang(30076))
-        if not sSearchText:
-            return False
-
-        oSearch = cSearch()
-        sCat = oInputParameterHandler.getValue('sCat')
-        oSearch.searchGlobal(sSearchText, sCat)
-        oGui.setEndOfDirectory()
-
-    def showMovies(self):
-        oGui = cGui()
-        addons = self.addons
-
-        oOutputParameterHandler = cOutputParameterHandler()
-
-        # oOutputParameterHandler.addParameter('sCat', '1')
-        # oGui.addDir(SITE_IDENTIFIER, 'showSearchText', self.addons.VSlang(30120), 'search.png', oOutputParameterHandler)
-
-#        oOutputParameterHandler.addParameter('siteUrl', 'search/movie')
-        oGui.addDir(SITE_IDENTIFIER, 'showMovieSearch', addons.VSlang(30076), 'search.png', oOutputParameterHandler)
-
-        # Nouveautés
-        oOutputParameterHandler.addParameter('siteUrl', 'discover/movie')
-        oGui.addDir(SITE_TMDB, 'showMoviesNews', addons.VSlang(30101), 'news.png', oOutputParameterHandler)
-
-        # Populaires
-        oOutputParameterHandler.addParameter('siteUrl', 'discover/movie')
-        oGui.addDir(SITE_TMDB, 'showMovies', addons.VSlang(30102), 'popular.png', oOutputParameterHandler)
+def showIPTV_AllCategories(self):
+    """Charge toutes les catégories de tous les pays"""
+    oGui = cGui()
+    from resources.lib.comaddon import VSlog
+    
+    VSlog("[HOME] Chargement catégories globales")
+    
+    try:
+        # Charger le M3U global (index complet)
+        url = "https://iptv-org.github.io/iptv/index.m3u"
+        VSlog(f"[HOME] Chargement depuis: {url}")
         
-        # Box office
-        oOutputParameterHandler.addParameter('siteUrl', 'movies/boxoffice')
-        oOutputParameterHandler.addParameter('sCat', '1')
-        oGui.addDir(SITE_TRAKT, 'getTrakt', addons.VSlang(30314), 'boxoffice.png', oOutputParameterHandler)
+        response = requests.get(url, timeout=20)
+        response.raise_for_status()
+        data = response.text
         
-        # Genres
-        oOutputParameterHandler.addParameter('siteUrl', 'genre/movie/list')
-        oGui.addDir(SITE_TMDB, 'showGenreMovie', addons.VSlang(30105), 'genres.png', oOutputParameterHandler)
+        VSlog(f"[HOME] {len(data)} caractères chargés")
         
-        # Années
-        oOutputParameterHandler.addParameter('siteUrl', 'discover/movie')
-        oGui.addDir(SITE_TMDB, 'showMoviesYears', self.addons.VSlang(30106), 'annees.png', oOutputParameterHandler)
-
-        # # Top films TMDB
-        # oOutputParameterHandler.addParameter('siteUrl', 'discover/movie')
-        # oGui.addDir(SITE_TMDB, 'showMoviesTop', addons.VSlang(30104), 'notes.png', oOutputParameterHandler)
-
-        # Top films TRAKT
-        oOutputParameterHandler.addParameter('siteUrl', 'movies/popular')
-        oOutputParameterHandler.addParameter('sCat', '1')
-        oGui.addDir(SITE_TRAKT, 'getTrakt', self.addons.VSlang(30104), 'notes.png', oOutputParameterHandler)
-
-
-        oOutputParameterHandler.addParameter('siteUrl', 'ANIM_ENFANTS')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30109), 'enfants.png', oOutputParameterHandler)
-
-        # oOutputParameterHandler.addParameter('siteUrl', 'MOVIE_VF')
-        # oGui.addDir(SITE_IDENTIFIER, 'callpluging', '%s (%s)' % (self.addons.VSlang(30120), self.addons.VSlang(30107)), 'vf.png', oOutputParameterHandler)
-
-        oOutputParameterHandler.addParameter('siteUrl', 'MOVIE_VOSTFR')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30108), 'vostfr.png', oOutputParameterHandler)
-
-        oOutputParameterHandler.addParameter('siteUrl', 'MOVIE_MOVIE')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30138), 'host.png', oOutputParameterHandler)
-
-        oGui.setEndOfDirectory()
-
-    def showSeries(self):
-        oGui = cGui()
-        addons=self.addons
-
-        oOutputParameterHandler = cOutputParameterHandler()
-
-        if self.addons.getSetting('history-view') == 'true':
-            oOutputParameterHandler.addParameter('siteUrl', 'search/tv')
-            oGui.addDir(SITE_IDENTIFIER, 'showSeriesSearch', addons.VSlang(30076), 'search.png', oOutputParameterHandler)
-        else:
-            oOutputParameterHandler.addParameter('siteUrl', 'search/tv')
-            oGui.addDir(SITE_TMDB, 'showSearchSerie', addons.VSlang(30121), 'search-series.png', oOutputParameterHandler)
-    
-        # Nouveautés
-        oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
-        oGui.addDir(SITE_TMDB, 'showSeriesNews', addons.VSlang(30101), 'news.png', oOutputParameterHandler)
-
-        # Populaires TMDB
-        # oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
-        # oGui.addDir(SITE_TMDB, 'showSeriesViews', addons.VSlang(30102), 'popular.png', oOutputParameterHandler)
-
-        # Populaires trakt
-        oOutputParameterHandler.addParameter('siteUrl', 'shows/trending')
-        oOutputParameterHandler.addParameter('sCat', '2')
-        oGui.addDir(SITE_TRAKT, 'getTrakt', addons.VSlang(30102), 'popular.png', oOutputParameterHandler)
-
-    
-        # Par diffuseurs
-        oOutputParameterHandler.addParameter('siteUrl', 'genre/tv/list')
-        oGui.addDir(SITE_TMDB, 'showSeriesNetworks', addons.VSlang(30467), 'diffuseur.png', oOutputParameterHandler)
-    
-        # Par genres
-        oOutputParameterHandler.addParameter('siteUrl', 'genre/tv/list')
-        oGui.addDir(SITE_TMDB, 'showGenreTV', addons.VSlang(30105), 'genres.png', oOutputParameterHandler)
-    
-        # Les mieux notés TMDB
-        oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
-        oGui.addDir(SITE_TMDB, 'showSeriesTop', addons.VSlang(30104), 'notes.png', oOutputParameterHandler)
-
-        # Les mieux notés TRAKT
-        # oOutputParameterHandler.addParameter('siteUrl', 'shows/popular')
-        # oOutputParameterHandler.addParameter('sCat', '2')
-        # oGui.addDir(SITE_TRAKT, 'getTrakt', addons.VSlang(30104), 'notes.png', oOutputParameterHandler)
-
-        # Par années
-        oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
-        oGui.addDir(SITE_TMDB, 'showSeriesYears', self.addons.VSlang(30106), 'annees.png', oOutputParameterHandler)
-
-        oOutputParameterHandler.addParameter('siteUrl', 'SERIE_LIST')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30111), 'az.png', oOutputParameterHandler)
-
-        oOutputParameterHandler.addParameter('siteUrl', 'SERIE_VOSTFRS')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30108), 'vostfr.png', oOutputParameterHandler)
-
-        oOutputParameterHandler.addParameter('siteUrl', 'SERIE_SERIES')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30138), 'host.png', oOutputParameterHandler)
-
-        oGui.setEndOfDirectory()
-
-    def showAnimes(self):
-        oGui = cGui()
-
-        oOutputParameterHandler = cOutputParameterHandler()
-
-        if self.addons.getSetting('history-view') == 'true':
-            oOutputParameterHandler.addParameter('siteUrl', 'search/tv')
-            oGui.addDir(SITE_IDENTIFIER, 'showAnimesSearch', self.addons.VSlang(30076), 'search.png', oOutputParameterHandler)
-        else:
-            oOutputParameterHandler.addParameter('sCat', '3')
-            oGui.addDir(SITE_IDENTIFIER, 'showSearchText', self.addons.VSlang(30076), 'search-animes.png', oOutputParameterHandler)
-
-        # Nouveautés
-        oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
-        oGui.addDir(SITE_TMDB, 'showAnimesNews', self.addons.VSlang(30101), 'news.png', oOutputParameterHandler)
-
-        # Populaires
-        oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
-        oGui.addDir(SITE_TMDB, 'showAnimes', self.addons.VSlang(30102), 'popular.png', oOutputParameterHandler)
-
-        # TOP
-        oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
-        oGui.addDir(SITE_TMDB, 'showAnimesTop', self.addons.VSlang(30104), 'notes.png', oOutputParameterHandler)
-
-        oOutputParameterHandler.addParameter('siteUrl', 'ANIM_GENRES')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30105), 'genres.png', oOutputParameterHandler)
-
-        oOutputParameterHandler.addParameter('siteUrl', 'ANIM_LIST')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30111), 'az.png', oOutputParameterHandler)
-
-        oOutputParameterHandler.addParameter('siteUrl', 'ANIM_VOSTFRS')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30108), 'vf.png', oOutputParameterHandler)
-
-        oOutputParameterHandler.addParameter('siteUrl', 'ANIM_ANIMS')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30138), 'host.png', oOutputParameterHandler)
-
-        oGui.setEndOfDirectory()
-
-    def showDramas(self):
-        oGui = cGui()
-
-        # Affiche les Nouveautés Dramas
-        oOutputParameterHandler = cOutputParameterHandler()
-        if self.addons.getSetting('history-view') == 'true':
-            oOutputParameterHandler.addParameter('siteUrl', 'search/tv')
-            oGui.addDir(SITE_IDENTIFIER, 'showDramasSearch', self.addons.VSlang(30076), 'search.png', oOutputParameterHandler)
-        else:
-            oOutputParameterHandler.addParameter('sCat', '9')
-            oGui.addDir(SITE_IDENTIFIER, 'showSearchText', self.addons.VSlang(30076), 'search-dramas.png', oOutputParameterHandler)
-
-        oOutputParameterHandler.addParameter('siteUrl', 'DRAMA_NEWS')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30101), 'news.png', oOutputParameterHandler)
-
-        oOutputParameterHandler.addParameter('siteUrl', 'DRAMA_VIEWS')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30102), 'popular.png', oOutputParameterHandler)
-
-        # Affiche les Genres Dramas
-        oOutputParameterHandler.addParameter('siteUrl', 'DRAMA_GENRES')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30105), 'genres.png', oOutputParameterHandler)
-
-        oOutputParameterHandler.addParameter('siteUrl', 'DRAMA_ANNEES')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30106), 'annees.png', oOutputParameterHandler)
-
-        oOutputParameterHandler.addParameter('siteUrl', 'DRAMA_LIST')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30111), 'az.png', oOutputParameterHandler)
-
-        # Affiche les Sources Dramas
-        oOutputParameterHandler.addParameter('siteUrl', 'DRAMA_DRAMAS')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30138), 'host.png', oOutputParameterHandler)
-
-        oGui.setEndOfDirectory()
-
-    def showDocs(self):
-        oGui = cGui()
-
-        # Affiche les Nouveautés Documentaires
-        oOutputParameterHandler = cOutputParameterHandler()
-        if self.addons.getSetting('history-view') == 'true':
-            oOutputParameterHandler.addParameter('siteUrl', 'search/tv')
-            oGui.addDir(SITE_IDENTIFIER, 'showDocsSearch', self.addons.VSlang(30076), 'search.png', oOutputParameterHandler)
-        else:
-            oOutputParameterHandler.addParameter('sCat', '5')
-            oGui.addDir(SITE_IDENTIFIER, 'showSearchText', self.addons.VSlang(30076), 'search-divers.png', oOutputParameterHandler)
-
-        oOutputParameterHandler.addParameter('siteUrl', 'DOC_NEWS')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30101), 'news.png', oOutputParameterHandler)
-
-        # Affiche les Genres Documentaires
-        oOutputParameterHandler.addParameter('siteUrl', 'DOC_GENRES')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30105), 'genres.png', oOutputParameterHandler)
-
-        # Affiche les Sources Documentaires
-        oOutputParameterHandler.addParameter('siteUrl', 'DOC_DOCS')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30138), 'host.png', oOutputParameterHandler)
-
-        oGui.setEndOfDirectory()
-
-    def showSports(self):
-        oGui = cGui()
-
-        # Affiche les live Sportifs
-        oOutputParameterHandler = cOutputParameterHandler()
-        oOutputParameterHandler.addParameter('siteUrl', 'SPORT_LIVE')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30119), 'replay.png', oOutputParameterHandler)
-
-        # Affiche les Genres Sportifs
-        oOutputParameterHandler.addParameter('siteUrl', 'SPORT_GENRES')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30105), 'genre_sport.png', oOutputParameterHandler)
-
-        # Chaines
-        oOutputParameterHandler.addParameter('siteUrl', 'SPORT_TV')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30200), 'tv.png', oOutputParameterHandler)
-
-        # Affiche les Sources Sportives
-        oOutputParameterHandler.addParameter('siteUrl', 'SPORT_SPORTS')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30138), 'host.png', oOutputParameterHandler)
-
-        oGui.setEndOfDirectory()
-
-    def showDirect(self):
-        oGui = cGui()
-        oGui.addText('fStream', 'Choisissez un pays')
-
-        for code, name in IPTV_COUNTRIES.items():
-            oOutput = cOutputParameterHandler()
-            oOutput.addParameter('country_code', code)
-            oOutput.addParameter('country_name', name)
-
-            oGui.addDir(SITE_IDENTIFIER, 'showIPTV_ByCountry', f"{name}", f"{code.lower()}.png", oOutput)
-
-        oGui.setEndOfDirectory()
-
-    def showMenuTV(self):
-        oGui = cGui()
-
-        oOutputParameterHandler = cOutputParameterHandler()
-
-        # SI plusieurs sources proposent la TNT
-        # oOutputParameterHandler.addParameter('siteUrl', 'CHAINE_TV')
-        # oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30332), 'host.png', oOutputParameterHandler)
-        # SINON accès direct à la seule source
-        oOutputParameterHandler.addParameter('siteUrl', 'TV')
-        oGui.addDir('freebox', 'showWeb', self.addons.VSlang(30332), 'tv.png', oOutputParameterHandler)
-
-        oOutputParameterHandler.addParameter('siteUrl', 'CHAINE_CINE')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', '%s (%s)' % (self.addons.VSlang(30200), self.addons.VSlang(30133)), 'films.png', oOutputParameterHandler)
-        # oGui.addDir(SITE_IDENTIFIER, 'callpluging', '%s (%s)' % (self.addons.VSlang(30138), self.addons.VSlang(30113)), 'host.png', oOutputParameterHandler)
-
-        oOutputParameterHandler.addParameter('siteUrl', 'TV_TV')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', '%s (%s)' % (self.addons.VSlang(30138), self.addons.VSlang(30200)), 'host.png', oOutputParameterHandler)
-
-        oGui.setEndOfDirectory()
-
-    def showReplay(self):
-        oGui = cGui()
-
-        oOutputParameterHandler = cOutputParameterHandler()
-        oOutputParameterHandler.addParameter('sCat', '6')
-        oGui.addDir(SITE_IDENTIFIER, 'showSearchText', self.addons.VSlang(30076), 'search.png', oOutputParameterHandler)
-
-        oOutputParameterHandler.addParameter('siteUrl', 'REPLAYTV_NEWS')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30101), 'news.png', oOutputParameterHandler)
-
-        oOutputParameterHandler.addParameter('siteUrl', 'REPLAYTV_GENRES')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30105), 'genres.png', oOutputParameterHandler)
-
-        # oOutputParameterHandler.addParameter('siteUrl', 'SPORT_REPLAY')
-        # oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30113), 'sport.png', oOutputParameterHandler)
-
-        oOutputParameterHandler.addParameter('siteUrl', 'REPLAYTV_REPLAYTV')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30138), 'host.png', oOutputParameterHandler)
-
-        oGui.setEndOfDirectory()
-
-    def showNets(self):
-        oGui = cGui()
-
-        # Affiche les Nouveautés Vidéos
-        oOutputParameterHandler = cOutputParameterHandler()
-        oOutputParameterHandler.addParameter('siteUrl', 'NETS_NEWS')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', '%s (%s)' % (self.addons.VSlang(30114), self.addons.VSlang(30101)), 'news.png', oOutputParameterHandler)
-
-        # Affiche les Genres Vidéos
-        oOutputParameterHandler.addParameter('siteUrl', 'NETS_GENRES')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', '%s (%s)' % (self.addons.VSlang(30114), self.addons.VSlang(30105)), 'genres.png', oOutputParameterHandler)
-
-        # Affiche les Sources Vidéos
-        oOutputParameterHandler.addParameter('siteUrl', 'NETS_NETS')
-        oGui.addDir(SITE_IDENTIFIER, 'callpluging', '%s (%s)' % (self.addons.VSlang(30138), self.addons.VSlang(30114)), 'host.png', oOutputParameterHandler)
-
-        oGui.setEndOfDirectory()
-
-    def showUsers(self):
-        oGui = cGui()
-        oGui.addDir('siteonefichier', 'load', self.addons.VSlang(30327), 'sites/siteonefichier.png')
-        oGui.addDir('alldebrid', 'load', 'AllDebrid', 'sites/alldebrid.png')
-        oGui.addDir('sitedarkibox', 'load', 'DarkiBox', 'sites/sitedarkibox.png')
-        oGui.addDir('themoviedb_org', 'showMyTmdb', 'TMDB', 'tmdb.png')
-        oGui.addDir('cTrakt', 'getLoad', self.addons.VSlang(30214), 'trakt.png')
-        # oGui.addDir('siteuptobox', 'load', 'Uptobox', 'sites/siteuptobox.png')
-        oGui.setEndOfDirectory()
-
-    def showTools(self):
-        oGui = cGui()
-        oGui.addDir(SITE_IDENTIFIER, 'opensetting', self.addons.VSlang(30227), 'parametres.png')
-        oGui.addDir('cDownload', 'getDownload', self.addons.VSlang(30224), 'download.png')
-        oGui.addDir('cLibrary', 'getLibrary', self.addons.VSlang(30303), 'library.png')
-        oGui.addDir(SITE_IDENTIFIER, 'showHostDirect', self.addons.VSlang(30469), 'web.png')
-        oGui.addDir(SITE_IDENTIFIER, 'showDonation', self.addons.VSlang(30143), 'paypal.png')
-        oGui.addDir('globalSources', 'globalSources', self.addons.VSlang(30449), 'host.png')
-        oGui.setEndOfDirectory()
-
-    def showHistory(self):
-        oGui = cGui()
-
-        oInputParameterHandler = cInputParameterHandler()
-        sCat = oInputParameterHandler.getValue('sCat')
-
-        from resources.lib.db import cDb
-        with cDb() as db:
-            row = db.get_history(sCat)
-
-        if row:
-            oGui.addText(SITE_IDENTIFIER, self.addons.VSlang(30416), '')
-        else:
-            oGui.addText(SITE_IDENTIFIER)
-        oOutputParameterHandler = cOutputParameterHandler()
-        for match in row:
-            sTitle = match['title']
-            sCat = match['disp']
-
-            # on ne propose l'historique que pour les films, séries, animes, doc, drama
-            if int(sCat) not in (1, 2, 3, 5, 9):
-                continue 
-
-            oOutputParameterHandler.addParameter('siteUrl', 'http://lomixx')
-            oOutputParameterHandler.addParameter('searchtext', sTitle)
-
-            oGuiElement = cGuiElement()
-            oGuiElement.setSiteName('globalSearch')
-            oGuiElement.setFunction('globalSearch')
-
-            try:
-                oGuiElement.setTitle('- ' + sTitle)
-            except:
-                oGuiElement.setTitle('- ' + str(sTitle, 'utf-8'))
-
-            oGuiElement.setFileName(sTitle)
-            oGuiElement.setCat(sCat)
-            oGuiElement.setIcon('search.png')
-            oGui.createSimpleMenu(oGuiElement, oOutputParameterHandler, SITE_IDENTIFIER, 'cHome', 'delSearch', self.addons.VSlang(30412))
-            oGui.addFolder(oGuiElement, oOutputParameterHandler)
-
-        if row:
-            oOutputParameterHandler.addParameter('siteUrl', 'http://lomixx')
-            oGui.addDir(SITE_IDENTIFIER, 'delSearch', self.addons.VSlang(30413), 'trash.png', oOutputParameterHandler)
-
-        oGui.setEndOfDirectory()
-
-
-    def showDonation(self):
-        from resources.lib.librecaptcha.gui import cInputWindowYesNo
-        inputText = 'Merci pour votre soutien, il permet de maintenir ce projet.\r\nScanner ce code ou rendez vous sur :\r\nhttps://www.paypal.com/paypalme/kodivstream'
-        oSolver = cInputWindowYesNo(captcha='special://home/addons/plugin.video.fstream/paypal.jpg', msg=inputText, roundnum=1, okDialog=True)
-        oSolver.get()
-
-
-    def showHostDirect(self):  # fonction de recherche
-        oGui = cGui()
-        sUrl = oGui.showKeyBoard(heading=self.addons.VSlang(30045))
-        if sUrl:
-
-            oHoster = cHosterGui().checkHoster(sUrl)
-            if oHoster:
-                oHoster.setDisplayName(self.addons.VSlang(30046))
-                oHoster.setFileName(self.addons.VSlang(30046))
-                cHosterGui().showHoster(oGui, oHoster, sUrl, '')
-
-        oGui.setEndOfDirectory()
-
-    def opensetting(self):
-        self.addons.openSettings()
-
-    def delSearch(self):
-        from resources.lib.db import cDb
-        with cDb() as db:
-            db.del_history()
-        return True
-
-    def callpluging(self):
-        oGui = cGui()
-
-        oInputParameterHandler = cInputParameterHandler()
-        sSiteUrl = oInputParameterHandler.getValue('siteUrl')
-
-        oPluginHandler = cPluginHandler()
-        aPlugins = oPluginHandler.getAvailablePlugins(sSiteUrl)
-        oOutputParameterHandler = cOutputParameterHandler()
-        for aPlugin in aPlugins:
-            try:
-                icon = 'sites/%s.png' % (aPlugin[2])
-                oOutputParameterHandler.addParameter('siteUrl', aPlugin[0])
-                oGui.addDir(aPlugin[2], aPlugin[3], aPlugin[1], icon, oOutputParameterHandler)
-            except:
-                pass
-
-        oGui.setEndOfDirectory()
-
-
-    
-    def showDirect(self):
-        """Menu principal IPTV avec choix de navigation"""
-        oGui = cGui()
-        oGui.addText('fStream', 'Chaînes TV en direct')
-
-        # Option 1: Navigation par catégorie
-        oOutputParameterHandler = cOutputParameterHandler()
-        oGui.addDir(
-            SITE_IDENTIFIER, 
-            'showIPTV_ByCategory', 
-            '📂 Par catégorie (Sport, News, etc.)', 
-            'genres.png', 
-            oOutputParameterHandler
-        )
+        # Afficher par catégories
+        parseAndShowM3U(oGui, data, show_by='category')
         
-        # Option 2: Navigation par pays
-        oOutputParameterHandler = cOutputParameterHandler()
-        oGui.addDir(
-            SITE_IDENTIFIER, 
-            'showIPTV_ByCountry', 
-            '🌍 Par pays', 
-            'flags.png', 
-            oOutputParameterHandler
-        )
-
-        oGui.setEndOfDirectory()
+    except Exception as e:
+        VSlog(f"[HOME] Erreur: {str(e)}")
+        import traceback
+        VSlog(traceback.format_exc())
+        oGui.addText('fStream', f'Erreur: {str(e)}')
     
-    def showIPTV_ByCategory(self):
-        """Affiche toutes les catégories de toutes les chaînes"""
-        oGui = cGui()
-        from resources.lib.comaddon import VSlog
+    oGui.setEndOfDirectory()
+
+def showIPTV_AllCountries(self):
+    """Affiche tous les pays disponibles"""
+    oGui = cGui()
+    from resources.lib.comaddon import VSlog
+    
+    VSlog("[HOME] Chargement liste des pays")
+    
+    try:
+        # Récupérer la liste dynamique des pays
+        countries = extractCountriesFromAPI()
+        VSlog(f"[HOME] {len(countries)} pays trouvés")
         
-        VSlog("[HOME] Chargement de toutes les catégories")
-        
-        try:
-            # Charger les M3U de tous les pays (ou un index global)
-            # Pour l'instant, on charge un pays principal ou global
-            url = "https://iptv-org.github.io/iptv/index.m3u"
-            
+        for code, name in sorted(countries.items(), key=lambda x: x[1]):
             oOutputParameterHandler = cOutputParameterHandler()
-            oOutputParameterHandler.addParameter('m3u_url', url)
+            oOutputParameterHandler.addParameter('country_code', code)
+            oOutputParameterHandler.addParameter('country_name', name)
+            
+            icon = f"{code.lower()}.png"
             oGui.addDir(
-                SITE_IDENTIFIER,
-                'showIPTV_LoadAndShowCategories',
-                'Toutes les catégories',
-                'genres.png',
+                SITE_IDENTIFIER, 
+                'showIPTV_CountryMenu', 
+                name, 
+                icon, 
                 oOutputParameterHandler
             )
-            
-        except Exception as e:
-            VSlog(f"[HOME] Erreur: {str(e)}")
-            oGui.addText('fStream', f'Erreur: {str(e)}')
         
-        oGui.setEndOfDirectory()
+    except Exception as e:
+        VSlog(f"[HOME] Erreur: {str(e)}")
+        oGui.addText('fStream', f'Erreur: {str(e)}')
     
-    def showIPTV_ByCountry(self):
-        """Affiche tous les pays disponibles"""
-        oGui = cGui()
-        from resources.lib.comaddon import VSlog
+    oGui.setEndOfDirectory()
+
+def showIPTV_CountryMenu(self):
+    """Menu pour un pays: catégories ou toutes les chaînes"""
+    oGui = cGui()
+    oInput = cInputParameterHandler()
+    
+    code = oInput.getValue('country_code')
+    name = oInput.getValue('country_name')
+    
+    from resources.lib.comaddon import VSlog
+    VSlog(f"[HOME] Menu pour {name} ({code})")
+    
+    # Par catégories
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('country_code', code)
+    oOutputParameterHandler.addParameter('show_by', 'category')
+    oGui.addDir(
+        SITE_IDENTIFIER,
+        'showIPTV_Load',
+        '📂 Par catégorie',
+        'genres.png',
+        oOutputParameterHandler
+    )
+    
+    # Toutes les chaînes
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('country_code', code)
+    oOutputParameterHandler.addParameter('show_by', 'all')
+    oGui.addDir(
+        SITE_IDENTIFIER,
+        'showIPTV_Load',
+        '📺 Toutes les chaînes',
+        'tv.png',
+        oOutputParameterHandler
+    )
+    
+    oGui.setEndOfDirectory()
+
+def showIPTV_Load(self):
+    """Charge et affiche les chaînes d'un pays"""
+    oGui = cGui()
+    oInput = cInputParameterHandler()
+    
+    code = oInput.getValue('country_code')
+    show_by = oInput.getValue('show_by')
+    
+    from resources.lib.comaddon import VSlog
+    VSlog(f"[HOME] Chargement {code}, mode: {show_by}")
+    
+    try:
+        urls = getCountryM3U(code)
+        data = loadM3U(urls, f"{code.lower()}_cache.m3u")
         
-        VSlog("[HOME] Chargement de la liste des pays")
-        
+        parseAndShowM3U(oGui, data, show_by=show_by)
+            
+    except Exception as e:
+        VSlog(f"[HOME] Erreur: {str(e)}")
+        import traceback
+        VSlog(traceback.format_exc())
+        oGui.addText('fStream', f'Erreur: {str(e)}')
+    
+    oGui.setEndOfDirectory()
+
+def showIPTV_Filtered(self):
+    """Affiche les chaînes filtrées"""
+    oGui = cGui()
+    oInput = cInputParameterHandler()
+    
+    filter_type = oInput.getValue('filter_type')
+    filter_value = oInput.getValue('filter_value')
+    data = oInput.getValue('m3u_data')
+    
+    from resources.lib.comaddon import VSlog
+    VSlog(f"[HOME] Filtrage: {filter_type}={filter_value}")
+    
+    try:
+        parseAndShowChannels(oGui, data, filter_type, filter_value)
+    except Exception as e:
+        VSlog(f"[HOME] Erreur: {str(e)}")
+        import traceback
+        VSlog(traceback.format_exc())
+        oGui.addText('fStream', f'Erreur: {str(e)}')
+    
+    oGui.setEndOfDirectory()
+
+def playIPTV(self):
+    """Joue un flux IPTV"""
+    oGui = cGui()
+    oInputParameterHandler = cInputParameterHandler()
+    sUrl = oInputParameterHandler.getValue('siteUrl')
+    sTitle = oInputParameterHandler.getValue('sMovieTitle')
+    
+    from resources.lib.comaddon import VSlog
+    VSlog(f"[HOME] Lecture: {sTitle}")
+    
+    oHoster = cHosterGui().checkHoster(sUrl)
+    if oHoster:
+        oHoster.setDisplayName(sTitle)
+        oHoster.setFileName(sTitle)
+        cHosterGui().showHoster(oGui, oHoster, sUrl, '')
+    else:
+        VSlog(f"[HOME] Pas de hoster pour: {sUrl}")
+        xbmcgui.Dialog().ok("Erreur", "Impossible de lire ce flux")
+    
+    oGui.setEndOfDirectory()
+
+# ===== AUTRES MÉTHODES =====
+
+def showMenuTV(self):
+    oGui = cGui()
+
+    oOutputParameterHandler = cOutputParameterHandler()
+
+    oOutputParameterHandler.addParameter('siteUrl', 'TV')
+    oGui.addDir('freebox', 'showWeb', self.addons.VSlang(30332), 'tv.png', oOutputParameterHandler)
+
+    oOutputParameterHandler.addParameter('siteUrl', 'CHAINE_CINE')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', '%s (%s)' % (self.addons.VSlang(30200), self.addons.VSlang(30133)), 'films.png', oOutputParameterHandler)
+
+    oOutputParameterHandler.addParameter('siteUrl', 'TV_TV')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', '%s (%s)' % (self.addons.VSlang(30138), self.addons.VSlang(30200)), 'host.png', oOutputParameterHandler)
+
+    oGui.setEndOfDirectory()
+
+def showReplay(self):
+    oGui = cGui()
+
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('sCat', '6')
+    oGui.addDir(SITE_IDENTIFIER, 'showSearchText', self.addons.VSlang(30076), 'search.png', oOutputParameterHandler)
+
+    oOutputParameterHandler.addParameter('siteUrl', 'REPLAYTV_NEWS')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30101), 'news.png', oOutputParameterHandler)
+
+    oOutputParameterHandler.addParameter('siteUrl', 'REPLAYTV_GENRES')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30105), 'genres.png', oOutputParameterHandler)
+
+    oOutputParameterHandler.addParameter('siteUrl', 'REPLAYTV_REPLAYTV')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', self.addons.VSlang(30138), 'host.png', oOutputParameterHandler)
+
+    oGui.setEndOfDirectory()
+
+def showNets(self):
+    oGui = cGui()
+
+    # Affiche les Nouveautés Vidéos
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('siteUrl', 'NETS_NEWS')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', '%s (%s)' % (self.addons.VSlang(30114), self.addons.VSlang(30101)), 'news.png', oOutputParameterHandler)
+
+    # Affiche les Genres Vidéos
+    oOutputParameterHandler.addParameter('siteUrl', 'NETS_GENRES')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', '%s (%s)' % (self.addons.VSlang(30114), self.addons.VSlang(30105)), 'genres.png', oOutputParameterHandler)
+
+    # Affiche les Sources Vidéos
+    oOutputParameterHandler.addParameter('siteUrl', 'NETS_NETS')
+    oGui.addDir(SITE_IDENTIFIER, 'callpluging', '%s (%s)' % (self.addons.VSlang(30138), self.addons.VSlang(30114)), 'host.png', oOutputParameterHandler)
+
+    oGui.setEndOfDirectory()
+
+def showUsers(self):
+    oGui = cGui()
+    oGui.addDir('siteonefichier', 'load', self.addons.VSlang(30327), 'sites/siteonefichier.png')
+    oGui.addDir('alldebrid', 'load', 'AllDebrid', 'sites/alldebrid.png')
+    oGui.addDir('sitedarkibox', 'load', 'DarkiBox', 'sites/sitedarkibox.png')
+    oGui.addDir('themoviedb_org', 'showMyTmdb', 'TMDB', 'tmdb.png')
+    oGui.addDir('cTrakt', 'getLoad', self.addons.VSlang(30214), 'trakt.png')
+    oGui.setEndOfDirectory()
+
+def showTools(self):
+    oGui = cGui()
+    oGui.addDir(SITE_IDENTIFIER, 'opensetting', self.addons.VSlang(30227), 'parametres.png')
+    oGui.addDir('cDownload', 'getDownload', self.addons.VSlang(30224), 'download.png')
+    oGui.addDir('cLibrary', 'getLibrary', self.addons.VSlang(30303), 'library.png')
+    oGui.addDir(SITE_IDENTIFIER, 'showHostDirect', self.addons.VSlang(30469), 'web.png')
+    oGui.addDir(SITE_IDENTIFIER, 'showDonation', self.addons.VSlang(30143), 'paypal.png')
+    oGui.addDir('globalSources', 'globalSources', self.addons.VSlang(30449), 'host.png')
+    oGui.setEndOfDirectory()
+
+def showHistory(self):
+    oGui = cGui()
+
+    oInputParameterHandler = cInputParameterHandler()
+    sCat = oInputParameterHandler.getValue('sCat')
+
+    from resources.lib.db import cDb
+    with cDb() as db:
+        row = db.get_history(sCat)
+
+    if row:
+        oGui.addText(SITE_IDENTIFIER, self.addons.VSlang(30416), '')
+    else:
+        oGui.addText(SITE_IDENTIFIER)
+    oOutputParameterHandler = cOutputParameterHandler()
+    for match in row:
+        sTitle = match['title']
+        sCat = match['disp']
+
+        # on ne propose l'historique que pour les films, séries, animes, doc, drama
+        if int(sCat) not in (1, 2, 3, 5, 9):
+            continue 
+
+        oOutputParameterHandler.addParameter('siteUrl', 'http://lomixx')
+        oOutputParameterHandler.addParameter('searchtext', sTitle)
+
+        oGuiElement = cGuiElement() 
+        oGuiElement.setSiteName('globalSearch') 
+        oGuiElement.setFunction('globalSearch')
+
         try:
-            # Récupérer la liste dynamique des pays
-            countries = extractCountriesFromAPI()
-            
-            for code, name in sorted(countries.items(), key=lambda x: x[1]):
-                oOutputParameterHandler = cOutputParameterHandler()
-                oOutputParameterHandler.addParameter('country_code', code)
-                oOutputParameterHandler.addParameter('country_name', name)
-                
-                icon = f"{code.lower()}.png"
-                oGui.addDir(
-                    SITE_IDENTIFIER, 
-                    'showIPTV_CountryMenu', 
-                    name, 
-                    icon, 
-                    oOutputParameterHandler
-                )
-            
-        except Exception as e:
-            VSlog(f"[HOME] Erreur: {str(e)}")
-            oGui.addText('fStream', f'Erreur: {str(e)}')
-        
-        oGui.setEndOfDirectory()
-    
-    def showIPTV_CountryMenu(self):
-        """Menu pour un pays: catégories ou toutes les chaînes"""
-        oGui = cGui()
-        oInput = cInputParameterHandler()
-        
-        code = oInput.getValue('country_code')
-        name = oInput.getValue('country_name')
-        
-        from resources.lib.comaddon import VSlog
-        VSlog(f"[HOME] Menu pour {name}")
-        
-        # Par catégories
-        oOutputParameterHandler = cOutputParameterHandler()
-        oOutputParameterHandler.addParameter('country_code', code)
-        oOutputParameterHandler.addParameter('show_by', 'category')
-        oGui.addDir(
-            SITE_IDENTIFIER,
-            'showIPTV_Load',
-            '📂 Par catégorie',
-            'genres.png',
-            oOutputParameterHandler
-        )
-        
-        # Toutes les chaînes
-        oOutputParameterHandler = cOutputParameterHandler()
-        oOutputParameterHandler.addParameter('country_code', code)
-        oOutputParameterHandler.addParameter('show_by', 'all')
-        oGui.addDir(
-            SITE_IDENTIFIER,
-            'showIPTV_Load',
-            '📺 Toutes les chaînes',
-            'tv.png',
-            oOutputParameterHandler
-        )
-        
-        oGui.setEndOfDirectory()
-    
-    def showIPTV_Load(self):
-        """Charge et affiche les chaînes d'un pays"""
-        oGui = cGui()
-        oInput = cInputParameterHandler()
-        
-        code = oInput.getValue('country_code')
-        show_by = oInput.getValue('show_by')
-        
-        from resources.lib.comaddon import VSlog
-        VSlog(f"[HOME] Chargement {code}, mode: {show_by}")
-        
-        try:
-            urls = getCountryM3U(code)
-            data = loadM3U(urls, f"{code.lower()}_cache.m3u")
-            
-            if show_by == 'category':
-                parseAndShowM3U(oGui, data, show_by='category')
-            else:
-                parseAndShowM3U(oGui, data, show_by='all')
-                
-        except Exception as e:
-            VSlog(f"[HOME] Erreur: {str(e)}")
-            import traceback
-            VSlog(traceback.format_exc())
-            oGui.addText('fStream', f'Erreur: {str(e)}')
-        
-        oGui.setEndOfDirectory()
-    
-    def showIPTV_Filtered(self):
-        """Affiche les chaînes filtrées"""
-        oGui = cGui()
-        oInput = cInputParameterHandler()
-        
-        filter_type = oInput.getValue('filter_type')
-        filter_value = oInput.getValue('filter_value')
-        data = oInput.getValue('m3u_data')
-        
-        from resources.lib.comaddon import VSlog
-        VSlog(f"[HOME] Filtrage: {filter_type}={filter_value}")
-        
-        try:
-            parseAndShowChannels(oGui, data, filter_type, filter_value)
-        except Exception as e:
-            VSlog(f"[HOME] Erreur: {str(e)}")
-            oGui.addText('fStream', f'Erreur: {str(e)}')
-        
-        oGui.setEndOfDirectory()
-    
-    def playIPTV(self):
-        """Joue un flux IPTV"""
-        oGui = cGui()
-        oInputParameterHandler = cInputParameterHandler()
-        sUrl = oInputParameterHandler.getValue('siteUrl')
-        sTitle = oInputParameterHandler.getValue('sMovieTitle')
-        
-        from resources.lib.comaddon import VSlog
-        VSlog(f"[HOME] Lecture: {sTitle}")
-        
+            oGuiElement.setTitle('- ' + sTitle)
+        except:
+            oGuiElement.setTitle('- ' + str(sTitle, 'utf-8'))
+
+        oGuiElement.setFileName(sTitle)
+        oGuiElement.setCat(sCat)
+        oGuiElement.setIcon('search.png')
+        oGui.createSimpleMenu(oGuiElement, oOutputParameterHandler, SITE_IDENTIFIER, 'cHome', 'delSearch', self.addons.VSlang(30412))
+        oGui.addFolder(oGuiElement, oOutputParameterHandler)
+
+    if row:
+        oOutputParameterHandler.addParameter('siteUrl', 'http://lomixx')
+        oGui.addDir(SITE_IDENTIFIER, 'delSearch', self.addons.VSlang(30413), 'trash.png', oOutputParameterHandler)
+
+    oGui.setEndOfDirectory()
+
+def showDonation(self):
+    from resources.lib.librecaptcha.gui import cInputWindowYesNo
+    inputText = 'Merci pour votre soutien, il permet de maintenir ce projet.\r\nScanner ce code ou rendez vous sur :\r\nhttps://www.paypal.com/paypalme/kodivstream'
+    oSolver = cInputWindowYesNo(captcha='special://home/addons/plugin.video.fstream/paypal.jpg', msg=inputText, roundnum=1, okDialog=True)
+    oSolver.get()
+
+def showHostDirect(self):
+    oGui = cGui()
+    sUrl = oGui.showKeyBoard(heading=self.addons.VSlang(30045))
+    if sUrl:
         oHoster = cHosterGui().checkHoster(sUrl)
         if oHoster:
-            oHoster.setDisplayName(sTitle)
-            oHoster.setFileName(sTitle)
+            oHoster.setDisplayName(self.addons.VSlang(30046))
+            oHoster.setFileName(self.addons.VSlang(30046))
             cHosterGui().showHoster(oGui, oHoster, sUrl, '')
-        else:
-            VSlog(f"[HOME] Pas de hoster pour: {sUrl}")
-            xbmcgui.Dialog().ok("Erreur", "Impossible de lire ce flux")
-        
-        oGui.setEndOfDirectory()
+
+    oGui.setEndOfDirectory()
+
+def opensetting(self):
+    self.addons.openSettings()
+
+def delSearch(self):
+    from resources.lib.db import cDb
+    with cDb() as db:
+        db.del_history()
+    return True
+
+def callpluging(self):
+    oGui = cGui()
+
+    oInputParameterHandler = cInputParameterHandler()
+    sSiteUrl = oInputParameterHandler.getValue('siteUrl')
+
+    oPluginHandler = cPluginHandler()
+    aPlugins = oPluginHandler.getAvailablePlugins(sSiteUrl)
+    oOutputParameterHandler = cOutputParameterHandler()
+    for aPlugin in aPlugins:
+        try:
+            icon = 'sites/%s.png' % (aPlugin[2])
+            oOutputParameterHandler.addParameter('siteUrl', aPlugin[0])
+            oGui.addDir(aPlugin[2], aPlugin[3], aPlugin[1], icon, oOutputParameterHandler)
+        except:
+            pass
+
+    oGui.setEndOfDirectory()
