@@ -139,8 +139,41 @@ def loadM3U(urls, cache_name):
     return data
 
 
-def parseAndShowM3U(oGui, data):
-    """Parse le contenu M3U et affiche les chaînes"""
+def extractCountriesFromAPI():
+    """Récupère la liste de tous les pays disponibles sur iptv-org"""
+    from resources.lib.comaddon import VSlog
+    import requests
+    
+    try:
+        # L'API iptv-org fournit un index des pays
+        url = "https://iptv-org.github.io/iptv/countries.json"
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        
+        countries_data = response.json()
+        VSlog(f"[IPTV] {len(countries_data)} pays trouvés")
+        
+        # Retourner un dictionnaire {code: name}
+        countries = {}
+        for country in countries_data:
+            code = country.get('code', '').upper()
+            name = country.get('name', '')
+            if code and name:
+                countries[code] = name
+        
+        return countries
+        
+    except Exception as e:
+        VSlog(f"[IPTV] Erreur récupération pays: {str(e)}")
+        # Fallback sur la liste statique
+        return IPTV_COUNTRIES
+
+
+def parseAndShowM3U(oGui, data, show_categories=True, show_by='category'):
+    """
+    Parse le contenu M3U et affiche selon le mode choisi
+    show_by: 'category' ou 'country'
+    """
     import re
     from resources.lib.comaddon import VSlog
     
@@ -149,57 +182,327 @@ def parseAndShowM3U(oGui, data):
         oGui.addText('fStream', 'Aucune chaîne trouvée')
         return
 
-    VSlog(f"[M3U] Parsing de {len(data)} caractères")
-    channels = data.split("#EXTINF")
-    VSlog(f"[M3U] {len(channels)} blocs trouvés")
-
-    count = 0
-    for block in channels:
-        if "tvg-name" in block or "tvg-logo" in block or "http" in block:
-            try:
-                # Extraction des informations
-                name_match = re.search(r'tvg-name="([^"]*)"', block)
-                logo_match = re.search(r'tvg-logo="([^"]*)"', block)
-                
-                # Récupération de l'URL du stream (dernière ligne non vide)
-                lines = [l.strip() for l in block.split("\n") if l.strip()]
-                stream_url = None
-                for line in reversed(lines):
-                    if line.startswith("http"):
-                        stream_url = line
-                        break
-                
-                if not stream_url:
-                    continue
-
-                # Titre de la chaîne
-                title = name_match.group(1) if name_match else "Chaîne sans nom"
-                if not title or title == "":
-                    # Essayer de récupérer le titre depuis la dernière partie avant l'URL
-                    title_match = re.search(r',([^,\n]+)\s*$', block.split(stream_url)[0])
-                    title = title_match.group(1).strip() if title_match else "Chaîne"
-                
-                # Logo
-                icon = logo_match.group(1) if logo_match else "tv.png"
-
-                # Ajout de la chaîne
-                oOutputParameterHandler = cOutputParameterHandler()
-                oOutputParameterHandler.addParameter('siteUrl', stream_url)
-                oOutputParameterHandler.addParameter('sMovieTitle', title)
-                oOutputParameterHandler.addParameter('sThumb', icon)
-                
-                # Utiliser addLink au lieu de addTV
-                oGui.addLink(SITE_IDENTIFIER, 'playIPTV', title, icon, '', oOutputParameterHandler)
-                count += 1
-                
-            except Exception as e:
-                VSlog(f"[M3U] Erreur parsing chaîne: {str(e)}")
-                continue
+    VSlog(f"[M3U] Parsing de {len(data)} caractères, mode: {show_by}")
     
-    VSlog(f"[M3U] {count} chaînes ajoutées")
+    # Dictionnaires pour regrouper
+    categories = {}
+    countries = {}
+    all_channels = []
+    
+    # Parser ligne par ligne
+    lines = data.split('\n')
+    i = 0
+    total_parsed = 0
+    
+    while i < len(lines):
+        line = lines[i].strip()
+        
+        if line.startswith('#EXTINF'):
+            try:
+                # ===== EXTRACTION DU TITRE =====
+                # Méthode 1: Chercher tvg-name
+                name_match = re.search(r'tvg-name="([^"]+)"', line)
+                title = name_match.group(1) if name_match else None
+                
+                # Méthode 2: Texte après la virgule (le plus courant)
+                if not title or len(title.strip()) == 0:
+                    comma_parts = line.split(',', 1)
+                    if len(comma_parts) > 1:
+                        # Nettoyer le titre (enlever les attributs avant)
+                        potential_title = comma_parts[1].strip()
+                        # Enlever les éventuels attributs qui traînent
+                        potential_title = re.sub(r'^.*?\s+([A-Za-z0-9])', r'\1', potential_title)
+                        if potential_title and len(potential_title) > 0:
+                            title = potential_title
+                
+                # Méthode 3: tvg-id peut parfois donner un indice
+                if not title or len(title.strip()) == 0:
+                    id_match = re.search(r'tvg-id="([^"]+)"', line)
+                    if id_match:
+                        title = id_match.group(1).replace('.', ' ').replace('-', ' ')
+                
+                # Si vraiment rien trouvé
+                if not title or len(title.strip()) == 0:
+                    title = "Chaîne"
+                
+                # ===== EXTRACTION DES AUTRES INFOS =====
+                logo_match = re.search(r'tvg-logo="([^"]*)"', line)
+                group_match = re.search(r'group-title="([^"]*)"', line)
+                country_match = re.search(r'tvg-country="([^"]*)"', line)
+                
+                # Chercher l'URL dans les lignes suivantes
+                stream_url = None
+                j = i + 1
+                while j < len(lines) and j < i + 5:
+                    next_line = lines[j].strip()
+                    if next_line and not next_line.startswith('#'):
+                        if next_line.startswith('http'):
+                            stream_url = next_line
+                            break
+                    j += 1
+                
+                if stream_url and title:
+                    logo = logo_match.group(1) if logo_match else "tv.png"
+                    category = group_match.group(1) if group_match else "Général"
+                    country = country_match.group(1) if country_match else "International"
+                    
+                    # Nettoyer le titre
+                    title = title.replace('[', '').replace(']', '').strip()
+                    # Enlever les balises HTML éventuelles
+                    title = re.sub(r'<[^>]+>', '', title)
+                    # Limiter la longueur si trop long
+                    if len(title) > 60:
+                        title = title[:57] + "..."
+                    
+                    # Créer l'objet chaîne
+                    channel = {
+                        'title': title,
+                        'url': stream_url,
+                        'logo': logo,
+                        'category': category,
+                        'country': country
+                    }
+                    
+                    # Grouper par catégorie
+                    if category not in categories:
+                        categories[category] = []
+                    categories[category].append(channel)
+                    
+                    # Grouper par pays
+                    if country not in countries:
+                        countries[country] = []
+                    countries[country].append(channel)
+
+                    # Liste globale
+                    all_channels.append(channel)
+                    
+                    total_parsed += 1
+                    
+                    if total_parsed <= 5:  # Debug: afficher les 5 premières
+                        VSlog(f"[M3U] Chaîne: '{title}' | Catégorie: {category} | Pays: {country}")
+                    
+            except Exception as e:
+                VSlog(f"[M3U] Erreur parsing ligne {i}: {str(e)}")
+        
+        i += 1
+    
+    VSlog(f"[M3U] Total parsé: {total_parsed} chaînes")
+    VSlog(f"[M3U] {len(categories)} catégories, {len(countries)} pays")
+    
+    # Affichage selon le mode
+    if show_by == 'category':
+        if categories:
+            sorted_categories = sorted(categories.keys())
+            for category in sorted_categories:
+                channel_count = len(categories[category])
+                
+                oOutputParameterHandler = cOutputParameterHandler()
+                oOutputParameterHandler.addParameter('filter_type', 'category')
+                oOutputParameterHandler.addParameter('filter_value', category)
+                oOutputParameterHandler.addParameter('m3u_data', data)
+                
+                icon = get_category_icon(category)
+                
+                oGui.addDir(
+                    SITE_IDENTIFIER, 
+                    'showIPTV_Filtered', 
+                    f"{category} ({channel_count})", 
+                    icon, 
+                    oOutputParameterHandler
+                )
+        else:
+            oGui.addText('fStream', 'Aucune catégorie trouvée')
+            
+    elif show_by == 'country':
+        if countries:
+            sorted_countries = sorted(countries.keys())
+            for country in sorted_countries:
+                channel_count = len(countries[country])
+                
+                oOutputParameterHandler = cOutputParameterHandler()
+                oOutputParameterHandler.addParameter('filter_type', 'country')
+                oOutputParameterHandler.addParameter('filter_value', country)
+                oOutputParameterHandler.addParameter('m3u_data', data)
+                
+                # Essayer de trouver le code pays pour l'icône
+                country_code = get_country_code(country)
+                icon = f"{country_code.lower()}.png" if country_code else "tv.png"
+                
+                oGui.addDir(
+                    SITE_IDENTIFIER, 
+                    'showIPTV_Filtered', 
+                    f"{country} ({channel_count})", 
+                    icon, 
+                    oOutputParameterHandler
+                )
+        else:
+            oGui.addText('fStream', 'Aucun pays trouvé')
+    elif show_by == 'all':
+        # Afficher toutes les chaînes
+        for channel in all_channels:
+            oOutputParameterHandler = cOutputParameterHandler()
+            oOutputParameterHandler.addParameter('siteUrl', channel['url'])
+            oOutputParameterHandler.addParameter('sMovieTitle', channel['title'])
+            oOutputParameterHandler.addParameter('sThumb', channel['logo'])
+            
+            oGui.addLink(
+                SITE_IDENTIFIER, 
+                'playIPTV', 
+                channel['title'], 
+                channel['logo'], 
+                '', 
+                oOutputParameterHandler
+            )
+        
+        if len(all_channels) == 0:
+            oGui.addText('fStream', 'Aucune chaîne trouvée')
+            
+
+def parseAndShowChannels(oGui, data, filter_type, filter_value):
+    """Affiche les chaînes filtrées par catégorie ou pays"""
+    import re
+    from resources.lib.comaddon import VSlog
+    
+    if not data:
+        VSlog("[M3U] Aucune donnée à parser")
+        oGui.addText('fStream', 'Aucune chaîne trouvée')
+        return
+    
+    VSlog(f"[M3U] Filtrage par {filter_type}: {filter_value}")
+    
+    lines = data.split('\n')
+    i = 0
+    count = 0
+    
+    while i < len(lines):
+        line = lines[i].strip()
+        
+        if line.startswith('#EXTINF'):
+            try:
+                # Extraire les métadonnées
+                group_match = re.search(r'group-title="([^"]*)"', line)
+                country_match = re.search(r'tvg-country="([^"]*)"', line)
+                
+                category = group_match.group(1) if group_match else "Général"
+                country = country_match.group(1) if country_match else "International"
+                
+                # Vérifier si correspond au filtre
+                match = False
+                if filter_type == 'category' and category == filter_value:
+                    match = True
+                elif filter_type == 'country' and country == filter_value:
+                    match = True
+                
+                if match:
+                    # Extraire le titre (même logique améliorée)
+                    name_match = re.search(r'tvg-name="([^"]+)"', line)
+                    title = name_match.group(1) if name_match else None
+                    
+                    if not title or len(title.strip()) == 0:
+                        comma_parts = line.split(',', 1)
+                        if len(comma_parts) > 1:
+                            title = comma_parts[1].strip()
+                            title = re.sub(r'^.*?\s+([A-Za-z0-9])', r'\1', title)
+                    
+                    if not title or len(title.strip()) == 0:
+                        id_match = re.search(r'tvg-id="([^"]+)"', line)
+                        if id_match:
+                            title = id_match.group(1).replace('.', ' ').replace('-', ' ')
+                    
+                    if not title or len(title.strip()) == 0:
+                        title = f"Chaîne {count + 1}"
+                    
+                    # Extraire logo et URL
+                    logo_match = re.search(r'tvg-logo="([^"]*)"', line)
+                    
+                    stream_url = None
+                    j = i + 1
+                    while j < len(lines) and j < i + 5:
+                        next_line = lines[j].strip()
+                        if next_line and not next_line.startswith('#'):
+                            if next_line.startswith('http'):
+                                stream_url = next_line
+                                break
+                        j += 1
+                    
+                    if stream_url:
+                        logo = logo_match.group(1) if logo_match else "tv.png"
+                        title = title.replace('[', '').replace(']', '').strip()
+                        title = re.sub(r'<[^>]+>', '', title)
+                        
+                        if len(title) > 60:
+                            title = title[:57] + "..."
+                        
+                        oOutputParameterHandler = cOutputParameterHandler()
+                        oOutputParameterHandler.addParameter('siteUrl', stream_url)
+                        oOutputParameterHandler.addParameter('sMovieTitle', title)
+                        oOutputParameterHandler.addParameter('sThumb', logo)
+                        
+                        oGui.addLink(
+                            SITE_IDENTIFIER, 
+                            'playIPTV', 
+                            title, 
+                            logo, 
+                            '', 
+                            oOutputParameterHandler
+                        )
+                        count += 1
+                        
+            except Exception as e:
+                VSlog(f"[M3U] Erreur parsing: {str(e)}")
+        
+        i += 1
+    
+    VSlog(f"[M3U] {count} chaînes affichées")
     
     if count == 0:
-        oGui.addText('fStream', 'Aucune chaîne valide trouvée')
+        oGui.addText('fStream', f'Aucune chaîne trouvée')
+
+
+def get_country_code(country_name):
+    """Essaie de trouver le code pays depuis le nom"""
+    # Mapping inversé
+    for code, name in IPTV_COUNTRIES.items():
+        if name.lower() == country_name.lower():
+            return code
+    
+    # Codes courants
+    common_codes = {
+        'france': 'FR', 'united states': 'US', 'usa': 'US',
+        'united kingdom': 'GB', 'uk': 'GB', 'germany': 'DE',
+        'italy': 'IT', 'spain': 'ES', 'canada': 'CA',
+        'international': 'WORLD'
+    }
+    
+    return common_codes.get(country_name.lower(), None)
+
+
+def get_category_icon(category):
+    """Retourne une icône appropriée selon la catégorie"""
+    category_lower = category.lower()
+    
+    icon_map = {
+        'news': 'news.png',
+        'sport': 'sport.png',
+        'entertainment': 'vod.png',
+        'movies': 'films.png',
+        'films': 'films.png',
+        'series': 'series.png',
+        'documentary': 'doc.png',
+        'kids': 'enfants.png',
+        'music': 'genres.png',
+        'general': 'tv.png',
+        'information': 'news.png',
+        'divertissement': 'vod.png',
+        'enfants': 'enfants.png',
+        'musique': 'genres.png',
+    }
+    
+    for key, icon in icon_map.items():
+        if key in category_lower:
+            return icon
+    
+    return 'tv.png'
 
 
 class cHome:
@@ -873,32 +1176,173 @@ class cHome:
 
 
     
-    def showIPTV_ByCountry(self):
-        """Affiche les chaînes IPTV d'un pays"""
+    def showDirect(self):
+        """Menu principal IPTV avec choix de navigation"""
         oGui = cGui()
-        oInput = cInputParameterHandler()
+        oGui.addText('fStream', 'Chaînes TV en direct')
 
-        code = oInput.getValue('country_code')
-        name = oInput.getValue('country_name')
+        # Option 1: Navigation par catégorie
+        oOutputParameterHandler = cOutputParameterHandler()
+        oGui.addDir(
+            SITE_IDENTIFIER, 
+            'showIPTV_ByCategory', 
+            '📂 Par catégorie (Sport, News, etc.)', 
+            'genres.png', 
+            oOutputParameterHandler
+        )
+        
+        # Option 2: Navigation par pays
+        oOutputParameterHandler = cOutputParameterHandler()
+        oGui.addDir(
+            SITE_IDENTIFIER, 
+            'showIPTV_ByCountry', 
+            '🌍 Par pays', 
+            'flags.png', 
+            oOutputParameterHandler
+        )
 
+        oGui.setEndOfDirectory()
+    
+    def showIPTV_ByCategory(self):
+        """Affiche toutes les catégories de toutes les chaînes"""
+        oGui = cGui()
         from resources.lib.comaddon import VSlog
-        VSlog(f"[HOME] Chargement IPTV pour {name} ({code})")
-
+        
+        VSlog("[HOME] Chargement de toutes les catégories")
+        
         try:
-            # Charger M3U
-            urls = getCountryM3U(code)
-            VSlog(f"[HOME] URLs M3U: {urls}")
+            # Charger les M3U de tous les pays (ou un index global)
+            # Pour l'instant, on charge un pays principal ou global
+            url = "https://iptv-org.github.io/iptv/index.m3u"
             
-            data = loadM3U(urls, f"{code.lower()}_cache.m3u")
-            VSlog(f"[HOME] Données M3U chargées: {len(data) if data else 0} caractères")
-            
-            # Parser et afficher
-            parseAndShowM3U(oGui, data)
+            oOutputParameterHandler = cOutputParameterHandler()
+            oOutputParameterHandler.addParameter('m3u_url', url)
+            oGui.addDir(
+                SITE_IDENTIFIER,
+                'showIPTV_LoadAndShowCategories',
+                'Toutes les catégories',
+                'genres.png',
+                oOutputParameterHandler
+            )
             
         except Exception as e:
-            VSlog(f"[HOME] Erreur showIPTV_ByCountry: {str(e)}")
+            VSlog(f"[HOME] Erreur: {str(e)}")
+            oGui.addText('fStream', f'Erreur: {str(e)}')
+        
+        oGui.setEndOfDirectory()
+    
+    def showIPTV_ByCountry(self):
+        """Affiche tous les pays disponibles"""
+        oGui = cGui()
+        from resources.lib.comaddon import VSlog
+        
+        VSlog("[HOME] Chargement de la liste des pays")
+        
+        try:
+            # Récupérer la liste dynamique des pays
+            countries = extractCountriesFromAPI()
+            
+            for code, name in sorted(countries.items(), key=lambda x: x[1]):
+                oOutputParameterHandler = cOutputParameterHandler()
+                oOutputParameterHandler.addParameter('country_code', code)
+                oOutputParameterHandler.addParameter('country_name', name)
+                
+                icon = f"{code.lower()}.png"
+                oGui.addDir(
+                    SITE_IDENTIFIER, 
+                    'showIPTV_CountryMenu', 
+                    name, 
+                    icon, 
+                    oOutputParameterHandler
+                )
+            
+        except Exception as e:
+            VSlog(f"[HOME] Erreur: {str(e)}")
+            oGui.addText('fStream', f'Erreur: {str(e)}')
+        
+        oGui.setEndOfDirectory()
+    
+    def showIPTV_CountryMenu(self):
+        """Menu pour un pays: catégories ou toutes les chaînes"""
+        oGui = cGui()
+        oInput = cInputParameterHandler()
+        
+        code = oInput.getValue('country_code')
+        name = oInput.getValue('country_name')
+        
+        from resources.lib.comaddon import VSlog
+        VSlog(f"[HOME] Menu pour {name}")
+        
+        # Par catégories
+        oOutputParameterHandler = cOutputParameterHandler()
+        oOutputParameterHandler.addParameter('country_code', code)
+        oOutputParameterHandler.addParameter('show_by', 'category')
+        oGui.addDir(
+            SITE_IDENTIFIER,
+            'showIPTV_Load',
+            '📂 Par catégorie',
+            'genres.png',
+            oOutputParameterHandler
+        )
+        
+        # Toutes les chaînes
+        oOutputParameterHandler = cOutputParameterHandler()
+        oOutputParameterHandler.addParameter('country_code', code)
+        oOutputParameterHandler.addParameter('show_by', 'all')
+        oGui.addDir(
+            SITE_IDENTIFIER,
+            'showIPTV_Load',
+            '📺 Toutes les chaînes',
+            'tv.png',
+            oOutputParameterHandler
+        )
+        
+        oGui.setEndOfDirectory()
+    
+    def showIPTV_Load(self):
+        """Charge et affiche les chaînes d'un pays"""
+        oGui = cGui()
+        oInput = cInputParameterHandler()
+        
+        code = oInput.getValue('country_code')
+        show_by = oInput.getValue('show_by')
+        
+        from resources.lib.comaddon import VSlog
+        VSlog(f"[HOME] Chargement {code}, mode: {show_by}")
+        
+        try:
+            urls = getCountryM3U(code)
+            data = loadM3U(urls, f"{code.lower()}_cache.m3u")
+            
+            if show_by == 'category':
+                parseAndShowM3U(oGui, data, show_by='category')
+            else:
+                parseAndShowM3U(oGui, data, show_by='all')
+                
+        except Exception as e:
+            VSlog(f"[HOME] Erreur: {str(e)}")
             import traceback
-            VSlog(f"[HOME] Traceback: {traceback.format_exc()}")
+            VSlog(traceback.format_exc())
+            oGui.addText('fStream', f'Erreur: {str(e)}')
+        
+        oGui.setEndOfDirectory()
+    
+    def showIPTV_Filtered(self):
+        """Affiche les chaînes filtrées"""
+        oGui = cGui()
+        oInput = cInputParameterHandler()
+        
+        filter_type = oInput.getValue('filter_type')
+        filter_value = oInput.getValue('filter_value')
+        data = oInput.getValue('m3u_data')
+        
+        from resources.lib.comaddon import VSlog
+        VSlog(f"[HOME] Filtrage: {filter_type}={filter_value}")
+        
+        try:
+            parseAndShowChannels(oGui, data, filter_type, filter_value)
+        except Exception as e:
+            VSlog(f"[HOME] Erreur: {str(e)}")
             oGui.addText('fStream', f'Erreur: {str(e)}')
         
         oGui.setEndOfDirectory()
@@ -911,7 +1355,7 @@ class cHome:
         sTitle = oInputParameterHandler.getValue('sMovieTitle')
         
         from resources.lib.comaddon import VSlog
-        VSlog(f"[HOME] Lecture IPTV: {sTitle} - {sUrl}")
+        VSlog(f"[HOME] Lecture: {sTitle}")
         
         oHoster = cHosterGui().checkHoster(sUrl)
         if oHoster:
@@ -919,8 +1363,7 @@ class cHome:
             oHoster.setFileName(sTitle)
             cHosterGui().showHoster(oGui, oHoster, sUrl, '')
         else:
-            VSlog(f"[HOME] Aucun hoster trouvé pour: {sUrl}")
+            VSlog(f"[HOME] Pas de hoster pour: {sUrl}")
             xbmcgui.Dialog().ok("Erreur", "Impossible de lire ce flux")
         
         oGui.setEndOfDirectory()
-
