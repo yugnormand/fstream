@@ -3,6 +3,9 @@
 # Venom.
 import xbmcaddon
 import xbmcgui
+import requests
+import os
+import xbmc
 from resources.lib import auth
 
 #addon = xbmcaddon.Addon()
@@ -48,41 +51,107 @@ IPTV_COUNTRIES = {
     'CIV': 'Ivory Coast'
 }
 
-# ✅ Fonctions utilitaires AVANT la classe
+# ✅ CLASSE DE CACHE SIMPLE
+class IPTVCache:
+    """Classe simple pour gérer le cache des fichiers M3U"""
+    
+    @staticmethod
+    def get_cache_dir():
+        """Retourne le répertoire de cache"""
+        cache_dir = xbmc.translatePath('special://temp/fstream_iptv_cache')
+        if not os.path.exists(cache_dir):
+            try:
+                os.makedirs(cache_dir)
+            except:
+                pass
+        return cache_dir
+    
+    @staticmethod
+    def get_cached(cache_name):
+        """Récupère le contenu du cache s'il existe"""
+        try:
+            cache_file = os.path.join(IPTVCache.get_cache_dir(), cache_name)
+            if os.path.exists(cache_file):
+                # Vérifier si le cache a moins de 24h
+                import time
+                file_time = os.path.getmtime(cache_file)
+                current_time = time.time()
+                
+                # Cache valide pendant 24h (86400 secondes)
+                if (current_time - file_time) < 86400:
+                    with open(cache_file, 'r', encoding='utf-8') as f:
+                        return f.read()
+            return None
+        except Exception as e:
+            from resources.lib.comaddon import VSlog
+            VSlog(f"[CACHE] Erreur lecture cache: {str(e)}")
+            return None
+    
+    @staticmethod
+    def save_cache(cache_name, data):
+        """Sauvegarde le contenu dans le cache"""
+        try:
+            cache_file = os.path.join(IPTVCache.get_cache_dir(), cache_name)
+            with open(cache_file, 'w', encoding='utf-8') as f:
+                f.write(data)
+            from resources.lib.comaddon import VSlog
+            VSlog(f"[CACHE] Cache sauvegardé: {cache_name}")
+        except Exception as e:
+            from resources.lib.comaddon import VSlog
+            VSlog(f"[CACHE] Erreur sauvegarde cache: {str(e)}")
+
+
+# ✅ Fonctions utilitaires
 def getCountryM3U(country_code):
     """Retourne l'URL du fichier M3U pour un pays donné"""
     return [f"https://iptv-org.github.io/iptv/countries/{country_code.lower()}.m3u"]
 
+
 def loadM3U(urls, cache_name):
     """Charge le contenu M3U depuis les URLs ou le cache"""
+    from resources.lib.comaddon import VSlog
+    
+    # Essayer de charger depuis le cache
     data = IPTVCache.get_cached(cache_name)
+    
+    if data is not None:
+        VSlog(f"[M3U] Chargé depuis le cache: {cache_name}")
+        return data
 
-    if data is None:
-        data = ""
-        for url in urls:
-            try:
-                response = requests.get(url, timeout=10)
-                response.raise_for_status()
-                data += response.text + "\n"
-            except Exception as e:
-                from resources.lib.comaddon import VSlog
-                VSlog(f"[HOME] Erreur chargement M3U depuis {url}: {str(e)}")
-                pass
+    # Sinon télécharger
+    VSlog(f"[M3U] Téléchargement depuis les URLs...")
+    data = ""
+    for url in urls:
+        try:
+            VSlog(f"[M3U] Téléchargement: {url}")
+            response = requests.get(url, timeout=15)
+            response.raise_for_status()
+            data += response.text + "\n"
+            VSlog(f"[M3U] Téléchargé: {len(response.text)} caractères")
+        except Exception as e:
+            VSlog(f"[M3U] Erreur téléchargement {url}: {str(e)}")
+            continue
 
-        if data:
-            IPTVCache.save_cache(cache_name, data)
-
+    # Sauvegarder dans le cache si on a des données
+    if data:
+        IPTVCache.save_cache(cache_name, data)
+    
     return data
+
 
 def parseAndShowM3U(oGui, data):
     """Parse le contenu M3U et affiche les chaînes"""
     import re
+    from resources.lib.comaddon import VSlog
     
     if not data:
+        VSlog("[M3U] Aucune donnée à parser")
         oGui.addText('fStream', 'Aucune chaîne trouvée')
         return
 
+    VSlog(f"[M3U] Parsing de {len(data)} caractères")
     channels = data.split("#EXTINF")
+    VSlog(f"[M3U] {len(channels)} blocs trouvés")
 
     count = 0
     for block in channels:
@@ -119,13 +188,15 @@ def parseAndShowM3U(oGui, data):
                 oOutputParameterHandler.addParameter('sMovieTitle', title)
                 oOutputParameterHandler.addParameter('sThumb', icon)
                 
-                oGui.addTV(SITE_IDENTIFIER, 'playIPTV', title, icon, '', '', oOutputParameterHandler)
+                # Utiliser addLink au lieu de addTV
+                oGui.addLink(SITE_IDENTIFIER, 'playIPTV', title, icon, '', oOutputParameterHandler)
                 count += 1
                 
             except Exception as e:
-                from resources.lib.comaddon import VSlog
-                VSlog(f"[HOME] Erreur parsing chaîne: {str(e)}")
+                VSlog(f"[M3U] Erreur parsing chaîne: {str(e)}")
                 continue
+    
+    VSlog(f"[M3U] {count} chaînes ajoutées")
     
     if count == 0:
         oGui.addText('fStream', 'Aucune chaîne valide trouvée')
@@ -826,13 +897,15 @@ class cHome:
             
         except Exception as e:
             VSlog(f"[HOME] Erreur showIPTV_ByCountry: {str(e)}")
+            import traceback
+            VSlog(f"[HOME] Traceback: {traceback.format_exc()}")
             oGui.addText('fStream', f'Erreur: {str(e)}')
         
-        # ✅ AJOUT IMPORTANT
         oGui.setEndOfDirectory()
     
     def playIPTV(self):
         """Joue un flux IPTV"""
+        oGui = cGui()
         oInputParameterHandler = cInputParameterHandler()
         sUrl = oInputParameterHandler.getValue('siteUrl')
         sTitle = oInputParameterHandler.getValue('sMovieTitle')
@@ -844,4 +917,10 @@ class cHome:
         if oHoster:
             oHoster.setDisplayName(sTitle)
             oHoster.setFileName(sTitle)
-            cHosterGui().showHoster(cGui(), oHoster, sUrl, '')
+            cHosterGui().showHoster(oGui, oHoster, sUrl, '')
+        else:
+            VSlog(f"[HOME] Aucun hoster trouvé pour: {sUrl}")
+            xbmcgui.Dialog().ok("Erreur", "Impossible de lire ce flux")
+        
+        oGui.setEndOfDirectory()
+
