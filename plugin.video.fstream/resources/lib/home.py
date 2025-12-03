@@ -48,6 +48,87 @@ IPTV_COUNTRIES = {
     'CIV': 'Ivory Coast'
 }
 
+# ✅ Fonctions utilitaires AVANT la classe
+def getCountryM3U(country_code):
+    """Retourne l'URL du fichier M3U pour un pays donné"""
+    return [f"https://iptv-org.github.io/iptv/countries/{country_code.lower()}.m3u"]
+
+def loadM3U(urls, cache_name):
+    """Charge le contenu M3U depuis les URLs ou le cache"""
+    data = IPTVCache.get_cached(cache_name)
+
+    if data is None:
+        data = ""
+        for url in urls:
+            try:
+                response = requests.get(url, timeout=10)
+                response.raise_for_status()
+                data += response.text + "\n"
+            except Exception as e:
+                from resources.lib.comaddon import VSlog
+                VSlog(f"[HOME] Erreur chargement M3U depuis {url}: {str(e)}")
+                pass
+
+        if data:
+            IPTVCache.save_cache(cache_name, data)
+
+    return data
+
+def parseAndShowM3U(oGui, data):
+    """Parse le contenu M3U et affiche les chaînes"""
+    import re
+    
+    if not data:
+        oGui.addText('fStream', 'Aucune chaîne trouvée')
+        return
+
+    channels = data.split("#EXTINF")
+
+    count = 0
+    for block in channels:
+        if "tvg-name" in block or "tvg-logo" in block or "http" in block:
+            try:
+                # Extraction des informations
+                name_match = re.search(r'tvg-name="([^"]*)"', block)
+                logo_match = re.search(r'tvg-logo="([^"]*)"', block)
+                
+                # Récupération de l'URL du stream (dernière ligne non vide)
+                lines = [l.strip() for l in block.split("\n") if l.strip()]
+                stream_url = None
+                for line in reversed(lines):
+                    if line.startswith("http"):
+                        stream_url = line
+                        break
+                
+                if not stream_url:
+                    continue
+
+                # Titre de la chaîne
+                title = name_match.group(1) if name_match else "Chaîne sans nom"
+                if not title or title == "":
+                    # Essayer de récupérer le titre depuis la dernière partie avant l'URL
+                    title_match = re.search(r',([^,\n]+)\s*$', block.split(stream_url)[0])
+                    title = title_match.group(1).strip() if title_match else "Chaîne"
+                
+                # Logo
+                icon = logo_match.group(1) if logo_match else "tv.png"
+
+                # Ajout de la chaîne
+                oOutputParameterHandler = cOutputParameterHandler()
+                oOutputParameterHandler.addParameter('siteUrl', stream_url)
+                oOutputParameterHandler.addParameter('sMovieTitle', title)
+                oOutputParameterHandler.addParameter('sThumb', icon)
+                
+                oGui.addTV(SITE_IDENTIFIER, 'playIPTV', title, icon, '', '', oOutputParameterHandler)
+                count += 1
+                
+            except Exception as e:
+                from resources.lib.comaddon import VSlog
+                VSlog(f"[HOME] Erreur parsing chaîne: {str(e)}")
+                continue
+    
+    if count == 0:
+        oGui.addText('fStream', 'Aucune chaîne valide trouvée')
 
 
 class cHome:
@@ -719,18 +800,48 @@ class cHome:
 
         oGui.setEndOfDirectory()
 
-    def getCountryM3U(country_code):
-        return [f"https://iptv-org.github.io/iptv/countries/{country_code.lower()}.m3u"]
+
     
     def showIPTV_ByCountry(self):
+        """Affiche les chaînes IPTV d'un pays"""
         oGui = cGui()
         oInput = cInputParameterHandler()
 
         code = oInput.getValue('country_code')
         name = oInput.getValue('country_name')
 
-        # Charger M3U
-        urls = getCountryM3U(code)
-        data = loadM3U(urls, f"{code.lower()}_cache.m3u")
+        from resources.lib.comaddon import VSlog
+        VSlog(f"[HOME] Chargement IPTV pour {name} ({code})")
 
-        parseAndShowM3U(oGui, data)
+        try:
+            # Charger M3U
+            urls = getCountryM3U(code)
+            VSlog(f"[HOME] URLs M3U: {urls}")
+            
+            data = loadM3U(urls, f"{code.lower()}_cache.m3u")
+            VSlog(f"[HOME] Données M3U chargées: {len(data) if data else 0} caractères")
+            
+            # Parser et afficher
+            parseAndShowM3U(oGui, data)
+            
+        except Exception as e:
+            VSlog(f"[HOME] Erreur showIPTV_ByCountry: {str(e)}")
+            oGui.addText('fStream', f'Erreur: {str(e)}')
+        
+        # ✅ AJOUT IMPORTANT
+        oGui.setEndOfDirectory()
+    
+    def playIPTV(self):
+        """Joue un flux IPTV"""
+        oInputParameterHandler = cInputParameterHandler()
+        sUrl = oInputParameterHandler.getValue('siteUrl')
+        sTitle = oInputParameterHandler.getValue('sMovieTitle')
+        
+        from resources.lib.comaddon import VSlog
+        VSlog(f"[HOME] Lecture IPTV: {sTitle} - {sUrl}")
+        
+        oHoster = cHosterGui().checkHoster(sUrl)
+        if oHoster:
+            oHoster.setDisplayName(sTitle)
+            oHoster.setFileName(sTitle)
+            cHosterGui().showHoster(cGui(), oHoster, sUrl, '')
