@@ -1403,17 +1403,15 @@ class cHome:
         oOutputParameterHandler = cOutputParameterHandler()
 
         # Option 1: Live TV (source existante livetv.py)
-        oOutputParameterHandler.addParameter('siteUrl', 'TV_LIVE')
         oGui.addDir(
-            SITE_IDENTIFIER,
-            'callpluging',
+            'livetv',
+            'load',
             'Live TV',
             'tv.png',
             oOutputParameterHandler
         )
 
         # Option 2: Navigation par pays (IPTV-org)
-        oOutputParameterHandler = cOutputParameterHandler()
         oGui.addDir(
             SITE_IDENTIFIER,
             "showIPTV_AllCountries",
