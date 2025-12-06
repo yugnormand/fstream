@@ -1393,8 +1393,56 @@ class cHome:
 
     # ===== MÉTHODES IPTV =====
 
+    def get_iptv_sources():
+        """Retourne un dictionnaire de sources IPTV disponibles"""
+        return {
+            "IPTV-ORG": {
+                "name": "IPTV-ORG (Mondial)",
+                "url": "https://iptv-org.github.io/iptv/index.m3u",
+                "type": "global",
+                "description": "Chaînes du monde entier"
+            },
+            "IPTV-ORG-SPORT": {
+                "name": "IPTV-ORG Sport",
+                "url": "https://iptv-org.github.io/iptv/categories/sports.m3u",
+                "type": "category",
+                "description": "Chaînes sportives uniquement"
+            },
+            "IPTV-ORG-NEWS": {
+                "name": "IPTV-ORG News",
+                "url": "https://iptv-org.github.io/iptv/categories/news.m3u",
+                "type": "category",
+                "description": "Chaînes d'information"
+            },
+            "PLUTO-TV-FR": {
+                "name": "Pluto TV France",
+                "url": "https://i.mjh.nz/PlutoTV/fr.m3u8",
+                "type": "country",
+                "description": "Chaînes Pluto TV françaises (légal)"
+            },
+            "PLUTO-TV-US": {
+                "name": "Pluto TV USA",
+                "url": "https://i.mjh.nz/PlutoTV/us.m3u8",
+                "type": "country",
+                "description": "Chaînes Pluto TV américaines (légal)"
+            },
+            "SAMSUNG-TV-FR": {
+                "name": "Samsung TV+ France",
+                "url": "https://i.mjh.nz/SamsungTVPlus/fr.m3u8",
+                "type": "country",
+                "description": "Chaînes Samsung TV+ françaises (légal)"
+            },
+            "PLEX-WEB": {
+                "name": "Plex Web TV",
+                "url": "https://i.mjh.nz/Plex/all.m3u8",
+                "type": "global",
+                "description": "Chaînes Plex gratuites (légal)"
+            }
+        }
+
+
     def showDirect(self):
-        """Menu principal IPTV avec Live TV et Par pays"""
+        """Menu principal IPTV avec plusieurs sources"""
         oGui = cGui()
 
         from resources.lib.comaddon import VSlog
@@ -1406,19 +1454,99 @@ class cHome:
         oGui.addDir(
             'livetv',
             'load',
-            'Live TV',
+            'Live TV (Evenements sportifs)',
             'tv.png',
             oOutputParameterHandler
         )
 
-        # Option 2: Navigation par pays (IPTV-org)
+        # Option 2: Par pays (IPTV-org)
+        oOutputParameterHandler = cOutputParameterHandler()
         oGui.addDir(
             SITE_IDENTIFIER,
             "showIPTV_AllCountries",
-            "Par pays",
-            "flags.png",
+            "Par Pays (Toutes chaines)",
+            "tv.png",
             oOutputParameterHandler,
         )
+
+        # Option 3: Chaînes Sport uniquement
+        oOutputParameterHandler = cOutputParameterHandler()
+        oOutputParameterHandler.addParameter("source_url", "https://iptv-org.github.io/iptv/categories/sports.m3u")
+        oOutputParameterHandler.addParameter("source_name", "Sport")
+        oGui.addDir(
+            SITE_IDENTIFIER,
+            "showIPTV_FromURL",
+            "Sport (IPTV-ORG)",
+            "sport.png",
+            oOutputParameterHandler,
+        )
+
+        # Option 4: Chaînes News uniquement
+        oOutputParameterHandler = cOutputParameterHandler()
+        oOutputParameterHandler.addParameter("source_url", "https://iptv-org.github.io/iptv/categories/news.m3u")
+        oOutputParameterHandler.addParameter("source_name", "News")
+        oGui.addDir(
+            SITE_IDENTIFIER,
+            "showIPTV_FromURL",
+            "News (IPTV-ORG)",
+            "news.png",
+            oOutputParameterHandler,
+        )
+
+        # Option 5: Pluto TV France (légal)
+        oOutputParameterHandler = cOutputParameterHandler()
+        oOutputParameterHandler.addParameter("source_url", "https://i.mjh.nz/PlutoTV/fr.m3u8")
+        oOutputParameterHandler.addParameter("source_name", "Pluto TV FR")
+        oGui.addDir(
+            SITE_IDENTIFIER,
+            "showIPTV_FromURL",
+            "Pluto TV France (Legal)",
+            "tv.png",
+            oOutputParameterHandler,
+        )
+
+        # Option 6: Samsung TV+ France (légal)
+        oOutputParameterHandler = cOutputParameterHandler()
+        oOutputParameterHandler.addParameter("source_url", "https://i.mjh.nz/SamsungTVPlus/fr.m3u8")
+        oOutputParameterHandler.addParameter("source_name", "Samsung TV+ FR")
+        oGui.addDir(
+            SITE_IDENTIFIER,
+            "showIPTV_FromURL",
+            "Samsung TV+ France (Legal)",
+            "tv.png",
+            oOutputParameterHandler,
+        )
+
+        oGui.setEndOfDirectory()
+
+
+    def showIPTV_FromURL(self):
+        """Charge et affiche les chaînes depuis une URL spécifique"""
+        oGui = cGui()
+        oInput = cInputParameterHandler()
+
+        source_url = oInput.getValue("source_url")
+        source_name = oInput.getValue("source_name")
+
+        from resources.lib.comaddon import VSlog
+        VSlog(f"[HOME] Chargement depuis: {source_url}")
+
+        try:
+            # Télécharger le M3U
+            response = requests.get(source_url, timeout=20)
+            response.raise_for_status()
+            data = response.text
+
+            VSlog(f"[HOME] {len(data)} caracteres charges")
+
+            # Afficher toutes les chaînes (pas de limite de 50 pour les catégories spécifiques)
+            parseAndShowM3U(oGui, data, show_by="all", max_channels=0)
+
+        except Exception as e:
+            VSlog(f"[HOME] Erreur: {str(e)}")
+            import traceback
+            VSlog(traceback.format_exc())
+            oGui.addText("fStream", f"Erreur: {str(e)}")
 
         oGui.setEndOfDirectory()
 
