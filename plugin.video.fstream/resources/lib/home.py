@@ -1394,7 +1394,7 @@ class cHome:
     # ===== MÉTHODES IPTV =====
 
     def showDirect(self):
-        """Menu principal IPTV simplifié"""
+        """Menu principal IPTV avec Live TV et Par pays"""
         oGui = cGui()
 
         from resources.lib.comaddon import VSlog
@@ -1402,7 +1402,18 @@ class cHome:
 
         oOutputParameterHandler = cOutputParameterHandler()
 
-        # Navigation par pays directement
+        # Option 1: Live TV (source existante livetv.py)
+        oOutputParameterHandler.addParameter('siteUrl', 'TV_LIVE')
+        oGui.addDir(
+            SITE_IDENTIFIER,
+            'callpluging',
+            'Live TV',
+            'tv.png',
+            oOutputParameterHandler
+        )
+
+        # Option 2: Navigation par pays (IPTV-org)
+        oOutputParameterHandler = cOutputParameterHandler()
         oGui.addDir(
             SITE_IDENTIFIER,
             "showIPTV_AllCountries",
