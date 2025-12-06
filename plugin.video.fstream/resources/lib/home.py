@@ -96,7 +96,7 @@ class IPTVCache:
                 f.write(data)
             from resources.lib.comaddon import VSlog
 
-            VSlog(f"[CACHE] Cache sauvegardé: {cache_name}")
+            VSlog(f"[CACHE] Cache sauvegarde: {cache_name}")
         except Exception as e:
             from resources.lib.comaddon import VSlog
 
@@ -117,7 +117,7 @@ def extractCountriesFromAPI():
         response.raise_for_status()
 
         countries_data = response.json()
-        VSlog(f"[IPTV] {len(countries_data)} pays trouvés via API")
+        VSlog(f"[IPTV] {len(countries_data)} pays trouves via API")
 
         # Retourner un dictionnaire {code: name}
         countries = {}
@@ -130,7 +130,7 @@ def extractCountriesFromAPI():
         return countries
 
     except Exception as e:
-        VSlog(f"[IPTV] Erreur récupération pays API: {str(e)}")
+        VSlog(f"[IPTV] Erreur recuperation pays API: {str(e)}")
         # Fallback sur la liste statique
         return IPTV_COUNTRIES
 
@@ -148,21 +148,21 @@ def loadM3U(urls, cache_name):
     data = IPTVCache.get_cached(cache_name)
 
     if data is not None:
-        VSlog(f"[M3U] Chargé depuis le cache: {cache_name}")
+        VSlog(f"[M3U] Charge depuis le cache: {cache_name}")
         return data
 
     # Sinon télécharger
-    VSlog(f"[M3U] Téléchargement depuis les URLs...")
+    VSlog(f"[M3U] Telechargement depuis les URLs...")
     data = ""
     for url in urls:
         try:
-            VSlog(f"[M3U] Téléchargement: {url}")
+            VSlog(f"[M3U] Telechargement: {url}")
             response = requests.get(url, timeout=15)
             response.raise_for_status()
             data += response.text + "\n"
-            VSlog(f"[M3U] Téléchargé: {len(response.text)} caractères")
+            VSlog(f"[M3U] Telecharge: {len(response.text)} caracteres")
         except Exception as e:
-            VSlog(f"[M3U] Erreur téléchargement {url}: {str(e)}")
+            VSlog(f"[M3U] Erreur telechargement {url}: {str(e)}")
             continue
 
     # Sauvegarder dans le cache si on a des données
@@ -172,24 +172,24 @@ def loadM3U(urls, cache_name):
     return data
 
 
-def parseAndShowM3U(oGui, data, show_by="category"):
+def parseAndShowM3U(oGui, data, show_by="category", max_channels=50):
     """
     Parse le contenu M3U et affiche selon le mode choisi
-    show_by: 'category', 'country' ou 'all'
+    show_by: 'category' ou 'all'
+    max_channels: nombre maximum de chaînes à afficher (0 = illimité)
     """
     import re
     from resources.lib.comaddon import VSlog
 
     if not data:
-        VSlog("[M3U] Aucune donnée à parser")
-        oGui.addText("fStream", "Aucune chaîne trouvée")
+        VSlog("[M3U] Aucune donnee a parser")
+        oGui.addText("fStream", "Aucune chaine trouvee")
         return
 
-    VSlog(f"[M3U] Parsing de {len(data)} caractères, mode: {show_by}")
+    VSlog(f"[M3U] Parsing de {len(data)} caracteres, mode: {show_by}, max: {max_channels}")
 
     # Dictionnaires pour regrouper
     categories = {}
-    countries = {}
     all_channels = []
 
     # Parser ligne par ligne
@@ -202,7 +202,7 @@ def parseAndShowM3U(oGui, data, show_by="category"):
 
         if line.startswith("#EXTINF"):
             try:
-                # ===== EXTRACTION DU TITRE (AMÉLIORÉ) =====
+                # ===== EXTRACTION DU TITRE (AMÉLI0RÉ) =====
                 title = None
 
                 # Méthode 1: tvg-name
@@ -235,12 +235,11 @@ def parseAndShowM3U(oGui, data, show_by="category"):
 
                 # Dernière chance: utiliser un compteur
                 if not title or len(title) == 0:
-                    title = f"Chaîne {total_parsed + 1}"
+                    title = f"Chaine {total_parsed + 1}"
 
                 # ===== EXTRACTION DES AUTRES INFOS =====
                 logo_match = re.search(r'tvg-logo="([^"]*)"', line)
                 group_match = re.search(r'group-title="([^"]*)"', line)
-                country_match = re.search(r'tvg-country="([^"]*)"', line)
 
                 # Chercher l'URL dans les lignes suivantes
                 stream_url = None
@@ -256,12 +255,7 @@ def parseAndShowM3U(oGui, data, show_by="category"):
                 if stream_url and title:
                     logo = logo_match.group(1) if logo_match else "tv.png"
                     category = (
-                        group_match.group(1).strip() if group_match else "Général"
-                    )
-                    country = (
-                        country_match.group(1).strip()
-                        if country_match
-                        else "International"
+                        group_match.group(1).strip() if group_match else "General"
                     )
 
                     # Nettoyer le titre
@@ -279,7 +273,6 @@ def parseAndShowM3U(oGui, data, show_by="category"):
                         "url": stream_url,
                         "logo": logo,
                         "category": category,
-                        "country": country,
                     }
 
                     # Grouper par catégorie
@@ -287,75 +280,74 @@ def parseAndShowM3U(oGui, data, show_by="category"):
                         categories[category] = []
                     categories[category].append(channel)
 
-                    # Grouper par pays
-                    if country not in countries:
-                        countries[country] = []
-                    countries[country].append(channel)
-
                     # Liste globale
                     all_channels.append(channel)
 
                     total_parsed += 1
 
                     if total_parsed <= 5:
-                        VSlog(f"[M3U] '{title}' | Cat: {category} | Pays: {country}")
+                        VSlog(f"[M3U] '{title}' | Cat: {category}")
+
+                    # Limiter le nombre de chaînes si demandé
+                    if max_channels > 0 and total_parsed >= max_channels:
+                        VSlog(f"[M3U] Limite de {max_channels} chaines atteinte")
+                        break
 
             except Exception as e:
                 VSlog(f"[M3U] Erreur parsing ligne {i}: {str(e)}")
 
         i += 1
 
+        # Vérifier la limite après chaque ligne
+        if max_channels > 0 and total_parsed >= max_channels:
+            break
+
     VSlog(
-        f"[M3U] Total: {total_parsed} chaînes, {len(categories)} catégories, {len(countries)} pays"
+        f"[M3U] Total: {total_parsed} chaines, {len(categories)} categories"
     )
 
     # ===== AFFICHAGE SELON LE MODE =====
     if show_by == "category":
         if categories:
-            sorted_categories = sorted(categories.keys())
-            for category in sorted_categories:
-                channel_count = len(categories[category])
+            # Catégorie Sport en premier
+            sport_categories = ["Sport", "Sports"]
+            other_categories = []
 
+            for category in sorted(categories.keys()):
+                if category in sport_categories or "sport" in category.lower():
+                    channel_count = len(categories[category])
+                    oOutputParameterHandler = cOutputParameterHandler()
+                    oOutputParameterHandler.addParameter("filter_type", "category")
+                    oOutputParameterHandler.addParameter("filter_value", category)
+                    oOutputParameterHandler.addParameter("m3u_data", data)
+
+                    oGui.addDir(
+                        SITE_IDENTIFIER,
+                        "showIPTV_Filtered",
+                        f"Sport ({channel_count})",
+                        "sport.png",
+                        oOutputParameterHandler,
+                    )
+                else:
+                    other_categories.append(category)
+
+            # Puis les autres catégories regroupées sous "Autres"
+            if other_categories:
+                total_other = sum(len(categories[cat]) for cat in other_categories)
                 oOutputParameterHandler = cOutputParameterHandler()
-                oOutputParameterHandler.addParameter("filter_type", "category")
-                oOutputParameterHandler.addParameter("filter_value", category)
+                oOutputParameterHandler.addParameter("filter_type", "all")
                 oOutputParameterHandler.addParameter("m3u_data", data)
-
-                icon = get_category_icon(category)
+                oOutputParameterHandler.addParameter("categories", ",".join(other_categories))
 
                 oGui.addDir(
                     SITE_IDENTIFIER,
                     "showIPTV_Filtered",
-                    f"{category} ({channel_count})",
-                    icon,
+                    f"Autres ({total_other})",
+                    "tv.png",
                     oOutputParameterHandler,
                 )
         else:
-            oGui.addText("fStream", "Aucune catégorie trouvée")
-
-    elif show_by == "country":
-        if countries:
-            sorted_countries = sorted(countries.keys())
-            for country in sorted_countries:
-                channel_count = len(countries[country])
-
-                oOutputParameterHandler = cOutputParameterHandler()
-                oOutputParameterHandler.addParameter("filter_type", "country")
-                oOutputParameterHandler.addParameter("filter_value", country)
-                oOutputParameterHandler.addParameter("m3u_data", data)
-
-                country_code = get_country_code(country)
-                icon = f"{country_code.lower()}.png" if country_code else "tv.png"
-
-                oGui.addDir(
-                    SITE_IDENTIFIER,
-                    "showIPTV_Filtered",
-                    f"{country} ({channel_count})",
-                    icon,
-                    oOutputParameterHandler,
-                )
-        else:
-            oGui.addText("fStream", "Aucun pays trouvé")
+            oGui.addText("fStream", "Aucune categorie trouvee")
 
     elif show_by == "all":
         # Afficher toutes les chaînes
@@ -375,17 +367,17 @@ def parseAndShowM3U(oGui, data, show_by="category"):
             )
 
         if len(all_channels) == 0:
-            oGui.addText("fStream", "Aucune chaîne trouvée")
+            oGui.addText("fStream", "Aucune chaine trouvee")
 
 
 def parseAndShowChannels(oGui, data, filter_type, filter_value):
-    """Affiche les chaînes filtrées par catégorie ou pays"""
+    """Affiche les chaînes filtrées par catégorie ou toutes"""
     import re
     from resources.lib.comaddon import VSlog
 
     if not data:
-        VSlog("[M3U] Aucune donnée à parser")
-        oGui.addText("fStream", "Aucune chaîne trouvée")
+        VSlog("[M3U] Aucune donnee a parser")
+        oGui.addText("fStream", "Aucune chaine trouvee")
         return
 
     VSlog(f"[M3U] Filtrage par {filter_type}: {filter_value}")
@@ -401,18 +393,13 @@ def parseAndShowChannels(oGui, data, filter_type, filter_value):
             try:
                 # Extraire les métadonnées
                 group_match = re.search(r'group-title="([^"]*)"', line)
-                country_match = re.search(r'tvg-country="([^"]*)"', line)
-
-                category = group_match.group(1).strip() if group_match else "Général"
-                country = (
-                    country_match.group(1).strip() if country_match else "International"
-                )
+                category = group_match.group(1).strip() if group_match else "General"
 
                 # Vérifier si correspond au filtre
                 match = False
                 if filter_type == "category" and category == filter_value:
                     match = True
-                elif filter_type == "country" and country == filter_value:
+                elif filter_type == "all":
                     match = True
 
                 if match:
@@ -440,7 +427,7 @@ def parseAndShowChannels(oGui, data, filter_type, filter_value):
                             )
 
                     if not title or len(title) == 0:
-                        title = f"Chaîne {count + 1}"
+                        title = f"Chaine {count + 1}"
 
                     # Extraire logo et URL
                     logo_match = re.search(r'tvg-logo="([^"]*)"', line)
@@ -484,10 +471,10 @@ def parseAndShowChannels(oGui, data, filter_type, filter_value):
 
         i += 1
 
-    VSlog(f"[M3U] {count} chaînes affichées pour {filter_value}")
+    VSlog(f"[M3U] {count} chaines affichees pour {filter_value}")
 
     if count == 0:
-        oGui.addText("fStream", f"Aucune chaîne trouvée")
+        oGui.addText("fStream", f"Aucune chaine trouvee")
 
 
 def get_country_code(country_name):
@@ -575,21 +562,21 @@ class cHome:
         """
         from resources.lib.comaddon import VSlog
 
-        VSlog("[HOME] Fonction doLogin() appelée")
+        VSlog("[HOME] Fonction doLogin() appelee")
 
         # Récupération des identifiants depuis settings.xml
         email = self.addons.getSetting("auth_username")
         password = self.addons.getSetting("auth_password")
 
-        VSlog(f"[HOME] Email récupéré : {email}")
-        VSlog(f"[HOME] Password présent : {bool(password)}")
+        VSlog(f"[HOME] Email recupere : {email}")
+        VSlog(f"[HOME] Password present : {bool(password)}")
 
         # Vérification que les champs ne sont pas vides
         if not email or not password:
             VSlog("[HOME] Identifiants manquants")
             xbmcgui.Dialog().ok(
                 "Fstream",
-                "Veuillez entrer votre email et mot de passe dans les paramètres",
+                "Veuillez entrer votre email et mot de passe dans les parametres",
             )
             self.addons.openSettings()
             return
@@ -598,21 +585,21 @@ class cHome:
         VSlog("[HOME] Appel de auth.login()...")
         success, message = auth.login(email, password)
 
-        VSlog(f"[HOME] Résultat login : success={success}, message={message}")
+        VSlog(f"[HOME] Resultat login : success={success}, message={message}")
 
         if success:
-            VSlog("[HOME] Login réussi, rechargement de l'interface")
-            xbmcgui.Dialog().ok("Fstream", "Connexion réussie !")
+            VSlog("[HOME] Login reussi, rechargement de l'interface")
+            xbmcgui.Dialog().ok("Fstream", "Connexion reussie !")
             # Rafraîchir l'interface
             self.load()
         else:
-            VSlog(f"[HOME] Login échoué : {message}")
+            VSlog(f"[HOME] Login echoue : {message}")
             # Afficher l'erreur retournée par l'API
             xbmcgui.Dialog().ok("Fstream", f"Erreur de connexion :\n{message}")
 
     def doLogout(self):
         auth.logout()
-        xbmcgui.Dialog().ok("Fstream", "Déconnecté")
+        xbmcgui.Dialog().ok("Fstream", "Deconnecte")
         self.loginScreen()
 
     def load(self):
@@ -627,7 +614,7 @@ class cHome:
         oGui.addDir(
             SITE_IDENTIFIER,
             "doLogout",
-            "[Déconnexion]",
+            "[Deconnexion]",
             "logout.png",
             oOutputParameterHandler,
         )
@@ -847,7 +834,6 @@ class cHome:
 
     def showAnimesSearch(self):
         oGui = cGui()
-        addons = self.addons
 
         oOutputParameterHandler = cOutputParameterHandler()
         # recherche directe
@@ -898,36 +884,10 @@ class cHome:
 
         oGui.setEndOfDirectory()
 
-    def showDocsSearch(self):
-        oGui = cGui()
-        oOutputParameterHandler =     cOutputParameterHandler()
-
-        # recherche directe
-        oOutputParameterHandler.addParameter("sCat", "5")
-        oGui.addDir(
-            SITE_IDENTIFIER,
-            "showSearchText",
-            self.addons.VSlang(30076),
-            "search-divers.png",
-            oOutputParameterHandler,
-        )
-
-        if self.addons.getSetting("history-view") == "true":
-            oOutputParameterHandler.addParameter("sCat", "5")
-            oGui.addDir(
-                SITE_IDENTIFIER,
-                "showHistory",
-                self.addons.VSlang(30308),
-                "history.png",
-                oOutputParameterHandler,
-            )
-
-        oGui.setEndOfDirectory()   
-
     def showSearchText(self):
         oGui = cGui()
-        oInputParameterHandler =     cInputParameterHandler()
-        sSearchText = oGui.showKeyBoard    (heading=self.addons.VSlang(30076))
+        oInputParameterHandler = cInputParameterHandler()
+        sSearchText = oGui.showKeyBoard(heading=self.addons.VSlang(30076))
         if not sSearchText:
             return False
 
@@ -1155,7 +1115,7 @@ class cHome:
         )
 
         oGui.setEndOfDirectory()
-    
+
     def showAnimes(self):
         oGui = cGui()
 
@@ -1248,7 +1208,6 @@ class cHome:
 
         oGui.setEndOfDirectory()
 
-
     def showDramas(self):
         oGui = cGui()
 
@@ -1331,7 +1290,6 @@ class cHome:
 
         oGui.setEndOfDirectory()
 
-
     def showDocs(self):
         oGui = cGui()
 
@@ -1387,7 +1345,6 @@ class cHome:
 
         oGui.setEndOfDirectory()
 
-
     def showSports(self):
         oGui = cGui()
 
@@ -1434,68 +1391,27 @@ class cHome:
 
         oGui.setEndOfDirectory()
 
-
     # ===== MÉTHODES IPTV =====
 
-
     def showDirect(self):
-        """Menu principal IPTV avec choix de navigation"""
+        """Menu principal IPTV simplifié"""
         oGui = cGui()
-        oGui.addText("fStream", "Chaînes TV en direct")
+
+        from resources.lib.comaddon import VSlog
+        VSlog("[HOME] showDirect() appelee")
 
         oOutputParameterHandler = cOutputParameterHandler()
 
-        # Option 1: Navigation par catégorie (tous pays confondus)
-        oGui.addDir(
-            SITE_IDENTIFIER,
-            "showIPTV_AllCategories",
-            "📂 Par catégorie (toutes chaînes)",
-            "genres.png",
-            oOutputParameterHandler,
-        )
-
-        # Option 2: Navigation par pays
+        # Navigation par pays directement
         oGui.addDir(
             SITE_IDENTIFIER,
             "showIPTV_AllCountries",
-            "🌍 Par pays",
+            "Par pays",
             "flags.png",
             oOutputParameterHandler,
         )
 
         oGui.setEndOfDirectory()
-
-
-    def showIPTV_AllCategories(self):
-        """Charge toutes les catégories de tous les pays"""
-        oGui = cGui()
-        from resources.lib.comaddon import VSlog
-
-        VSlog("[HOME] Chargement catégories globales")
-
-        try:
-            # Charger le M3U global (index complet)
-            url = "https://iptv-org.github.io/iptv/index.m3u"
-            VSlog(f"[HOME] Chargement depuis: {url}")
-
-            response = requests.get(url, timeout=20)
-            response.raise_for_status()
-            data = response.text
-
-            VSlog(f"[HOME] {len(data)} caractères chargés")
-
-            # Afficher par catégories
-            parseAndShowM3U(oGui, data, show_by="category")
-
-        except Exception as e:
-            VSlog(f"[HOME] Erreur: {str(e)}")
-            import traceback
-
-            VSlog(traceback.format_exc())
-            oGui.addText("fStream", f"Erreur: {str(e)}")
-
-        oGui.setEndOfDirectory()
-
 
     def showIPTV_AllCountries(self):
         """Affiche tous les pays disponibles"""
@@ -1507,7 +1423,7 @@ class cHome:
         try:
             # Récupérer la liste dynamique des pays
             countries = extractCountriesFromAPI()
-            VSlog(f"[HOME] {len(countries)} pays trouvés")
+            VSlog(f"[HOME] {len(countries)} pays trouves")
 
             for code, name in sorted(countries.items(), key=lambda x: x[1]):
                 oOutputParameterHandler = cOutputParameterHandler()
@@ -1517,7 +1433,7 @@ class cHome:
                 icon = f"{code.lower()}.png"
                 oGui.addDir(
                     SITE_IDENTIFIER,
-                    "showIPTV_CountryMenu",
+                    "showIPTV_CountryChannels",
                     name,
                     icon,
                     oOutputParameterHandler,
@@ -1529,9 +1445,8 @@ class cHome:
 
         oGui.setEndOfDirectory()
 
-
-    def showIPTV_CountryMenu(self):
-        """Menu pour un pays: catégories ou toutes les chaînes"""
+    def showIPTV_CountryChannels(self):
+        """Charge et affiche les chaînes d'un pays (max 50) avec catégories Sport et Autres"""
         oGui = cGui()
         oInput = cInputParameterHandler()
 
@@ -1540,52 +1455,14 @@ class cHome:
 
         from resources.lib.comaddon import VSlog
 
-        VSlog(f"[HOME] Menu pour {name} ({code})")
-
-        # Par catégories
-        oOutputParameterHandler = cOutputParameterHandler()
-        oOutputParameterHandler.addParameter("country_code", code)
-        oOutputParameterHandler.addParameter("show_by", "category")
-        oGui.addDir(
-            SITE_IDENTIFIER,
-            "showIPTV_Load",
-            "📂 Par catégorie",
-            "genres.png",
-            oOutputParameterHandler,
-        )
-
-        # Toutes les chaînes
-        oOutputParameterHandler = cOutputParameterHandler()
-        oOutputParameterHandler.addParameter("country_code", code)
-        oOutputParameterHandler.addParameter("show_by", "all")
-        oGui.addDir(
-            SITE_IDENTIFIER,
-            "showIPTV_Load",
-            "📺 Toutes les chaînes",
-            "tv.png",
-            oOutputParameterHandler,
-        )
-
-        oGui.setEndOfDirectory()
-
-
-    def showIPTV_Load(self):
-        """Charge et affiche les chaînes d'un pays"""
-        oGui = cGui()
-        oInput = cInputParameterHandler()
-
-        code = oInput.getValue("country_code")
-        show_by = oInput.getValue("show_by")
-
-        from resources.lib.comaddon import VSlog
-
-        VSlog(f"[HOME] Chargement {code}, mode: {show_by}")
+        VSlog(f"[HOME] Chargement chaines pour {name} ({code})")
 
         try:
             urls = getCountryM3U(code)
             data = loadM3U(urls, f"{code.lower()}_cache.m3u")
 
-            parseAndShowM3U(oGui, data, show_by=show_by)
+            # Afficher par catégories (Sport / Autres) avec max 50 chaînes
+            parseAndShowM3U(oGui, data, show_by="category", max_channels=50)
 
         except Exception as e:
             VSlog(f"[HOME] Erreur: {str(e)}")
@@ -1595,7 +1472,6 @@ class cHome:
             oGui.addText("fStream", f"Erreur: {str(e)}")
 
         oGui.setEndOfDirectory()
-
 
     def showIPTV_Filtered(self):
         """Affiche les chaînes filtrées"""
@@ -1621,7 +1497,6 @@ class cHome:
 
         oGui.setEndOfDirectory()
 
-
     def playIPTV(self):
         """Joue un flux IPTV"""
         oGui = cGui()
@@ -1644,9 +1519,7 @@ class cHome:
 
         oGui.setEndOfDirectory()
 
-
     # ===== AUTRES MÉTHODES =====
-
 
     def showMenuTV(self):
         oGui = cGui()
@@ -1681,7 +1554,6 @@ class cHome:
         )
 
         oGui.setEndOfDirectory()
-
 
     def showReplay(self):
         oGui = cGui()
@@ -1725,7 +1597,6 @@ class cHome:
 
         oGui.setEndOfDirectory()
 
-
     def showNets(self):
         oGui = cGui()
 
@@ -1762,7 +1633,6 @@ class cHome:
 
         oGui.setEndOfDirectory()
 
-
     def showUsers(self):
         oGui = cGui()
         oGui.addDir(
@@ -1773,7 +1643,6 @@ class cHome:
         oGui.addDir("themoviedb_org", "showMyTmdb", "TMDB", "tmdb.png")
         oGui.addDir("cTrakt", "getLoad", self.addons.VSlang(30214), "trakt.png")
         oGui.setEndOfDirectory()
-
 
     def showTools(self):
         oGui = cGui()
@@ -1788,7 +1657,6 @@ class cHome:
         )
         oGui.addDir("globalSources", "globalSources", self.addons.VSlang(30449), "host.png")
         oGui.setEndOfDirectory()
-
 
     def showHistory(self):
         oGui = cGui()
@@ -1851,7 +1719,6 @@ class cHome:
 
         oGui.setEndOfDirectory()
 
-
     def showDonation(self):
         from resources.lib.librecaptcha.gui import cInputWindowYesNo
 
@@ -1863,7 +1730,6 @@ class cHome:
             okDialog=True,
         )
         oSolver.get()
-
 
     def showHostDirect(self):
         oGui = cGui()
@@ -1877,10 +1743,8 @@ class cHome:
 
         oGui.setEndOfDirectory()
 
-
     def opensetting(self):
         self.addons.openSettings()
-
 
     def delSearch(self):
         from resources.lib.db import cDb
@@ -1888,7 +1752,6 @@ class cHome:
         with cDb() as db:
             db.del_history()
         return True
-
 
     def callpluging(self):
         oGui = cGui()
@@ -1910,7 +1773,3 @@ class cHome:
                 pass
 
         oGui.setEndOfDirectory()
-
-
-     
-
