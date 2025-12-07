@@ -531,6 +531,220 @@ def get_category_icon(category):
 
     return "tv.png"
 
+def get_iptv_sources():
+    """Retourne un dictionnaire de sources IPTV vérifiées et fonctionnelles"""
+    return {
+        # === IPTV-ORG PAR CATÉGORIE ===
+        "IPTV-ORG-SPORT": {
+            "name": "Sport (Mondial)",
+            "url": "https://iptv-org.github.io/iptv/categories/sports.m3u",
+            "type": "category",
+            "icon": "sport.png",
+            "description": "Chaînes sportives du monde entier"
+        },
+        "IPTV-ORG-NEWS": {
+            "name": "News (Mondial)",
+            "url": "https://iptv-org.github.io/iptv/categories/news.m3u",
+            "type": "category",
+            "icon": "news.png",
+            "description": "Chaînes d'information"
+        },
+        "IPTV-ORG-MOVIES": {
+            "name": "Films (Mondial)",
+            "url": "https://iptv-org.github.io/iptv/categories/movies.m3u",
+            "type": "category",
+            "icon": "films.png",
+            "description": "Chaînes de films"
+        },
+        "IPTV-ORG-SERIES": {
+            "name": "Series (Mondial)",
+            "url": "https://iptv-org.github.io/iptv/categories/series.m3u",
+            "type": "category",
+            "icon": "series.png",
+            "description": "Chaînes de séries TV"
+        },
+        "IPTV-ORG-ENTERTAINMENT": {
+            "name": "Divertissement",
+            "url": "https://iptv-org.github.io/iptv/categories/entertainment.m3u",
+            "type": "category",
+            "icon": "vod.png",
+            "description": "Chaînes de divertissement"
+        },
+        "IPTV-ORG-MUSIC": {
+            "name": "Musique",
+            "url": "https://iptv-org.github.io/iptv/categories/music.m3u",
+            "type": "category",
+            "icon": "genres.png",
+            "description": "Chaînes musicales"
+        },
+        "IPTV-ORG-KIDS": {
+            "name": "Enfants",
+            "url": "https://iptv-org.github.io/iptv/categories/kids.m3u",
+            "type": "category",
+            "icon": "enfants.png",
+            "description": "Chaînes pour enfants"
+        },
+        "IPTV-ORG-DOCUMENTARY": {
+            "name": "Documentaires",
+            "url": "https://iptv-org.github.io/iptv/categories/documentary.m3u",
+            "type": "category",
+            "icon": "doc.png",
+            "description": "Chaînes documentaires"
+        },
+        "IPTV-ORG-COOKING": {
+            "name": "Cuisine",
+            "url": "https://iptv-org.github.io/iptv/categories/cooking.m3u",
+            "type": "category",
+            "icon": "vod.png",
+            "description": "Chaînes de cuisine"
+        },
+        "IPTV-ORG-TRAVEL": {
+            "name": "Voyage",
+            "url": "https://iptv-org.github.io/iptv/categories/travel.m3u",
+            "type": "category",
+            "icon": "vod.png",
+            "description": "Chaînes de voyage"
+        },
+        "IPTV-ORG-WEATHER": {
+            "name": "Meteo",
+            "url": "https://iptv-org.github.io/iptv/categories/weather.m3u",
+            "type": "category",
+            "icon": "tv.png",
+            "description": "Chaînes météo"
+        },
+        "IPTV-ORG-RELIGIOUS": {
+            "name": "Religion",
+            "url": "https://iptv-org.github.io/iptv/categories/religious.m3u",
+            "type": "category",
+            "icon": "tv.png",
+            "description": "Chaînes religieuses"
+        },
+        "IPTV-ORG-EDUCATION": {
+            "name": "Education",
+            "url": "https://iptv-org.github.io/iptv/categories/education.m3u",
+            "type": "category",
+            "icon": "doc.png",
+            "description": "Chaînes éducatives"
+        },
+        "IPTV-ORG-SCIENCE": {
+            "name": "Science",
+            "url": "https://iptv-org.github.io/iptv/categories/science.m3u",
+            "type": "category",
+            "icon": "doc.png",
+            "description": "Chaînes scientifiques"
+        },
+        "IPTV-ORG-ANIMATION": {
+            "name": "Animation",
+            "url": "https://iptv-org.github.io/iptv/categories/animation.m3u",
+            "type": "category",
+            "icon": "animes.png",
+            "description": "Chaînes d'animation"
+        },
+        "IPTV-ORG-CLASSIC": {
+            "name": "Classique",
+            "url": "https://iptv-org.github.io/iptv/categories/classic.m3u",
+            "type": "category",
+            "icon": "films.png",
+            "description": "Chaînes classiques"
+        },
+        "IPTV-ORG-COMEDY": {
+            "name": "Comedie",
+            "url": "https://iptv-org.github.io/iptv/categories/comedy.m3u",
+            "type": "category",
+            "icon": "vod.png",
+            "description": "Chaînes de comédie"
+        },
+        "IPTV-ORG-BUSINESS": {
+            "name": "Business",
+            "url": "https://iptv-org.github.io/iptv/categories/business.m3u",
+            "type": "category",
+            "icon": "news.png",
+            "description": "Chaînes business"
+        },
+        "IPTV-ORG-LIFESTYLE": {
+            "name": "Lifestyle",
+            "url": "https://iptv-org.github.io/iptv/categories/lifestyle.m3u",
+            "type": "category",
+            "icon": "vod.png",
+            "description": "Chaînes lifestyle"
+        },
+        "IPTV-ORG-AUTO": {
+            "name": "Auto",
+            "url": "https://iptv-org.github.io/iptv/categories/auto.m3u",
+            "type": "category",
+            "icon": "vod.png",
+            "description": "Chaînes automobile"
+        },
+
+        # === IPTV-ORG PAR LANGUE ===
+        "IPTV-ORG-FRENCH": {
+            "name": "Chaines francophones",
+            "url": "https://iptv-org.github.io/iptv/languages/fra.m3u",
+            "type": "language",
+            "icon": "fr.png",
+            "description": "Toutes les chaînes en français"
+        },
+        "IPTV-ORG-ENGLISH": {
+            "name": "Chaines anglophones",
+            "url": "https://iptv-org.github.io/iptv/languages/eng.m3u",
+            "type": "language",
+            "icon": "gb.png",
+            "description": "Toutes les chaînes en anglais"
+        },
+        "IPTV-ORG-SPANISH": {
+            "name": "Chaines hispanophones",
+            "url": "https://iptv-org.github.io/iptv/languages/spa.m3u",
+            "type": "language",
+            "icon": "es.png",
+            "description": "Toutes les chaînes en espagnol"
+        },
+        "IPTV-ORG-ARABIC": {
+            "name": "Chaines arabophones",
+            "url": "https://iptv-org.github.io/iptv/languages/ara.m3u",
+            "type": "language",
+            "icon": "sa.png",
+            "description": "Toutes les chaînes en arabe"
+        },
+        "IPTV-ORG-PORTUGUESE": {
+            "name": "Chaines lusophones",
+            "url": "https://iptv-org.github.io/iptv/languages/por.m3u",
+            "type": "language",
+            "icon": "br.png",
+            "description": "Toutes les chaînes en portugais"
+        },
+
+        # === FREE-TV (Sources légales) ===
+        "FREE-TV-FRANCE": {
+            "name": "Free-TV France (Legal)",
+            "url": "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlists/playlist_france_full.m3u8",
+            "type": "country",
+            "icon": "fr.png",
+            "description": "Chaînes françaises légales uniquement"
+        },
+        "FREE-TV-USA": {
+            "name": "Free-TV USA (Legal)",
+            "url": "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlists/playlist_usa_full.m3u8",
+            "type": "country",
+            "icon": "us.png",
+            "description": "Chaînes américaines légales uniquement"
+        },
+        "FREE-TV-UK": {
+            "name": "Free-TV UK (Legal)",
+            "url": "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlists/playlist_uk_full.m3u8",
+            "type": "country",
+            "icon": "gb.png",
+            "description": "Chaînes britanniques légales uniquement"
+        },
+
+        # === INDEX GLOBAL ===
+        "IPTV-ORG-GLOBAL": {
+            "name": "Toutes les chaines (Mondial)",
+            "url": "https://iptv-org.github.io/iptv/index.m3u",
+            "type": "global",
+            "icon": "tv.png",
+            "description": "Index complet de toutes les chaînes IPTV-ORG"
+        }
+    }
 
 # ===== CLASSE PRINCIPALE =====
 
@@ -1392,267 +1606,6 @@ class cHome:
         oGui.setEndOfDirectory()
 
     # ===== MÉTHODES IPTV =====
-
-    def get_iptv_sources():
-        """Retourne un dictionnaire de sources IPTV vérifiées et fonctionnelles"""
-        return {
-            # === IPTV-ORG PAR CATÉGORIE ===
-            "IPTV-ORG-SPORT": {
-                "name": "Sport (Mondial)",
-                "url": "https://iptv-org.github.io/iptv/categories/sports.m3u",
-                "type": "category",
-                "icon": "sport.png",
-                "description": "Chaînes sportives du monde entier"
-            },
-            "IPTV-ORG-NEWS": {
-                "name": "News (Mondial)",
-                "url": "https://iptv-org.github.io/iptv/categories/news.m3u",
-                "type": "category",
-                "icon": "news.png",
-                "description": "Chaînes d'information"
-            },
-            "IPTV-ORG-MOVIES": {
-                "name": "Films (Mondial)",
-                "url": "https://iptv-org.github.io/iptv/categories/movies.m3u",
-                "type": "category",
-                "icon": "films.png",
-                "description": "Chaînes de films"
-            },
-            "IPTV-ORG-SERIES": {
-                "name": "Series (Mondial)",
-                "url": "https://iptv-org.github.io/iptv/categories/series.m3u",
-                "type": "category",
-                "icon": "series.png",
-                "description": "Chaînes de séries TV"
-            },
-            "IPTV-ORG-ENTERTAINMENT": {
-                "name": "Divertissement",
-                "url": "https://iptv-org.github.io/iptv/categories/entertainment.m3u",
-                "type": "category",
-                "icon": "vod.png",
-                "description": "Chaînes de divertissement"
-            },
-            "IPTV-ORG-MUSIC": {
-                "name": "Musique",
-                "url": "https://iptv-org.github.io/iptv/categories/music.m3u",
-                "type": "category",
-                "icon": "genres.png",
-                "description": "Chaînes musicales"
-            },
-            "IPTV-ORG-KIDS": {
-                "name": "Enfants",
-                "url": "https://iptv-org.github.io/iptv/categories/kids.m3u",
-                "type": "category",
-                "icon": "enfants.png",
-                "description": "Chaînes pour enfants"
-            },
-            "IPTV-ORG-DOCUMENTARY": {
-                "name": "Documentaires",
-                "url": "https://iptv-org.github.io/iptv/categories/documentary.m3u",
-                "type": "category",
-                "icon": "doc.png",
-                "description": "Chaînes documentaires"
-            },
-            "IPTV-ORG-COOKING": {
-                "name": "Cuisine",
-                "url": "https://iptv-org.github.io/iptv/categories/cooking.m3u",
-                "type": "category",
-                "icon": "vod.png",
-                "description": "Chaînes de cuisine"
-            },
-            "IPTV-ORG-TRAVEL": {
-                "name": "Voyage",
-                "url": "https://iptv-org.github.io/iptv/categories/travel.m3u",
-                "type": "category",
-                "icon": "vod.png",
-                "description": "Chaînes de voyage"
-            },
-            "IPTV-ORG-WEATHER": {
-                "name": "Meteo",
-                "url": "https://iptv-org.github.io/iptv/categories/weather.m3u",
-                "type": "category",
-                "icon": "tv.png",
-                "description": "Chaînes météo"
-            },
-            "IPTV-ORG-RELIGIOUS": {
-                "name": "Religion",
-                "url": "https://iptv-org.github.io/iptv/categories/religious.m3u",
-                "type": "category",
-                "icon": "tv.png",
-                "description": "Chaînes religieuses"
-            },
-            "IPTV-ORG-EDUCATION": {
-                "name": "Education",
-                "url": "https://iptv-org.github.io/iptv/categories/education.m3u",
-                "type": "category",
-                "icon": "doc.png",
-                "description": "Chaînes éducatives"
-            },
-            "IPTV-ORG-SCIENCE": {
-                "name": "Science",
-                "url": "https://iptv-org.github.io/iptv/categories/science.m3u",
-                "type": "category",
-                "icon": "doc.png",
-                "description": "Chaînes scientifiques"
-            },
-            "IPTV-ORG-ANIMATION": {
-                "name": "Animation",
-                "url": "https://iptv-org.github.io/iptv/categories/animation.m3u",
-                "type": "category",
-                "icon": "animes.png",
-                "description": "Chaînes d'animation"
-            },
-            "IPTV-ORG-CLASSIC": {
-                "name": "Classique",
-                "url": "https://iptv-org.github.io/iptv/categories/classic.m3u",
-                "type": "category",
-                "icon": "films.png",
-                "description": "Chaînes classiques"
-            },
-            "IPTV-ORG-COMEDY": {
-                "name": "Comedie",
-                "url": "https://iptv-org.github.io/iptv/categories/comedy.m3u",
-                "type": "category",
-                "icon": "vod.png",
-                "description": "Chaînes de comédie"
-            },
-            "IPTV-ORG-BUSINESS": {
-                "name": "Business",
-                "url": "https://iptv-org.github.io/iptv/categories/business.m3u",
-                "type": "category",
-                "icon": "news.png",
-                "description": "Chaînes business"
-            },
-            "IPTV-ORG-LIFESTYLE": {
-                "name": "Lifestyle",
-                "url": "https://iptv-org.github.io/iptv/categories/lifestyle.m3u",
-                "type": "category",
-                "icon": "vod.png",
-                "description": "Chaînes lifestyle"
-            },
-            "IPTV-ORG-AUTO": {
-                "name": "Auto",
-                "url": "https://iptv-org.github.io/iptv/categories/auto.m3u",
-                "type": "category",
-                "icon": "vod.png",
-                "description": "Chaînes automobile"
-            },
-
-            # === IPTV-ORG PAR LANGUE ===
-            "IPTV-ORG-FRENCH": {
-                "name": "Chaines francophones",
-                "url": "https://iptv-org.github.io/iptv/languages/fra.m3u",
-                "type": "language",
-                "icon": "fr.png",
-                "description": "Toutes les chaînes en français"
-            },
-            "IPTV-ORG-ENGLISH": {
-                "name": "Chaines anglophones",
-                "url": "https://iptv-org.github.io/iptv/languages/eng.m3u",
-                "type": "language",
-                "icon": "gb.png",
-                "description": "Toutes les chaînes en anglais"
-            },
-            "IPTV-ORG-SPANISH": {
-                "name": "Chaines hispanophones",
-                "url": "https://iptv-org.github.io/iptv/languages/spa.m3u",
-                "type": "language",
-                "icon": "es.png",
-                "description": "Toutes les chaînes en espagnol"
-            },
-            "IPTV-ORG-ARABIC": {
-                "name": "Chaines arabophones",
-                "url": "https://iptv-org.github.io/iptv/languages/ara.m3u",
-                "type": "language",
-                "icon": "sa.png",
-                "description": "Toutes les chaînes en arabe"
-            },
-            "IPTV-ORG-PORTUGUESE": {
-                "name": "Chaines lusophones",
-                "url": "https://iptv-org.github.io/iptv/languages/por.m3u",
-                "type": "language",
-                "icon": "br.png",
-                "description": "Toutes les chaînes en portugais"
-            },
-
-            # === FREE-TV (Sources légales) ===
-            "FREE-TV-FRANCE": {
-                "name": "Free-TV France (Legal)",
-                "url": "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlists/playlist_france_full.m3u8",
-                "type": "country",
-                "icon": "fr.png",
-                "description": "Chaînes françaises légales uniquement"
-            },
-            "FREE-TV-USA": {
-                "name": "Free-TV USA (Legal)",
-                "url": "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlists/playlist_usa_full.m3u8",
-                "type": "country",
-                "icon": "us.png",
-                "description": "Chaînes américaines légales uniquement"
-            },
-            "FREE-TV-UK": {
-                "name": "Free-TV UK (Legal)",
-                "url": "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlists/playlist_uk_full.m3u8",
-                "type": "country",
-                "icon": "gb.png",
-                "description": "Chaînes britanniques légales uniquement"
-            },
-
-            # === INDEX GLOBAL ===
-            "IPTV-ORG-GLOBAL": {
-                "name": "Toutes les chaines (Mondial)",
-                "url": "https://iptv-org.github.io/iptv/index.m3u",
-                "type": "global",
-                "icon": "tv.png",
-                "description": "Index complet de toutes les chaînes IPTV-ORG"
-            }
-        }
-        """Retourne un dictionnaire de sources IPTV disponibles"""
-        return {
-            "IPTV-ORG": {
-                "name": "IPTV-ORG (Mondial)",
-                "url": "https://iptv-org.github.io/iptv/index.m3u",
-                "type": "global",
-                "description": "Chaînes du monde entier"
-            },
-            "IPTV-ORG-SPORT": {
-                "name": "IPTV-ORG Sport",
-                "url": "https://iptv-org.github.io/iptv/categories/sports.m3u",
-                "type": "category",
-                "description": "Chaînes sportives uniquement"
-            },
-            "IPTV-ORG-NEWS": {
-                "name": "IPTV-ORG News",
-                "url": "https://iptv-org.github.io/iptv/categories/news.m3u",
-                "type": "category",
-                "description": "Chaînes d'information"
-            },
-            "PLUTO-TV-FR": {
-                "name": "Pluto TV France",
-                "url": "https://i.mjh.nz/PlutoTV/fr.m3u8",
-                "type": "country",
-                "description": "Chaînes Pluto TV françaises (légal)"
-            },
-            "PLUTO-TV-US": {
-                "name": "Pluto TV USA",
-                "url": "https://i.mjh.nz/PlutoTV/us.m3u8",
-                "type": "country",
-                "description": "Chaînes Pluto TV américaines (légal)"
-            },
-            "SAMSUNG-TV-FR": {
-                "name": "Samsung TV+ France",
-                "url": "https://i.mjh.nz/SamsungTVPlus/fr.m3u8",
-                "type": "country",
-                "description": "Chaînes Samsung TV+ françaises (légal)"
-            },
-            "PLEX-WEB": {
-                "name": "Plex Web TV",
-                "url": "https://i.mjh.nz/Plex/all.m3u8",
-                "type": "global",
-                "description": "Chaînes Plex gratuites (légal)"
-            }
-        }
-
 
     def showDirect(self):
         """Menu principal IPTV avec toutes les sources"""
