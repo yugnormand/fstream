@@ -1616,10 +1616,10 @@ class cHome:
 
         oOutputParameterHandler = cOutputParameterHandler()
 
-        # Option 1: Live TV (source existante livetv.py)
+        # Option 1: Live TV (menu complet avec sous-menus)
         oGui.addDir(
-            'livetv',
-            'load',
+            SITE_IDENTIFIER,
+            'showMenuLiveTV',
             'Live TV (Evenements sportifs)',
             'tv.png',
             oOutputParameterHandler
@@ -1630,8 +1630,8 @@ class cHome:
         oGui.addDir(
             SITE_IDENTIFIER,
             "showIPTV_AllCountries",
-            "Par pays (50 chaines max)",
-            "flags.png",
+            "Par Pays (50 chaines max)",
+            "tv.png",
             oOutputParameterHandler,
         )
 
@@ -1924,6 +1924,56 @@ class cHome:
 
         oGui.setEndOfDirectory()
     
+    def showMenuLiveTV(self):
+        """Sous-menu Live TV avec Genres, Chaines, Sources"""
+        oGui = cGui()
+        oOutputParameterHandler = cOutputParameterHandler()
+
+        # En cours (événements en direct)
+        oOutputParameterHandler.addParameter("siteUrl", "SPORT_LIVE")
+        oGui.addDir(
+            SITE_IDENTIFIER,
+            "callpluging",
+            self.addons.VSlang(30119),  # "En cours"
+            "replay.png",
+            oOutputParameterHandler,
+        )
+
+        # Genres sportifs
+        oOutputParameterHandler = cOutputParameterHandler()
+        oOutputParameterHandler.addParameter("siteUrl", "SPORT_GENRES")
+        oGui.addDir(
+            SITE_IDENTIFIER,
+            "callpluging",
+            self.addons.VSlang(30105),  # "Genres"
+            "genre_sport.png",
+            oOutputParameterHandler,
+        )
+
+        # Chaînes TV sportives
+        oOutputParameterHandler = cOutputParameterHandler()
+        oOutputParameterHandler.addParameter("siteUrl", "SPORT_TV")
+        oGui.addDir(
+            SITE_IDENTIFIER,
+            "callpluging",
+            self.addons.VSlang(30200),  # "Chaines"
+            "tv.png",
+            oOutputParameterHandler,
+        )
+
+        # Sources sportives
+        oOutputParameterHandler = cOutputParameterHandler()
+        oOutputParameterHandler.addParameter("siteUrl", "SPORT_SPORTS")
+        oGui.addDir(
+            SITE_IDENTIFIER,
+            "callpluging",
+            self.addons.VSlang(30138),  # "Sources"
+            "host.png",
+            oOutputParameterHandler,
+        )
+
+        oGui.setEndOfDirectory()
+
     def showIPTV_AllSources(self):
         """Affiche toutes les sources disponibles organisées"""
         oGui = cGui()
