@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/yugnormand/fstream
+# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
 # Makoto et Arias800 02/06/2019
 import re
 

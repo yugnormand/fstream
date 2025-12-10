@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# https://github.com/yugnormand/fstream
+# https://github.com/Kodi-vStream/venom-xbmc-addons
 
 from resources.lib.gui.gui import cGui
 from resources.lib.gui.guiElement import cGuiElement
@@ -1203,7 +1203,7 @@ def searchActors(sSearch=''):
         actorFamous = []
         for actor in result['results']:
             # Ne garder que les acteurs
-            if actor['known_for_department'] != 'Acting':
+            if actor.get('known_for_department', None) != 'Acting':
                 continue
             
             # Ne pas garder garder les éléments non-genrés

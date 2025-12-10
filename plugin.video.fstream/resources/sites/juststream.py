@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/yugnormand/fstream
+# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
 # Nouvelle source de streaming FILMS ET SÉRIES
 import re
 

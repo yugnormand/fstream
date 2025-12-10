@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/yugnormand/fstream
+# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
 # Makoto
 from resources.lib.gui.hoster import cHosterGui
 from resources.lib.gui.gui import cGui

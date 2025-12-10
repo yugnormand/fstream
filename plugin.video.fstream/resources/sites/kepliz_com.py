@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/yugnormand/fstream
+# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
 
 from resources.lib.gui.hoster import cHosterGui
 from resources.lib.gui.gui import cGui
@@ -163,6 +163,8 @@ def showMovies(sSearch=''):
         oRequestHandler = cRequestHandler(sUrl)
         oRequestHandler.setRequestType(cRequestHandler.REQUEST_TYPE_POST)
         oRequestHandler.addParameters('searchword', sSearch)
+        oRequestHandler.addParameters('Referer', sUrl)
+        oRequestHandler.addHeaderEntry('Cookie', 'g=true')
         sABPattern = '<div class="column24"'
     else:
         oInputParameterHandler = cInputParameterHandler()

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/yugnormand/fstream
+# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
 # Ovni-crea
 import base64
 import re
@@ -1373,7 +1373,7 @@ def getUrl(sHtmlContent, url):
     oParser = cParser()
     
     # import xbmcvfs
-    # f = xbmcvfs.File('special://userdata/addon_data/plugin.video.fstream/test.txt','w')
+    # f = xbmcvfs.File('special://userdata/addon_data/plugin.video.vstream/test.txt','w')
     # f.write(sHtmlContent)
     # f.close()
 
