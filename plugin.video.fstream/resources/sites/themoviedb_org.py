@@ -828,19 +828,108 @@ def showYears(movie = False):
 def showSeriesNetworks():
     oGui = cGui()
     
-    term = 'with_original_language=en|fr&'
-    term += '&without_genres=10767|10763|10764'
-    term += '&with_status=3|4'
-    term += '&with_networks=%d'
-    
     for netID, name in sorted(DIFFUSEURS.items(), key=lambda diff: diff[1]):
-        oOutputParameterHandler = cOutputParameterHandler()  # Pas de lien après 2022
-        oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
-        oOutputParameterHandler.addParameter('term', term % netID)
-        oOutputParameterHandler.addParameter('sTmdbId', netID)    # Utilisé par TMDB
-#        oOutputParameterHandler.addParameter('network', netID)    # Utilisé par TMDB
+        oOutputParameterHandler = cOutputParameterHandler()
+        oOutputParameterHandler.addParameter('network_id', netID)
+        oOutputParameterHandler.addParameter('network_name', name)
         
-        oGui.addNetwork(SITE_IDENTIFIER, 'showSeries', name, 'host.png', oOutputParameterHandler)
+        oGui.addNetwork(SITE_IDENTIFIER, 'showNetworkMenu', name, 'host.png', oOutputParameterHandler)
+    oGui.setEndOfDirectory()
+
+
+# Menu pour chaque diffuseur (Nouveautés, Genres, Films, Séries)
+def showNetworkMenu():
+    oGui = cGui()
+    addons = addon()
+    
+    oInputParameterHandler = cInputParameterHandler()
+    network_id = oInputParameterHandler.getValue('network_id')
+    network_name = oInputParameterHandler.getValue('network_name')
+    
+    # Base term pour ce diffuseur
+    base_term = 'with_original_language=en|fr&'
+    base_term += '&without_genres=10767|10763|10764'
+    base_term += '&with_status=3|4'
+    base_term += '&with_networks=%s' % network_id
+    
+    oOutputParameterHandler = cOutputParameterHandler()
+    
+    # Nouveautés
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
+    oOutputParameterHandler.addParameter('term', base_term + '&sort_by=first_air_date.desc')
+    oOutputParameterHandler.addParameter('sTmdbId', network_id)
+    oOutputParameterHandler.addParameter('network_name', network_name)
+    oGui.addDir(SITE_IDENTIFIER, 'showSeries', addons.VSlang(30101), 'news.png', oOutputParameterHandler)
+    
+    # Populaires
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
+    oOutputParameterHandler.addParameter('term', base_term + '&sort_by=popularity.desc')
+    oOutputParameterHandler.addParameter('sTmdbId', network_id)
+    oOutputParameterHandler.addParameter('network_name', network_name)
+    oGui.addDir(SITE_IDENTIFIER, 'showSeries', addons.VSlang(30102), 'popular.png', oOutputParameterHandler)
+    
+    # Mieux notées
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
+    oOutputParameterHandler.addParameter('term', base_term + '&sort_by=vote_average.desc&vote_count.gte=100')
+    oOutputParameterHandler.addParameter('sTmdbId', network_id)
+    oOutputParameterHandler.addParameter('network_name', network_name)
+    oGui.addDir(SITE_IDENTIFIER, 'showSeries', addons.VSlang(30104), 'notes.png', oOutputParameterHandler)
+    
+    # Par genres
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('siteUrl', 'genre/tv/list')
+    oOutputParameterHandler.addParameter('network_id', network_id)
+    oOutputParameterHandler.addParameter('network_name', network_name)
+    oGui.addDir(SITE_IDENTIFIER, 'showNetworkGenres', addons.VSlang(30105), 'genres.png', oOutputParameterHandler)
+    
+    # Toutes les séries
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
+    oOutputParameterHandler.addParameter('term', base_term)
+    oOutputParameterHandler.addParameter('sTmdbId', network_id)
+    oOutputParameterHandler.addParameter('network_name', network_name)
+    oGui.addDir(SITE_IDENTIFIER, 'showSeries', 'Toutes les series', 'series.png', oOutputParameterHandler)
+    
+    oGui.setEndOfDirectory()
+
+
+# Genres pour un diffuseur spécifique
+def showNetworkGenres():
+    oGui = cGui()
+    grab = cTMDb()
+    
+    oInputParameterHandler = cInputParameterHandler()
+    network_id = oInputParameterHandler.getValue('network_id')
+    network_name = oInputParameterHandler.getValue('network_name')
+    
+    # Récupérer la liste des genres TV
+    result = grab.getUrl('genre/tv/list', 1)
+    
+    if 'genres' in result:
+        for genre in result['genres']:
+            genre_id = genre['id']
+            genre_name = genre['name']
+            
+            # Exclure les genres non désirés (Talk, News, Reality)
+            if genre_id in [10767, 10763, 10764]:
+                continue
+            
+            term = 'with_original_language=en|fr&'
+            term += '&with_status=3|4'
+            term += '&with_networks=%s' % network_id
+            term += '&with_genres=%d' % genre_id
+            
+            oOutputParameterHandler = cOutputParameterHandler()
+            oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
+            oOutputParameterHandler.addParameter('term', term)
+            oOutputParameterHandler.addParameter('sTmdbId', network_id)
+            oOutputParameterHandler.addParameter('network_name', network_name)
+            
+            oGui.addDir(SITE_IDENTIFIER, 'showSeries', genre_name, 'genres.png', oOutputParameterHandler)
+    
     oGui.setEndOfDirectory()
 
 # Dernieres séries selon la date de sortie
