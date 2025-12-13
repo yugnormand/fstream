@@ -827,30 +827,23 @@ def showYears(movie = False):
 # par diffuseurs
 def showSeriesNetworks():
     oGui = cGui()
-    
-    # Mapping des icônes par diffuseur
-    network_icons = {
-        213: 'netflix.png',      # Netflix
-        1024: 'prime.png',       # Prime Video
-        285: 'canal.png',        # Canal+
-        2739: 'disney.png',      # Disney+
-        49: 'hbo.png',           # HBO
-        453: 'hulu.png',         # Hulu
-        4330: 'paramount.png',   # Paramount+
-        2552: 'apple.png',       # Apple TV+
-        3353: 'peacock.png',     # Peacock
-        1344: 'crave.png',       # Crave
-    }
+    grab = cTMDb()
     
     for netID, name in sorted(DIFFUSEURS.items(), key=lambda diff: diff[1]):
+        # Récupérer le logo du diffuseur depuis TMDB
+        logo_url = 'host.png'  # Icone par défaut
+        try:
+            network_info = grab.getUrl('network/%d' % netID, 1)
+            if network_info and 'logo_path' in network_info and network_info['logo_path']:
+                logo_url = grab.poster + network_info['logo_path']
+        except:
+            pass
+        
         oOutputParameterHandler = cOutputParameterHandler()
         oOutputParameterHandler.addParameter('network_id', netID)
         oOutputParameterHandler.addParameter('network_name', name)
         
-        # Utiliser l'icône spécifique ou 'host.png' par défaut
-        icon = network_icons.get(netID, 'host.png')
-        
-        oGui.addNetwork(SITE_IDENTIFIER, 'showNetworkMenu', name, icon, oOutputParameterHandler)
+        oGui.addNetwork(SITE_IDENTIFIER, 'showNetworkMenu', name, logo_url, oOutputParameterHandler)
     oGui.setEndOfDirectory()
 
 
