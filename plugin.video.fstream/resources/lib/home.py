@@ -867,6 +867,10 @@ class cHome:
         oGui.addDir(
             SITE_IDENTIFIER, "showDramas", self.addons.VSlang(30124), "dramas.png"
         )
+        # Diffuseurs au menu principal VOD
+        oGui.addDir(
+            "themoviedb_org", "showSeriesNetworks", "Diffuseurs", "diffuseur.png"
+        )
         oGui.addDir(SITE_TMDB, "showMenuActeur", self.addons.VSlang(30466), "actor.png")
         oGui.addDir(
             SITE_IDENTIFIER,

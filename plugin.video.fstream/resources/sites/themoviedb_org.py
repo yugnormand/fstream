@@ -827,23 +827,48 @@ def showYears(movie = False):
 # par diffuseurs
 def showSeriesNetworks():
     oGui = cGui()
-    grab = cTMDb()
+    
+    # Mapping manuel des logos - plus rapide et fiable
+    # Ces logos doivent être dans resources/art/diffuseurs/
+    network_logos = {
+        213: 'netflix',      # Netflix
+        1024: 'primevideo',  # Prime Video
+        285: 'canalplus',    # Canal+
+        2739: 'disneyplus',  # Disney+
+        49: 'hbo',           # HBO
+        453: 'hulu',         # Hulu
+        4330: 'paramount',   # Paramount+
+        2552: 'appletv',     # Apple TV+
+        3353: 'peacock',     # Peacock
+        1344: 'crave',       # Crave
+        1899: 'ocs',         # OCS
+        302: 'tva',          # TVA
+        141: 'radiocanada',  # Radio-Canada
+        2: 'abc',            # ABC
+        16: 'cbs',           # CBS
+        19: 'fox',           # FOX
+        6: 'nbc',            # NBC
+        4: 'bbc',            # BBC
+        290: 'tf1',          # TF1
+        712: 'm6',           # M6
+        88: 'fx',            # FX
+        174: 'amc',          # AMC
+        67: 'showtime',      # Showtime
+        318: 'starz',        # Starz
+        77: 'syfy',          # Syfy
+        71: 'thecw',         # The CW
+    }
     
     for netID, name in sorted(DIFFUSEURS.items(), key=lambda diff: diff[1]):
-        # Récupérer le logo du diffuseur depuis TMDB
-        logo_url = 'host.png'  # Icone par défaut
-        try:
-            network_info = grab.getUrl('network/%d' % netID, 1)
-            if network_info and 'logo_path' in network_info and network_info['logo_path']:
-                logo_url = grab.poster + network_info['logo_path']
-        except:
-            pass
-        
         oOutputParameterHandler = cOutputParameterHandler()
         oOutputParameterHandler.addParameter('network_id', netID)
         oOutputParameterHandler.addParameter('network_name', name)
         
-        oGui.addNetwork(SITE_IDENTIFIER, 'showNetworkMenu', name, logo_url, oOutputParameterHandler)
+        # Utiliser le logo spécifique ou 'host.png' par défaut
+        logo_name = network_logos.get(netID, 'host')
+        icon = 'diffuseurs/%s.png' % logo_name
+        
+        oGui.addNetwork(SITE_IDENTIFIER, 'showNetworkMenu', name, icon, oOutputParameterHandler)
     oGui.setEndOfDirectory()
 
 
