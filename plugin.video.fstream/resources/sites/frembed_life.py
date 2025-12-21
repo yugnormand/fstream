@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# fStream - Frembed.life
-# Source: https://frembed.life / https://frembed.fun
+# fStream - Frembed
+# Source: https://frembed.life
 
 from resources.lib.gui.hoster import cHosterGui
 from resources.lib.gui.gui import cGui
@@ -14,12 +14,17 @@ import re
 
 SITE_IDENTIFIER = 'frembed_life'
 SITE_NAME = 'Frembed'
-SITE_DESC = 'Films & Séries en Streaming'
+SITE_DESC = 'Films & Séries via Frembed'
 
-# API Frembed
-API_URL = 'https://frembed.life'
-MOVIE_API = API_URL + '/api/film.php?id='  # + tmdb_id
-SERIE_API = API_URL + '/api/serie.php?id='  # + tmdb_id&sa=season&epi=episode
+# URL de base
+URL_MAIN = 'https://frembed.life'
+
+# Intégration dans fStream
+def getCategoryList():
+    liste = []
+    liste.append(['Films', URL_MAIN, 'films.png', 'showMovies'])
+    liste.append(['Séries', URL_MAIN, 'series.png', 'showSeries'])
+    return liste
 
 
 def load():
@@ -29,6 +34,7 @@ def load():
     oOutputParameterHandler.addParameter('siteUrl', 'movies')
     oGui.addDir(SITE_IDENTIFIER, 'showMovies', 'Films', 'films.png', oOutputParameterHandler)
     
+    oOutputParameterHandler = cOutputParameterHandler()
     oOutputParameterHandler.addParameter('siteUrl', 'series')
     oGui.addDir(SITE_IDENTIFIER, 'showSeries', 'Séries', 'series.png', oOutputParameterHandler)
     
@@ -39,11 +45,8 @@ def showMovies():
     oGui = cGui()
     
     oOutputParameterHandler = cOutputParameterHandler()
-    oOutputParameterHandler.addParameter('siteUrl', API_URL + '/api/movies?order=latest&limit=50')
-    oGui.addDir(SITE_IDENTIFIER, 'showMoviesList', 'Derniers Films Ajoutés', 'news.png', oOutputParameterHandler)
-    
-    oOutputParameterHandler.addParameter('siteUrl', API_URL + '/api/movies?order=update&limit=50')
-    oGui.addDir(SITE_IDENTIFIER, 'showMoviesList', 'Dernières MAJ Films', 'update.png', oOutputParameterHandler)
+    oOutputParameterHandler.addParameter('siteUrl', URL_MAIN)
+    oGui.addDir(SITE_IDENTIFIER, 'showSearchMovie', 'Recherche par TMDB ID', 'search.png', oOutputParameterHandler)
     
     oGui.setEndOfDirectory()
 
@@ -52,242 +55,130 @@ def showSeries():
     oGui = cGui()
     
     oOutputParameterHandler = cOutputParameterHandler()
-    oOutputParameterHandler.addParameter('siteUrl', API_URL + '/api/tv?order=latest&limit=50')
-    oGui.addDir(SITE_IDENTIFIER, 'showSeriesList', 'Dernières Séries Ajoutées', 'news.png', oOutputParameterHandler)
-    
-    oOutputParameterHandler.addParameter('siteUrl', API_URL + '/api/tv?order=update&limit=50')
-    oGui.addDir(SITE_IDENTIFIER, 'showSeriesList', 'Dernières MAJ Séries', 'update.png', oOutputParameterHandler)
+    oOutputParameterHandler.addParameter('siteUrl', URL_MAIN)
+    oGui.addDir(SITE_IDENTIFIER, 'showSearchSerie', 'Recherche par TMDB ID', 'search.png', oOutputParameterHandler)
     
     oGui.setEndOfDirectory()
 
 
-def showMoviesList(sSearch=''):
+def showSearchMovie():
+    """Recherche de film par TMDB ID"""
     oGui = cGui()
-    oInputParameterHandler = cInputParameterHandler()
-    sUrl = oInputParameterHandler.getValue('siteUrl')
     
-    if sSearch:
-        # Recherche par TMDB ID ou titre
-        sUrl = API_URL + '/api/movies?search=' + sSearch
-    
-    oRequestHandler = cRequestHandler(sUrl)
-    sHtmlContent = oRequestHandler.request()
-    
-    if not sHtmlContent:
-        oGui.addText(SITE_IDENTIFIER, 'Aucun résultat')
+    sSearchText = oGui.showKeyBoard('', 'Entrez le TMDB ID du film')
+    if not sSearchText:
         oGui.setEndOfDirectory()
         return
     
-    # Parser la réponse JSON
+    VSlog('Frembed - Recherche film TMDB ID: ' + sSearchText)
+    
+    # URL de l'API film
+    sUrl = URL_MAIN + '/api/film.php?id=' + sSearchText
+    
+    VSlog('Frembed - URL: ' + sUrl)
+    
+    oRequestHandler = cRequestHandler(sUrl)
+    oRequestHandler.addHeaderEntry('User-Agent', 'Mozilla/5.0')
+    oRequestHandler.addHeaderEntry('Referer', URL_MAIN)
+    
     try:
-        import json
-        data = json.loads(sHtmlContent)
+        sHtmlContent = oRequestHandler.request()
+        VSlog('Frembed - Réponse reçue: ' + str(len(sHtmlContent) if sHtmlContent else 0) + ' caractères')
         
-        if 'data' in data and data['data']:
-            movies = data['data']
-            
-            for movie in movies:
-                sTitle = movie.get('title', 'Film')
-                sTmdbId = str(movie.get('tmdb_id', ''))
-                sYear = str(movie.get('year', ''))
-                sPoster = movie.get('poster', '')
-                sDesc = movie.get('overview', '')
+        if sHtmlContent:
+            # Essayer de parser comme JSON
+            try:
+                import json
+                data = json.loads(sHtmlContent)
+                VSlog('Frembed - JSON parsé avec succès')
                 
-                if not sTmdbId:
-                    continue
-                
-                # Construire le titre avec l'année
-                if sYear:
-                    sDisplayTitle = sTitle + ' (' + sYear + ')'
+                if 'title' in data:
+                    sTitle = data.get('title', 'Film')
+                    sPoster = data.get('poster', '')
+                    
+                    oOutputParameterHandler = cOutputParameterHandler()
+                    oOutputParameterHandler.addParameter('siteUrl', sUrl)
+                    oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
+                    oOutputParameterHandler.addParameter('sThumb', sPoster)
+                    oOutputParameterHandler.addParameter('sTmdbId', sSearchText)
+                    
+                    oGui.addMovie(SITE_IDENTIFIER, 'showHosters', sTitle, 'films.png', sPoster, '', oOutputParameterHandler)
                 else:
-                    sDisplayTitle = sTitle
-                
+                    VSlog('Frembed - Pas de titre dans la réponse JSON')
+                    oGui.addText(SITE_IDENTIFIER, 'Film non trouvé')
+            except Exception as e:
+                VSlog('Frembed - Erreur parsing JSON: ' + str(e))
+                VSlog('Frembed - Contenu brut: ' + sHtmlContent[:200])
+                # Ce n'est peut-être pas du JSON, essayons de récupérer le lecteur iframe
                 oOutputParameterHandler = cOutputParameterHandler()
-                oOutputParameterHandler.addParameter('siteUrl', MOVIE_API + sTmdbId)
-                oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
-                oOutputParameterHandler.addParameter('sThumb', sPoster)
-                oOutputParameterHandler.addParameter('sTmdbId', sTmdbId)
-                oOutputParameterHandler.addParameter('sYear', sYear)
+                oOutputParameterHandler.addParameter('siteUrl', sUrl)
+                oOutputParameterHandler.addParameter('sMovieTitle', 'Film TMDB ID: ' + sSearchText)
+                oOutputParameterHandler.addParameter('sTmdbId', sSearchText)
                 
-                oGui.addMovie(SITE_IDENTIFIER, 'showHosters', sDisplayTitle, 'films.png', sPoster, sDesc, oOutputParameterHandler)
-        
-        # Pagination
-        if 'current_page' in data and 'last_page' in data:
-            current = int(data['current_page'])
-            last = int(data['last_page'])
-            
-            if current < last:
-                oOutputParameterHandler = cOutputParameterHandler()
-                next_url = sUrl.split('&page=')[0] + '&page=' + str(current + 1)
-                oOutputParameterHandler.addParameter('siteUrl', next_url)
-                oGui.addNext(SITE_IDENTIFIER, 'showMoviesList', 'Page ' + str(current + 1), oOutputParameterHandler)
+                oGui.addMovie(SITE_IDENTIFIER, 'showHosters', 'Film TMDB ID: ' + sSearchText, 'films.png', '', '', oOutputParameterHandler)
+        else:
+            VSlog('Frembed - Aucune réponse reçue')
+            oGui.addText(SITE_IDENTIFIER, 'Aucune réponse du serveur')
     
     except Exception as e:
-        VSlog('Frembed - Erreur parsing JSON: ' + str(e))
-        oGui.addText(SITE_IDENTIFIER, 'Erreur lors du chargement')
+        VSlog('Frembed - Erreur requête: ' + str(e))
+        oGui.addText(SITE_IDENTIFIER, 'Erreur de connexion: ' + str(e))
     
     oGui.setEndOfDirectory()
 
 
-def showSeriesList(sSearch=''):
+def showSearchSerie():
+    """Recherche de série par TMDB ID"""
     oGui = cGui()
-    oInputParameterHandler = cInputParameterHandler()
-    sUrl = oInputParameterHandler.getValue('siteUrl')
     
-    if sSearch:
-        sUrl = API_URL + '/api/tv?search=' + sSearch
-    
-    oRequestHandler = cRequestHandler(sUrl)
-    sHtmlContent = oRequestHandler.request()
-    
-    if not sHtmlContent:
-        oGui.addText(SITE_IDENTIFIER, 'Aucun résultat')
+    sSearchText = oGui.showKeyBoard('', 'Entrez le TMDB ID de la série')
+    if not sSearchText:
         oGui.setEndOfDirectory()
         return
     
-    try:
-        import json
-        data = json.loads(sHtmlContent)
-        
-        if 'data' in data and data['data']:
-            series = data['data']
-            
-            for serie in series:
-                sTitle = serie.get('title', 'Série')
-                sTmdbId = str(serie.get('tmdb_id', ''))
-                sYear = str(serie.get('year', ''))
-                sPoster = serie.get('poster', '')
-                sDesc = serie.get('overview', '')
-                
-                if not sTmdbId:
-                    continue
-                
-                if sYear:
-                    sDisplayTitle = sTitle + ' (' + sYear + ')'
-                else:
-                    sDisplayTitle = sTitle
-                
-                oOutputParameterHandler = cOutputParameterHandler()
-                oOutputParameterHandler.addParameter('siteUrl', API_URL + '/api/tv/' + sTmdbId)
-                oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
-                oOutputParameterHandler.addParameter('sThumb', sPoster)
-                oOutputParameterHandler.addParameter('sTmdbId', sTmdbId)
-                oOutputParameterHandler.addParameter('sYear', sYear)
-                
-                oGui.addTV(SITE_IDENTIFIER, 'showSeasons', sDisplayTitle, 'series.png', sPoster, sDesc, oOutputParameterHandler)
-        
-        # Pagination
-        if 'current_page' in data and 'last_page' in data:
-            current = int(data['current_page'])
-            last = int(data['last_page'])
-            
-            if current < last:
-                oOutputParameterHandler = cOutputParameterHandler()
-                next_url = sUrl.split('&page=')[0] + '&page=' + str(current + 1)
-                oOutputParameterHandler.addParameter('siteUrl', next_url)
-                oGui.addNext(SITE_IDENTIFIER, 'showSeriesList', 'Page ' + str(current + 1), oOutputParameterHandler)
+    VSlog('Frembed - Recherche série TMDB ID: ' + sSearchText)
     
-    except Exception as e:
-        VSlog('Frembed - Erreur parsing JSON: ' + str(e))
-        oGui.addText(SITE_IDENTIFIER, 'Erreur lors du chargement')
+    # Demander la saison
+    sSeason = oGui.showKeyBoard('1', 'Numéro de saison')
+    if not sSeason:
+        sSeason = '1'
     
-    oGui.setEndOfDirectory()
-
-
-def showSeasons():
-    oGui = cGui()
-    oInputParameterHandler = cInputParameterHandler()
-    sUrl = oInputParameterHandler.getValue('siteUrl')
-    sMovieTitle = oInputParameterHandler.getValue('sMovieTitle')
-    sTmdbId = oInputParameterHandler.getValue('sTmdbId')
-    sThumb = oInputParameterHandler.getValue('sThumb')
+    # Demander l'épisode
+    sEpisode = oGui.showKeyBoard('1', 'Numéro d\'épisode')
+    if not sEpisode:
+        sEpisode = '1'
+    
+    # URL de l'API série
+    sUrl = URL_MAIN + '/api/serie.php?id=' + sSearchText + '&sa=' + sSeason + '&epi=' + sEpisode
+    
+    VSlog('Frembed - URL: ' + sUrl)
     
     oRequestHandler = cRequestHandler(sUrl)
-    sHtmlContent = oRequestHandler.request()
-    
-    if not sHtmlContent:
-        oGui.addText(SITE_IDENTIFIER, 'Aucune saison trouvée')
-        oGui.setEndOfDirectory()
-        return
+    oRequestHandler.addHeaderEntry('User-Agent', 'Mozilla/5.0')
+    oRequestHandler.addHeaderEntry('Referer', URL_MAIN)
     
     try:
-        import json
-        data = json.loads(sHtmlContent)
+        sHtmlContent = oRequestHandler.request()
+        VSlog('Frembed - Réponse reçue: ' + str(len(sHtmlContent) if sHtmlContent else 0) + ' caractères')
         
-        if 'seasons' in data:
-            seasons = data['seasons']
+        if sHtmlContent:
+            sTitle = 'S' + sSeason.zfill(2) + 'E' + sEpisode.zfill(2) + ' - TMDB ID: ' + sSearchText
             
-            for season in seasons:
-                season_num = season.get('season_number', 0)
-                episode_count = season.get('episode_count', 0)
-                
-                if season_num == 0:  # Ignorer les "Specials"
-                    continue
-                
-                sTitle = 'Saison ' + str(season_num) + ' (' + str(episode_count) + ' épisodes)'
-                
-                oOutputParameterHandler = cOutputParameterHandler()
-                oOutputParameterHandler.addParameter('siteUrl', API_URL + '/api/tv/' + sTmdbId + '/season/' + str(season_num))
-                oOutputParameterHandler.addParameter('sMovieTitle', sMovieTitle)
-                oOutputParameterHandler.addParameter('sThumb', sThumb)
-                oOutputParameterHandler.addParameter('sTmdbId', sTmdbId)
-                oOutputParameterHandler.addParameter('sSeason', str(season_num))
-                
-                oGui.addSeason(SITE_IDENTIFIER, 'showEpisodes', sTitle, 'series.png', sThumb, '', oOutputParameterHandler)
+            oOutputParameterHandler = cOutputParameterHandler()
+            oOutputParameterHandler.addParameter('siteUrl', sUrl)
+            oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
+            oOutputParameterHandler.addParameter('sTmdbId', sSearchText)
+            oOutputParameterHandler.addParameter('sSeason', sSeason)
+            oOutputParameterHandler.addParameter('sEpisode', sEpisode)
+            
+            oGui.addEpisode(SITE_IDENTIFIER, 'showHosters', sTitle, 'series.png', '', '', oOutputParameterHandler)
+        else:
+            VSlog('Frembed - Aucune réponse reçue')
+            oGui.addText(SITE_IDENTIFIER, 'Aucune réponse du serveur')
     
     except Exception as e:
-        VSlog('Frembed - Erreur parsing saisons: ' + str(e))
-        oGui.addText(SITE_IDENTIFIER, 'Erreur lors du chargement des saisons')
-    
-    oGui.setEndOfDirectory()
-
-
-def showEpisodes():
-    oGui = cGui()
-    oInputParameterHandler = cInputParameterHandler()
-    sUrl = oInputParameterHandler.getValue('siteUrl')
-    sMovieTitle = oInputParameterHandler.getValue('sMovieTitle')
-    sTmdbId = oInputParameterHandler.getValue('sTmdbId')
-    sSeason = oInputParameterHandler.getValue('sSeason')
-    sThumb = oInputParameterHandler.getValue('sThumb')
-    
-    oRequestHandler = cRequestHandler(sUrl)
-    sHtmlContent = oRequestHandler.request()
-    
-    if not sHtmlContent:
-        oGui.addText(SITE_IDENTIFIER, 'Aucun épisode trouvé')
-        oGui.setEndOfDirectory()
-        return
-    
-    try:
-        import json
-        data = json.loads(sHtmlContent)
-        
-        if 'episodes' in data:
-            episodes = data['episodes']
-            
-            for episode in episodes:
-                ep_num = episode.get('episode_number', 0)
-                ep_title = episode.get('name', 'Episode ' + str(ep_num))
-                
-                sTitle = 'S' + sSeason.zfill(2) + 'E' + str(ep_num).zfill(2) + ' - ' + ep_title
-                
-                # URL de l'API pour cet épisode
-                sEpisodeUrl = SERIE_API + sTmdbId + '&sa=' + sSeason + '&epi=' + str(ep_num)
-                
-                oOutputParameterHandler = cOutputParameterHandler()
-                oOutputParameterHandler.addParameter('siteUrl', sEpisodeUrl)
-                oOutputParameterHandler.addParameter('sMovieTitle', sMovieTitle + ' ' + sTitle)
-                oOutputParameterHandler.addParameter('sThumb', sThumb)
-                oOutputParameterHandler.addParameter('sTmdbId', sTmdbId)
-                oOutputParameterHandler.addParameter('sSeason', sSeason)
-                oOutputParameterHandler.addParameter('sEpisode', str(ep_num))
-                
-                oGui.addEpisode(SITE_IDENTIFIER, 'showHosters', sTitle, 'series.png', sThumb, '', oOutputParameterHandler)
-    
-    except Exception as e:
-        VSlog('Frembed - Erreur parsing épisodes: ' + str(e))
-        oGui.addText(SITE_IDENTIFIER, 'Erreur lors du chargement des épisodes')
+        VSlog('Frembed - Erreur requête: ' + str(e))
+        oGui.addText(SITE_IDENTIFIER, 'Erreur de connexion: ' + str(e))
     
     oGui.setEndOfDirectory()
 
@@ -299,8 +190,7 @@ def showHosters():
     sMovieTitle = oInputParameterHandler.getValue('sMovieTitle')
     sThumb = oInputParameterHandler.getValue('sThumb')
     
-    # L'URL de l'API Frembed retourne directement un lecteur embed
-    # On peut essayer de récupérer le lien direct ou utiliser l'iframe
+    VSlog('Frembed - showHosters URL: ' + sUrl)
     
     oOutputParameterHandler = cOutputParameterHandler()
     oOutputParameterHandler.addParameter('siteUrl', sUrl)
@@ -321,61 +211,81 @@ def playVideo():
     
     VSlog('Frembed - Lecture: ' + sUrl)
     
-    # L'API Frembed retourne une page avec un player embed
-    # On doit extraire le vrai lien de streaming
+    # Frembed retourne une page HTML avec un iframe embed
+    # On récupère le contenu et on cherche le lecteur
     oRequestHandler = cRequestHandler(sUrl)
-    sHtmlContent = oRequestHandler.request()
+    oRequestHandler.addHeaderEntry('User-Agent', 'Mozilla/5.0')
+    oRequestHandler.addHeaderEntry('Referer', URL_MAIN)
     
-    if not sHtmlContent:
-        oGui.addText(SITE_IDENTIFIER, 'Impossible de charger la vidéo')
-        oGui.setEndOfDirectory()
-        return
-    
-    # Extraire l'iframe ou le lien direct
-    oParser = cParser()
-    
-    # Chercher les patterns communs de liens de streaming
-    patterns = [
-        '<iframe[^>]+src=["\']([^"\']+)["\']',
-        'file:["\']([^"\']+)["\']',
-        'source:["\']([^"\']+)["\']',
-        'src=["\']([^"\']+\.m3u8[^"\']*)["\']',
-        'src=["\']([^"\']+\.mp4[^"\']*)["\']'
-    ]
-    
-    aResult = None
-    for pattern in patterns:
-        aResult = oParser.parse(sHtmlContent, pattern)
-        if aResult[0]:
-            break
-    
-    if aResult and aResult[0]:
-        stream_url = aResult[1][0]
+    try:
+        sHtmlContent = oRequestHandler.request()
         
-        # Si c'est un lien relatif, le compléter
-        if stream_url.startswith('//'):
-            stream_url = 'https:' + stream_url
-        elif stream_url.startswith('/'):
-            stream_url = API_URL + stream_url
+        if not sHtmlContent:
+            oGui.addText(SITE_IDENTIFIER, 'Impossible de charger la vidéo')
+            oGui.setEndOfDirectory()
+            return
         
-        VSlog('Frembed - Stream URL: ' + stream_url)
+        VSlog('Frembed - Contenu HTML reçu: ' + str(len(sHtmlContent)) + ' caractères')
         
-        # Vérifier si c'est un hoster connu
-        oHoster = cHosterGui().checkHoster(stream_url)
-        if oHoster:
-            oHoster.setDisplayName(sMovieTitle)
-            oHoster.setFileName(sMovieTitle)
-            cHosterGui().showHoster(oGui, oHoster, stream_url, sThumb)
+        # Chercher l'iframe ou le lien de streaming
+        oParser = cParser()
+        
+        # Patterns à chercher
+        patterns = [
+            '<iframe[^>]+src=["\']([^"\']+)["\']',
+            'file:["\']([^"\']+)["\']',
+            'source:["\']([^"\']+)["\']',
+            'src=["\']([^"\']+\.m3u8[^"\']*)["\']',
+            'src=["\']([^"\']+\.mp4[^"\']*)["\']',
+            'player_src=["\']([^"\']+)["\']'
+        ]
+        
+        stream_url = None
+        for pattern in patterns:
+            aResult = oParser.parse(sHtmlContent, pattern)
+            if aResult[0]:
+                stream_url = aResult[1][0]
+                VSlog('Frembed - Lien trouvé avec pattern: ' + pattern)
+                break
+        
+        if stream_url:
+            # Nettoyer l'URL
+            if stream_url.startswith('//'):
+                stream_url = 'https:' + stream_url
+            elif stream_url.startswith('/'):
+                stream_url = URL_MAIN + stream_url
+            
+            VSlog('Frembed - Stream URL finale: ' + stream_url)
+            
+            # Vérifier si c'est un hoster connu
+            oHoster = cHosterGui().checkHoster(stream_url)
+            if oHoster:
+                oHoster.setDisplayName(sMovieTitle)
+                oHoster.setFileName(sMovieTitle)
+                cHosterGui().showHoster(oGui, oHoster, stream_url, sThumb)
+            else:
+                # Essayer de lire directement
+                VSlog('Frembed - Tentative de lecture directe')
+                from resources.lib.player import cPlayer
+                oPlayer = cPlayer()
+                oPlayer.clearPlayList()
+                oPlayer.addItemToPlaylist(stream_url, sMovieTitle, sThumb)
+                oPlayer.startPlayer()
         else:
-            # Essayer de lire directement
+            # Si aucun lien trouvé, on affiche l'URL de l'API comme iframe
+            VSlog('Frembed - Aucun lien extrait, tentative avec l\'URL directe')
+            
+            # On peut essayer de charger l'URL de Frembed directement dans le lecteur
             from resources.lib.player import cPlayer
             oPlayer = cPlayer()
             oPlayer.clearPlayList()
-            oPlayer.addItemToPlaylist(stream_url, sMovieTitle, sThumb)
+            oPlayer.addItemToPlaylist(sUrl, sMovieTitle, sThumb)
             oPlayer.startPlayer()
-    else:
-        # Si on ne trouve pas de lien, on peut essayer de charger l'iframe directement
-        VSlog('Frembed - Aucun lien trouvé, utilisation de l\'iframe')
-        oGui.addText(SITE_IDENTIFIER, 'Lien de streaming non disponible')
+    
+    except Exception as e:
+        VSlog('Frembed - Erreur lecture: ' + str(e))
+        import traceback
+        VSlog('Frembed - Traceback: ' + traceback.format_exc())
+        oGui.addText(SITE_IDENTIFIER, 'Erreur lors de la lecture')
     
     oGui.setEndOfDirectory()
