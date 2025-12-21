@@ -17,7 +17,7 @@
         "animesama": {
             "label": "Anime Sama",
             "active": "True",
-            "url": "https://anime-sama.org/"
+            "url": "https://anime-sama.eu/"
         },
         "animeultime": {
             "label": "Anime Ultime",
@@ -64,7 +64,7 @@
         "coflix": {
             "label": "Coflix",
             "active": "True",
-            "url": "https://coflix.foo/"
+            "url": "https://coflix.fi/"
         },
         "cpasmal": {
             "label": "CpasMal",
@@ -154,6 +154,11 @@
             "label": "Freebox",
             "active": "True",
             "url": "http://mafreebox.freebox.fr/freeboxtv/playlist.m3u"
+        },
+        "frembed_life": {
+            "label": "Frembed",
+            "active": "True",
+            "url": "https://frembed.fun"
         },
         "french_stream_com": {
             "label": "French Stream",
@@ -304,7 +309,7 @@
         "toonanime": {
             "label": "Toonanime",
             "active": "True",
-            "url": "https://v8.toonanime.co/"
+            "url": "https://toonanimetv.com/"
         },
         "topimdb": {
             "label": "Top IMDB",
@@ -315,7 +320,7 @@
             "label": "top-stream",
             "active": "True",
             "cloudflare": "False",
-            "url": "https://top-stream.art/"
+            "url": "https://top-stream.fit/"
         },
         "vfilms": {
             "label": "VFilms",
@@ -354,7 +359,7 @@
             "active": "True",
             "cloudflare": "False",
             "site_info": "https://www.wiflix-nouvelle-adresse.site/",
-            "url": "https://flemmix.one/"
+            "url": "https://flemmix.bond/"
         },
         "wilifilm": {
             "label": "Wilifilm",
@@ -373,4 +378,3 @@
         }
     }
 }
-
