@@ -10,6 +10,7 @@ from resources.lib.handler.requestHandler import cRequestHandler
 from resources.lib.comaddon import progress, VSlog, addon
 from resources.lib.parser import cParser
 from resources.lib.util import cUtil
+from resources.lib.tmdb import cTMDb
 import re
 
 SITE_IDENTIFIER = 'frembed_life'
@@ -19,11 +20,19 @@ SITE_DESC = 'Films & Séries via Frembed'
 # URL de base
 URL_MAIN = 'https://frembed.life'
 
+# Menu GLOBALE HOME
+MOVIE_MOVIE = (True, 'showMenuMovies')
+SERIE_SERIES = (True, 'showMenuSeries')
+
+# Recherche
+MY_SEARCH_MOVIES = (True, 'showSearchMovie')
+MY_SEARCH_SERIES = (True, 'showSearchSerie')
+
 # Intégration dans fStream
 def getCategoryList():
     liste = []
-    liste.append(['Films', URL_MAIN, 'films.png', 'showMovies'])
-    liste.append(['Séries', URL_MAIN, 'series.png', 'showSeries'])
+    liste.append(['Films', URL_MAIN, 'films.png', 'showMenuMovies'])
+    liste.append(['Séries', URL_MAIN, 'series.png', 'showMenuSeries'])
     return liste
 
 
@@ -31,154 +40,278 @@ def load():
     oGui = cGui()
     
     oOutputParameterHandler = cOutputParameterHandler()
-    oOutputParameterHandler.addParameter('siteUrl', 'movies')
-    oGui.addDir(SITE_IDENTIFIER, 'showMovies', 'Films', 'films.png', oOutputParameterHandler)
+    oOutputParameterHandler.addParameter('siteUrl', MOVIE_MOVIE[0])
+    oGui.addDir(SITE_IDENTIFIER, MOVIE_MOVIE[1], 'Films', 'films.png', oOutputParameterHandler)
     
     oOutputParameterHandler = cOutputParameterHandler()
-    oOutputParameterHandler.addParameter('siteUrl', 'series')
-    oGui.addDir(SITE_IDENTIFIER, 'showSeries', 'Séries', 'series.png', oOutputParameterHandler)
+    oOutputParameterHandler.addParameter('siteUrl', SERIE_SERIES[0])
+    oGui.addDir(SITE_IDENTIFIER, SERIE_SERIES[1], 'Séries', 'series.png', oOutputParameterHandler)
     
     oGui.setEndOfDirectory()
 
 
-def showMovies():
+def showMenuMovies():
     oGui = cGui()
+    addons = addon()
     
     oOutputParameterHandler = cOutputParameterHandler()
-    oOutputParameterHandler.addParameter('siteUrl', URL_MAIN)
-    oGui.addDir(SITE_IDENTIFIER, 'showSearchMovie', 'Recherche par TMDB ID', 'search.png', oOutputParameterHandler)
+    oOutputParameterHandler.addParameter('siteUrl', MY_SEARCH_MOVIES[0])
+    oGui.addDir(SITE_IDENTIFIER, MY_SEARCH_MOVIES[1], addons.VSlang(30076), 'search.png', oOutputParameterHandler)
+    
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('siteUrl', 'tmdb_popular')
+    oGui.addDir(SITE_IDENTIFIER, 'showMoviesFromTMDB', addons.VSlang(30102), 'popular.png', oOutputParameterHandler)
+    
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('siteUrl', 'tmdb_top')
+    oGui.addDir(SITE_IDENTIFIER, 'showMoviesFromTMDB', addons.VSlang(30421), 'notes.png', oOutputParameterHandler)
+    
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('siteUrl', 'tmdb_upcoming')
+    oGui.addDir(SITE_IDENTIFIER, 'showMoviesFromTMDB', 'Films à venir', 'news.png', oOutputParameterHandler)
     
     oGui.setEndOfDirectory()
 
 
-def showSeries():
+def showMenuSeries():
     oGui = cGui()
+    addons = addon()
     
     oOutputParameterHandler = cOutputParameterHandler()
-    oOutputParameterHandler.addParameter('siteUrl', URL_MAIN)
-    oGui.addDir(SITE_IDENTIFIER, 'showSearchSerie', 'Recherche par TMDB ID', 'search.png', oOutputParameterHandler)
+    oOutputParameterHandler.addParameter('siteUrl', MY_SEARCH_SERIES[0])
+    oGui.addDir(SITE_IDENTIFIER, MY_SEARCH_SERIES[1], addons.VSlang(30076), 'search.png', oOutputParameterHandler)
+    
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('siteUrl', 'tmdb_popular')
+    oGui.addDir(SITE_IDENTIFIER, 'showSeriesFromTMDB', addons.VSlang(30102), 'popular.png', oOutputParameterHandler)
+    
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('siteUrl', 'tmdb_top')
+    oGui.addDir(SITE_IDENTIFIER, 'showSeriesFromTMDB', addons.VSlang(30421), 'notes.png', oOutputParameterHandler)
+    
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('siteUrl', 'tmdb_airing')
+    oGui.addDir(SITE_IDENTIFIER, 'showSeriesFromTMDB', 'Séries en cours', 'news.png', oOutputParameterHandler)
     
     oGui.setEndOfDirectory()
 
 
 def showSearchMovie():
-    """Recherche de film par TMDB ID"""
+    """Recherche de film"""
     oGui = cGui()
     
-    sSearchText = oGui.showKeyBoard('', 'Entrez le TMDB ID du film')
+    sSearchText = oGui.showKeyBoard()
     if not sSearchText:
         oGui.setEndOfDirectory()
         return
     
-    VSlog('Frembed - Recherche film TMDB ID: ' + sSearchText)
+    # Recherche via TMDB
+    oTmdb = cTMDb(SITE_IDENTIFIER, SITE_NAME)
+    aResult = oTmdb.searchMovie(sSearchText)
     
-    # URL de l'API film
-    sUrl = URL_MAIN + '/api/film.php?id=' + sSearchText
-    
-    VSlog('Frembed - URL: ' + sUrl)
-    
-    oRequestHandler = cRequestHandler(sUrl)
-    oRequestHandler.addHeaderEntry('User-Agent', 'Mozilla/5.0')
-    oRequestHandler.addHeaderEntry('Referer', URL_MAIN)
-    
-    try:
-        sHtmlContent = oRequestHandler.request()
-        VSlog('Frembed - Réponse reçue: ' + str(len(sHtmlContent) if sHtmlContent else 0) + ' caractères')
-        
-        if sHtmlContent:
-            # Essayer de parser comme JSON
-            try:
-                import json
-                data = json.loads(sHtmlContent)
-                VSlog('Frembed - JSON parsé avec succès')
-                
-                if 'title' in data:
-                    sTitle = data.get('title', 'Film')
-                    sPoster = data.get('poster', '')
-                    
-                    oOutputParameterHandler = cOutputParameterHandler()
-                    oOutputParameterHandler.addParameter('siteUrl', sUrl)
-                    oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
-                    oOutputParameterHandler.addParameter('sThumb', sPoster)
-                    oOutputParameterHandler.addParameter('sTmdbId', sSearchText)
-                    
-                    oGui.addMovie(SITE_IDENTIFIER, 'showHosters', sTitle, 'films.png', sPoster, '', oOutputParameterHandler)
-                else:
-                    VSlog('Frembed - Pas de titre dans la réponse JSON')
-                    oGui.addText(SITE_IDENTIFIER, 'Film non trouvé')
-            except Exception as e:
-                VSlog('Frembed - Erreur parsing JSON: ' + str(e))
-                VSlog('Frembed - Contenu brut: ' + sHtmlContent[:200])
-                # Ce n'est peut-être pas du JSON, essayons de récupérer le lecteur iframe
-                oOutputParameterHandler = cOutputParameterHandler()
-                oOutputParameterHandler.addParameter('siteUrl', sUrl)
-                oOutputParameterHandler.addParameter('sMovieTitle', 'Film TMDB ID: ' + sSearchText)
-                oOutputParameterHandler.addParameter('sTmdbId', sSearchText)
-                
-                oGui.addMovie(SITE_IDENTIFIER, 'showHosters', 'Film TMDB ID: ' + sSearchText, 'films.png', '', '', oOutputParameterHandler)
-        else:
-            VSlog('Frembed - Aucune réponse reçue')
-            oGui.addText(SITE_IDENTIFIER, 'Aucune réponse du serveur')
-    
-    except Exception as e:
-        VSlog('Frembed - Erreur requête: ' + str(e))
-        oGui.addText(SITE_IDENTIFIER, 'Erreur de connexion: ' + str(e))
+    if aResult:
+        oOutputParameterHandler = cOutputParameterHandler()
+        for aMovie in aResult:
+            sTitle = aMovie['title']
+            sYear = aMovie['year']
+            sId = aMovie['tmdb_id']
+            sPoster = aMovie['cover_url']
+            sDesc = aMovie['overview']
+            
+            sDisplayTitle = '%s (%s)' % (sTitle, sYear)
+            
+            oOutputParameterHandler.addParameter('siteUrl', URL_MAIN + '/api/film.php?id=' + str(sId))
+            oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
+            oOutputParameterHandler.addParameter('sThumb', sPoster)
+            oOutputParameterHandler.addParameter('sTmdbId', str(sId))
+            oOutputParameterHandler.addParameter('sYear', sYear)
+            
+            oGui.addMovie(SITE_IDENTIFIER, 'showHosters', sDisplayTitle, '', sPoster, sDesc, oOutputParameterHandler)
+    else:
+        oGui.addText(SITE_IDENTIFIER, 'Aucun résultat')
     
     oGui.setEndOfDirectory()
 
 
 def showSearchSerie():
-    """Recherche de série par TMDB ID"""
+    """Recherche de série"""
     oGui = cGui()
     
-    sSearchText = oGui.showKeyBoard('', 'Entrez le TMDB ID de la série')
+    sSearchText = oGui.showKeyBoard()
     if not sSearchText:
         oGui.setEndOfDirectory()
         return
     
-    VSlog('Frembed - Recherche série TMDB ID: ' + sSearchText)
+    # Recherche via TMDB
+    oTmdb = cTMDb(SITE_IDENTIFIER, SITE_NAME)
+    aResult = oTmdb.searchTVShow(sSearchText)
     
-    # Demander la saison
-    sSeason = oGui.showKeyBoard('1', 'Numéro de saison')
-    if not sSeason:
-        sSeason = '1'
-    
-    # Demander l'épisode
-    sEpisode = oGui.showKeyBoard('1', 'Numéro d\'épisode')
-    if not sEpisode:
-        sEpisode = '1'
-    
-    # URL de l'API série
-    sUrl = URL_MAIN + '/api/serie.php?id=' + sSearchText + '&sa=' + sSeason + '&epi=' + sEpisode
-    
-    VSlog('Frembed - URL: ' + sUrl)
-    
-    oRequestHandler = cRequestHandler(sUrl)
-    oRequestHandler.addHeaderEntry('User-Agent', 'Mozilla/5.0')
-    oRequestHandler.addHeaderEntry('Referer', URL_MAIN)
-    
-    try:
-        sHtmlContent = oRequestHandler.request()
-        VSlog('Frembed - Réponse reçue: ' + str(len(sHtmlContent) if sHtmlContent else 0) + ' caractères')
-        
-        if sHtmlContent:
-            sTitle = 'S' + sSeason.zfill(2) + 'E' + sEpisode.zfill(2) + ' - TMDB ID: ' + sSearchText
+    if aResult:
+        oOutputParameterHandler = cOutputParameterHandler()
+        for aSerie in aResult:
+            sTitle = aSerie['title']
+            sYear = aSerie['year']
+            sId = aSerie['tmdb_id']
+            sPoster = aSerie['cover_url']
+            sDesc = aSerie['overview']
             
-            oOutputParameterHandler = cOutputParameterHandler()
-            oOutputParameterHandler.addParameter('siteUrl', sUrl)
+            sDisplayTitle = '%s (%s)' % (sTitle, sYear)
+            
+            oOutputParameterHandler.addParameter('siteUrl', URL_MAIN + '/api/serie.php?id=' + str(sId))
             oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
-            oOutputParameterHandler.addParameter('sTmdbId', sSearchText)
-            oOutputParameterHandler.addParameter('sSeason', sSeason)
-            oOutputParameterHandler.addParameter('sEpisode', sEpisode)
+            oOutputParameterHandler.addParameter('sThumb', sPoster)
+            oOutputParameterHandler.addParameter('sTmdbId', str(sId))
+            oOutputParameterHandler.addParameter('sYear', sYear)
             
-            oGui.addEpisode(SITE_IDENTIFIER, 'showHosters', sTitle, 'series.png', '', '', oOutputParameterHandler)
-        else:
-            VSlog('Frembed - Aucune réponse reçue')
-            oGui.addText(SITE_IDENTIFIER, 'Aucune réponse du serveur')
+            oGui.addTV(SITE_IDENTIFIER, 'showSeasons', sDisplayTitle, '', sPoster, sDesc, oOutputParameterHandler)
+    else:
+        oGui.addText(SITE_IDENTIFIER, 'Aucun résultat')
     
-    except Exception as e:
-        VSlog('Frembed - Erreur requête: ' + str(e))
-        oGui.addText(SITE_IDENTIFIER, 'Erreur de connexion: ' + str(e))
+    oGui.setEndOfDirectory()
+
+
+def showMoviesFromTMDB():
+    """Affiche les films depuis TMDB"""
+    oGui = cGui()
+    oInputParameterHandler = cInputParameterHandler()
+    sType = oInputParameterHandler.getValue('siteUrl')
+    
+    oTmdb = cTMDb(SITE_IDENTIFIER, SITE_NAME)
+    
+    if sType == 'tmdb_popular':
+        aResult = oTmdb.getPopularMovies()
+    elif sType == 'tmdb_top':
+        aResult = oTmdb.getTopRatedMovies()
+    elif sType == 'tmdb_upcoming':
+        aResult = oTmdb.getUpcomingMovies()
+    else:
+        aResult = []
+    
+    if aResult:
+        oOutputParameterHandler = cOutputParameterHandler()
+        for aMovie in aResult:
+            sTitle = aMovie['title']
+            sYear = aMovie['year']
+            sId = aMovie['tmdb_id']
+            sPoster = aMovie['cover_url']
+            sDesc = aMovie['overview']
+            
+            sDisplayTitle = '%s (%s)' % (sTitle, sYear)
+            
+            oOutputParameterHandler.addParameter('siteUrl', URL_MAIN + '/api/film.php?id=' + str(sId))
+            oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
+            oOutputParameterHandler.addParameter('sThumb', sPoster)
+            oOutputParameterHandler.addParameter('sTmdbId', str(sId))
+            oOutputParameterHandler.addParameter('sYear', sYear)
+            
+            oGui.addMovie(SITE_IDENTIFIER, 'showHosters', sDisplayTitle, '', sPoster, sDesc, oOutputParameterHandler)
+    
+    oGui.setEndOfDirectory()
+
+
+def showSeriesFromTMDB():
+    """Affiche les séries depuis TMDB"""
+    oGui = cGui()
+    oInputParameterHandler = cInputParameterHandler()
+    sType = oInputParameterHandler.getValue('siteUrl')
+    
+    oTmdb = cTMDb(SITE_IDENTIFIER, SITE_NAME)
+    
+    if sType == 'tmdb_popular':
+        aResult = oTmdb.getPopularTVShows()
+    elif sType == 'tmdb_top':
+        aResult = oTmdb.getTopRatedTVShows()
+    elif sType == 'tmdb_airing':
+        aResult = oTmdb.getOnTheAirTVShows()
+    else:
+        aResult = []
+    
+    if aResult:
+        oOutputParameterHandler = cOutputParameterHandler()
+        for aSerie in aResult:
+            sTitle = aSerie['title']
+            sYear = aSerie['year']
+            sId = aSerie['tmdb_id']
+            sPoster = aSerie['cover_url']
+            sDesc = aSerie['overview']
+            
+            sDisplayTitle = '%s (%s)' % (sTitle, sYear)
+            
+            oOutputParameterHandler.addParameter('siteUrl', URL_MAIN + '/api/serie.php?id=' + str(sId))
+            oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
+            oOutputParameterHandler.addParameter('sThumb', sPoster)
+            oOutputParameterHandler.addParameter('sTmdbId', str(sId))
+            oOutputParameterHandler.addParameter('sYear', sYear)
+            
+            oGui.addTV(SITE_IDENTIFIER, 'showSeasons', sDisplayTitle, '', sPoster, sDesc, oOutputParameterHandler)
+    
+    oGui.setEndOfDirectory()
+
+
+def showSeasons():
+    """Affiche les saisons d'une série"""
+    oGui = cGui()
+    oInputParameterHandler = cInputParameterHandler()
+    sUrl = oInputParameterHandler.getValue('siteUrl')
+    sMovieTitle = oInputParameterHandler.getValue('sMovieTitle')
+    sThumb = oInputParameterHandler.getValue('sThumb')
+    sTmdbId = oInputParameterHandler.getValue('sTmdbId')
+    
+    # Récupérer les infos de la série via TMDB
+    oTmdb = cTMDb(SITE_IDENTIFIER, SITE_NAME)
+    aSeasons = oTmdb.getSeasons(sTmdbId)
+    
+    if aSeasons:
+        oOutputParameterHandler = cOutputParameterHandler()
+        for aSeason in aSeasons:
+            sSeasonNum = str(aSeason['season'])
+            sSeasonTitle = '%s - Saison %s' % (sMovieTitle, sSeasonNum)
+            
+            oOutputParameterHandler.addParameter('siteUrl', sUrl)
+            oOutputParameterHandler.addParameter('sMovieTitle', sMovieTitle)
+            oOutputParameterHandler.addParameter('sThumb', sThumb)
+            oOutputParameterHandler.addParameter('sTmdbId', sTmdbId)
+            oOutputParameterHandler.addParameter('sSeason', sSeasonNum)
+            
+            oGui.addSeason(SITE_IDENTIFIER, 'showEpisodes', sSeasonTitle, '', sThumb, '', oOutputParameterHandler)
+    
+    oGui.setEndOfDirectory()
+
+
+def showEpisodes():
+    """Affiche les épisodes d'une saison"""
+    oGui = cGui()
+    oInputParameterHandler = cInputParameterHandler()
+    sUrl = oInputParameterHandler.getValue('siteUrl')
+    sMovieTitle = oInputParameterHandler.getValue('sMovieTitle')
+    sThumb = oInputParameterHandler.getValue('sThumb')
+    sTmdbId = oInputParameterHandler.getValue('sTmdbId')
+    sSeason = oInputParameterHandler.getValue('sSeason')
+    
+    # Récupérer les épisodes via TMDB
+    oTmdb = cTMDb(SITE_IDENTIFIER, SITE_NAME)
+    aEpisodes = oTmdb.getEpisodes(sTmdbId, sSeason)
+    
+    if aEpisodes:
+        oOutputParameterHandler = cOutputParameterHandler()
+        for aEpisode in aEpisodes:
+            sEpisodeNum = str(aEpisode['episode'])
+            sEpisodeTitle = aEpisode.get('title', 'Episode ' + sEpisodeNum)
+            
+            sTitle = '%s S%sE%s' % (sMovieTitle, sSeason.zfill(2), sEpisodeNum.zfill(2))
+            sDisplayTitle = '%s - %s' % (sTitle, sEpisodeTitle)
+            
+            # URL de l'API Frembed avec saison et épisode
+            sEpisodeUrl = sUrl.replace('serie.php?id=', 'serie.php?id=') + '&sa=' + sSeason + '&epi=' + sEpisodeNum
+            
+            oOutputParameterHandler.addParameter('siteUrl', sEpisodeUrl)
+            oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
+            oOutputParameterHandler.addParameter('sThumb', sThumb)
+            oOutputParameterHandler.addParameter('sTmdbId', sTmdbId)
+            oOutputParameterHandler.addParameter('sSeason', sSeason)
+            oOutputParameterHandler.addParameter('sEpisode', sEpisodeNum)
+            
+            oGui.addEpisode(SITE_IDENTIFIER, 'showHosters', sDisplayTitle, '', sThumb, '', oOutputParameterHandler)
     
     oGui.setEndOfDirectory()
 

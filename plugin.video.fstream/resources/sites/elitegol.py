@@ -13,7 +13,7 @@ from resources.lib.handler.requestHandler import cRequestHandler
 
 
 SITE_IDENTIFIER = 'elitegol'
-SITE_NAME = 'Elitegol'
+SITE_NAME = 'Favoris Sport 1'
 SITE_DESC = 'Chaines TV en directs'
 
 URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)

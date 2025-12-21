@@ -13,7 +13,7 @@ from resources.lib.parser import cParser
 
 
 SITE_IDENTIFIER = 'neymartv'
-SITE_NAME = 'NeymarTV'
+SITE_NAME = 'Favoris Sport 2'
 SITE_DESC = 'Toutes les chaines de Sport'
 URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)
 
