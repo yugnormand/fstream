@@ -17,7 +17,7 @@ SITE_NAME = 'Frembed'
 SITE_DESC = 'Films & Séries en Streaming'
 
 # API Frembed
-API_URL = 'https://frembed.fun'
+API_URL = 'https://frembed.life'
 MOVIE_API = API_URL + '/api/film.php?id='  # + tmdb_id
 SERIE_API = API_URL + '/api/serie.php?id='  # + tmdb_id&sa=season&epi=episode
 
