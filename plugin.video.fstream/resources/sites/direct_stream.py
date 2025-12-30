@@ -62,7 +62,7 @@ channels = [
     # ['M6', [39, '']],
     # ['6ter', [70, '']],
     # ['SyFy', [29, '']],
-    ['TF1 Serie Films', [122, 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Logo_TF1_2013.svg/langfr-330px-Logo_TF1_2013.svg.png']],
+    #['TF1 Serie Films', [122, 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Logo_TF1_2013.svg/langfr-330px-Logo_TF1_2013.svg.png']],
     # ['Serie club', [128, '']],
 
     # ['National Geographic', [20, '']],
@@ -161,11 +161,10 @@ def showLink():
 
         oHoster = oHosterGui.checkHoster(sHosterUrl)
         if oHoster:
-            # Nettoyer l'URL_MAIN pour éviter les doubles slashes
-            sReferer = URL_MAIN.rstrip('/')
-            sHosterUrl += "|Referer=" + sReferer
+            sHosterUrl += "|Referer=" + URL_MAIN
             oHoster.setDisplayName(sTitle)
             oHoster.setFileName(sTitle)
             oHosterGui.showHoster(oGui, oHoster, sHosterUrl, sThumb)
 
     oGui.setEndOfDirectory()
+
