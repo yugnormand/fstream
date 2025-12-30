@@ -10,7 +10,7 @@ from resources.lib.parser import cParser
 
 
 SITE_IDENTIFIER = 'direct_stream'
-SITE_NAME = 'Favoris Sport 3 (En maintenance)'
+SITE_NAME = 'Favoris Sport 3 (Can 2025)'
 SITE_DESC = 'Chaines TV en directs'
 
 URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)
@@ -62,7 +62,7 @@ channels = [
     # ['M6', [39, '']],
     # ['6ter', [70, '']],
     # ['SyFy', [29, '']],
-    # ['TF1 Serie Films', [122, '']],
+    ['TF1 Serie Films', [122, 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Logo_TF1_2013.svg/langfr-330px-Logo_TF1_2013.svg.png']],
     # ['Serie club', [128, '']],
 
     # ['National Geographic', [20, '']],
