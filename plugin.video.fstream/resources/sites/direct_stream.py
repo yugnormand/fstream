@@ -161,10 +161,11 @@ def showLink():
 
         oHoster = oHosterGui.checkHoster(sHosterUrl)
         if oHoster:
-            sHosterUrl += "|Referer=" + URL_MAIN
+            # Nettoyer l'URL_MAIN pour éviter les doubles slashes
+            sReferer = URL_MAIN.rstrip('/')
+            sHosterUrl += "|Referer=" + sReferer
             oHoster.setDisplayName(sTitle)
             oHoster.setFileName(sTitle)
             oHosterGui.showHoster(oGui, oHoster, sHosterUrl, sThumb)
 
     oGui.setEndOfDirectory()
-
