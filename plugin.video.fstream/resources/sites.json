@@ -91,6 +91,11 @@
             "active": "True",
             "url": "https://debrid-link.fr"
         },
+        "directfr": {
+            "label": "DirectFR",
+            "active": "True",
+            "url": "https://directfr.sbs/"
+        },
         "direct_stream": {
             "label": "direct-streamfr",
             "active": "True",
