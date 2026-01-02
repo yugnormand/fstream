@@ -24,7 +24,7 @@ class cGuiElement:
 
         # self.__sRootArt = cConfig().getRootArt()
         self.__sFunctionName = ''
-        self.__sRootArt = 'special://home/addons/plugin.video.vstream/resources/art/'
+        self.__sRootArt = 'special://home/addons/plugin.video.fstream/resources/art/'
         self.__sType = 'video'
         self.__sMeta = 0
         self.__sTrailer = ''
@@ -417,7 +417,7 @@ class cGuiElement:
     def getIcon(self):
         # if 'http' in self.__sIcon:
         #    return UnquotePlus(self.__sIcon)
-        folder = 'special://home/addons/plugin.video.vstream/resources/art'
+        folder = 'special://home/addons/plugin.video.fstream/resources/art'
         path = '/'.join([folder, self.__sIcon])
         # return os.path.join(unicode(self.__sRootArt, 'utf-8'), self.__sIcon)
         return path

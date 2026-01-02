@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 # return False
 import re
 
@@ -176,7 +176,7 @@ def showMovies(sSearch=''):
 
 
 def __checkForNextPage(sHtmlContent):
-    # &raquo; est réécris par vStream en >>
+    # &raquo; est réécris par fstream en >>
     sPattern = 'pages\'>.age.+?sur (\d+).+?current\'>.+?href="([^"]+)">>>'
     oParser = cParser()
     aResult = oParser.parse(sHtmlContent, sPattern)

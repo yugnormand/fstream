@@ -1,5 +1,5 @@
 #-*- coding: utf-8 -*-
-#Vstream https://github.com/Kodi-vStream/venom-xbmc-addons
+#fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 
 #site HS le 02/10/18
 return False

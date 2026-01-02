@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 # Ovni-crea
 
 import re
@@ -175,7 +175,7 @@ def showIsdb():
 
             sUrl2 = URL_MAIN + aEntry[0]
             sHoster = aEntry[1].capitalize()
-            sThumb = 'special://home/addons/plugin.video.vstream/resources/art/replay.png'
+            sThumb = 'special://home/addons/plugin.video.fstream/resources/art/replay.png'
 
             sTitle = ('%s [COLOR coral]%s[/COLOR]') % (sMovieTitle, sHoster)
 

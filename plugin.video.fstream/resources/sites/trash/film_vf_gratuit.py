@@ -1,5 +1,5 @@
 #-*- coding: utf-8 -*-
-# https://github.com/Kodi-vStream/venom-xbmc-addons
+# https://github.com/Kodi-fstream/venom-xbmc-addons
 return false
 from resources.lib.gui.hoster import cHosterGui
 from resources.lib.gui.gui import cGui

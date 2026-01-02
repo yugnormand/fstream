@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 
 return False #l'adresse a changé mais plus du tout le meme site, le 06/06/22
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # https://vidzi.tv/xxx.html
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 
 from resources.lib.handler.requestHandler import cRequestHandler
 from resources.lib.parser import cParser

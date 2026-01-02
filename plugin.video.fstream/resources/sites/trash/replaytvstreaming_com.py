@@ -1,7 +1,7 @@
 return False # Désactivé le 08/04/2020
 
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 #
 from resources.lib.gui.hoster import cHosterGui
 from resources.lib.gui.gui import cGui

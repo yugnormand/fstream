@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 # S09 update 02/11/2020
 return False # 0212020 Site HS depuis plus de 1 moi
 import re

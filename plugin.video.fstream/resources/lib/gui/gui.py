@@ -456,7 +456,7 @@ class cGui:
             # https://alwinesch.github.io/class_x_b_m_c_addon_1_1xbmc_1_1_info_tag_video.html
             # https://alwinesch.github.io/group__python___info_tag_video.html
 
-            # les infos récupérées par vStream
+            # les infos récupérées par fstream
             videoInfoTag.setOriginalTitle(data.get('originaltitle', ""))
             videoInfoTag.setPlot(data.get('plot', ""))
             videoInfoTag.setPlotOutline(data.get('tagline', ""))
@@ -841,7 +841,7 @@ class cGui:
 
     def setWatched(self):
         if True:
-            # Use vStream database
+            # Use fstream database
             oInputParameterHandler = cInputParameterHandler()
             sSite = oInputParameterHandler.getValue('sId')
             sSiteUrl = oInputParameterHandler.getValue('siteUrl')

@@ -1,5 +1,5 @@
 #-*- coding: utf-8 -*-
-# https://github.com/Kodi-vStream/venom-xbmc-addons
+# https://github.com/Kodi-fstream/venom-xbmc-addons
 # Recaptcha 
 return False
 from resources.lib.gui.hoster import cHosterGui
@@ -663,7 +663,7 @@ def showHosters():
             if sTitle.startswith('Telecharger ') :
                 sTitle = sTitle.replace('Telecharger ', '')
             
-            #test si le host est supporte par vstream.
+            #test si le host est supporte par fstream.
             oHoster = cHosterGui().checkHoster(sHost.lower())
             if  sHost == 'Revivelink':
                 oHoster = True

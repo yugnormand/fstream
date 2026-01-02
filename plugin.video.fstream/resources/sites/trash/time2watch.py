@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 # Arias800
 return False
 import base64
@@ -228,7 +228,7 @@ Si jamais vous vous trompez il suffit de recharger la page.
 Utilité d'avoir un compte:
 Le site est limité en nombre de passage pour les personnes qui n'ont pas de compte.
 Avoir un compte permet aussi de ne pas avoir le Captcha qui apparait à chaque fois.
-Vous pouvez activer la connexion au compte dans les paramètres de vStream.""", title="Fonctionnement du site")
+Vous pouvez activer la connexion au compte dans les paramètres de fstream.""", title="Fonctionnement du site")
 
 
 def showSearch():
@@ -521,7 +521,7 @@ def decryptTime():
             oRequestHandler.addHeaderEntry('Cookie', Cookie)
         sHtmlContent = oRequestHandler.request()
 
-        downloaded_image = xbmcvfs.File("special://home/userdata/addon_data/plugin.video.vstream/challenge.png", 'wb')
+        downloaded_image = xbmcvfs.File("special://home/userdata/addon_data/plugin.video.fstream/challenge.png", 'wb')
         downloaded_image.write(bytearray(sHtmlContent))
         downloaded_image.close()
 
@@ -531,13 +531,13 @@ def decryptTime():
                 oRequestHandler.addHeaderEntry('Cookie', Cookie)
             imgdata = oRequestHandler.request()
 
-            downloaded_image = xbmcvfs.File("special://home/userdata/addon_data/plugin.video.vstream/test" + str(i) + ".png", 'wb')
+            downloaded_image = xbmcvfs.File("special://home/userdata/addon_data/plugin.video.fstream/test" + str(i) + ".png", 'wb')
             downloaded_image.write(bytearray(imgdata))
             downloaded_image.close()
-            Filename.append("special://home/userdata/addon_data/plugin.video.vstream/test" + str(i) + ".png")
+            Filename.append("special://home/userdata/addon_data/plugin.video.fstream/test" + str(i) + ".png")
             i = i + 1
 
-        oSolver = cInputWindow(captcha=Filename, challenge="special://home/userdata/addon_data/plugin.video.vstream/challenge.png")
+        oSolver = cInputWindow(captcha=Filename, challenge="special://home/userdata/addon_data/plugin.video.fstream/challenge.png")
         retArg = oSolver.get()
 
         data = "g-recaptcha-response=" + aResult[1][int(retArg)][0] + "&challenge=" + challengeTok
@@ -591,8 +591,8 @@ class cInputWindow(xbmcgui.WindowDialog):
         u = 0
         pos = []
 
-        bg_image = 'special://home/addons/plugin.video.vstream/resources/art/background.png'
-        check_image = 'special://home/addons/plugin.video.vstream/resources/art/trans_checked.png'
+        bg_image = 'special://home/addons/plugin.video.fstream/resources/art/background.png'
+        check_image = 'special://home/addons/plugin.video.fstream/resources/art/trans_checked.png'
 
         self.ctrlBackground = xbmcgui.ControlImage(0, 0, 1280, 720, bg_image)
         self.cancelled = False

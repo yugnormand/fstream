@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 import platform
 import random
 import threading
@@ -65,23 +65,23 @@ URL_SEARCH_SERIES = (URL_MAIN + '&sMedia=serie&sSearch=', 'showMovies')
 URL_SEARCH_ANIMS = (URL_MAIN + '&sMedia=anime&sSearch=', 'showMovies')
 URL_SEARCH_MISC = (URL_MAIN + '&sMedia=divers&sSearch=', 'showMovies')
 
-CACHE = 'special://home/userdata/addon_data/plugin.video.vstream/%s_cache.db' % SITE_IDENTIFIER
+CACHE = 'special://home/userdata/addon_data/plugin.video.fstream/%s_cache.db' % SITE_IDENTIFIER
 
 # Dépend de la version de python
 PYVERSION = platform.python_version()
 VSlog('Pastebin - Python version : ' + PYVERSION)
 if '3.10' in PYVERSION:
     REALCACHE = VSPath(CACHE)
-    PATH = 'special://home/addons/plugin.video.vstream/resources/lib/pasteCrypt310.pyc'
+    PATH = 'special://home/addons/plugin.video.fstream/resources/lib/pasteCrypt310.pyc'
 elif '3.11' in PYVERSION or '3.12' in PYVERSION:
     REALCACHE = VSPath(CACHE)
-    PATH = 'special://home/addons/plugin.video.vstream/resources/lib/pasteCrypt311.pyc'
+    PATH = 'special://home/addons/plugin.video.fstream/resources/lib/pasteCrypt311.pyc'
 elif '2.' in PYVERSION:
     REALCACHE = VSPath(CACHE).decode('utf-8')
-    PATH = 'special://home/addons/plugin.video.vstream/resources/lib/pasteCrypt2.pyc'
+    PATH = 'special://home/addons/plugin.video.fstream/resources/lib/pasteCrypt2.pyc'
 else:  # autre Versions 3.0x
     REALCACHE = VSPath(CACHE)
-    PATH = 'special://home/addons/plugin.video.vstream/resources/lib/pasteCrypt3.pyc'
+    PATH = 'special://home/addons/plugin.video.fstream/resources/lib/pasteCrypt3.pyc'
 
 
 # Pour le multithreading

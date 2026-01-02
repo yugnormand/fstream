@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 
 # 07/05/20 mise en place recaptcha
 return False  # 07/03/2021
@@ -386,8 +386,8 @@ def get_response(img, cookie):
 
     dialogs = dialog()
 
-    filename = "special://home/userdata/addon_data/plugin.video.vstream/Captcha.raw"
-    # PathCache = xbmc.translatePath(xbmcaddon.Addon('plugin.video.vstream').getAddonInfo("profile"))
+    filename = "special://home/userdata/addon_data/plugin.video.fstream/Captcha.raw"
+    # PathCache = xbmc.translatePath(xbmcaddon.Addon('plugin.video.fstream').getAddonInfo("profile"))
     # filename  = os.path.join(PathCache, 'Captcha.raw')
 
     hostComplet = re.sub(r'(https*:\/\/[^/]+)(\/*.*)', '\\1', img)
@@ -468,7 +468,7 @@ def get_response(img, cookie):
                     if action.getId() in (9, 10, 11, 30, 92, 216, 247, 257, 275, 61467, 61448):
                         self.close()
 
-            path = "special://home/addons/plugin.video.vstream"
+            path = "special://home/addons/plugin.video.fstream"
             # path = cConfig().getAddonPath().decode("utf-8")
             wd = XMLDialog('DialogCaptcha.xml', path, 'default', '720p')
             wd.doModal()

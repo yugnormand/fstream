@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 from resources.lib.comaddon import siteManager
 from resources.lib.gui.gui import cGui
 from resources.lib.gui.hoster import cHosterGui

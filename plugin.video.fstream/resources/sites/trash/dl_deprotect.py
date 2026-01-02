@@ -10,7 +10,7 @@ import xbmc,xbmcgui
 import xbmc
 
 import xbmcaddon,os
-PathCache = xbmc.translatePath(xbmcaddon.Addon('plugin.video.vstream').getAddonInfo("profile"))
+PathCache = xbmc.translatePath(xbmcaddon.Addon('plugin.video.fstream').getAddonInfo("profile"))
 
 #-----------------------------------------------------------
 #Partie veant de PYLOAD https://github.com/pyload

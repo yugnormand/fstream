@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 #
 from requests import post, Session, Request, RequestException, ConnectionError
 from resources.lib.comaddon import addon, dialog, VSlog, VSPath, isMatrix

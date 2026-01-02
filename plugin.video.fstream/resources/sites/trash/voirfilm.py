@@ -1,5 +1,5 @@
 #-*- coding: utf-8 -*-
-# Vstream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 # Votre nom ou pseudo
 #Site avec que openload et souvent sans aucun lien.
 return False
