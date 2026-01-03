@@ -14,7 +14,7 @@ from resources.lib.comaddon import VSlog
 import re
 
 SITE_IDENTIFIER = 'directfr'
-SITE_NAME = 'Chaines TV Françaises'
+SITE_NAME = 'Favoris Chaines TV Françaises'
 SITE_DESC = 'Chaines TV en directs'
 
 URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)
@@ -47,6 +47,8 @@ CHANNEL_MAPPING = {
     'CANAL + Sport HD': 'chaines-tv/17-canal-sport-360.html',
     'Dazn 1': 'chaines-tv/52-dazn-1.html',
     'Dazn 2': 'chaines-tv/54-dazn-2.html',
+    'NOVELAS TV': 'chaines-tv/10-novelas-tv.html',
+    'Mangas': 'chaines-tv/11-mangas.html',
 }
 
 def load():
@@ -131,6 +133,8 @@ def showChannels():
                     ('CANAL + Sport HD', 'chaines-tv/17-canal-sport-360.html'),
                     ('Dazn 1', 'chaines-tv/52-dazn-1.html'),
                     ('Dazn 2', 'chaines-tv/54-dazn-2.html'),
+                    ('NOVELAS TV', 'chaines-tv/10-novelas-tv.html'),
+                    ('Mangas', 'chaines-tv/11-mangas.html'),
                 ]
             elif sCategory == 'sport':
                 channels_found = [
