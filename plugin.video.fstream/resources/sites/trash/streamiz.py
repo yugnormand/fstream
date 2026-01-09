@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
 # source 37 https://streamiz-filmze.org/ 24122020
 return False  # url instable et de plus en plus souvent  redirection vers streamcomplet3 (clone qui le remplace)
 import re

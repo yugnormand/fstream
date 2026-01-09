@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
 
 import re
 import string
@@ -343,7 +343,7 @@ def hostersLink():
     sHosterUrl = sUrl
 
     if 'oload.tv' in sUrl:  # https://oload.tv/embed/0rRYBdB_3Xw/# #ace attorney vostfr
-        oGui.addText(SITE_IDENTIFIER, ' fstream : Accès refusé : Le site Oload.tv n\'est pas sécurisé')
+        oGui.addText(SITE_IDENTIFIER, ' fStream : Accès refusé : Le site Oload.tv n\'est pas sécurisé')
         oGui.setEndOfDirectory()
         return
 

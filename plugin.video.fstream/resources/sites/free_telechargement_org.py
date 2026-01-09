@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
 import re
 import xbmc
 import xbmcgui
@@ -754,8 +754,8 @@ def get_response(img, cookie):
 
     dialogs = dialog()
 
-    filename = "special://home/userdata/addon_data/plugin.video.fstream/Captcha.raw"
-    # PathCache = xbmc.translatePath(xbmcaddon.Addon('plugin.video.fstream').getAddonInfo("profile"))
+    filename = "special://home/userdata/addon_data/plugin.video.fStream/Captcha.raw"
+    # PathCache = xbmc.translatePath(xbmcaddon.Addon('plugin.video.fStream').getAddonInfo("profile"))
     # filename  = os.path.join(PathCache, 'Captcha.raw')
 
     # hostComplet = re.sub(r'(https*:\/\/[^/]+)(\/*.*)', '\\1', img)
@@ -836,7 +836,7 @@ def get_response(img, cookie):
                     if action.getId() in (9, 10, 11, 30, 92, 216, 247, 257, 275, 61467, 61448):
                         self.close()
 
-            path = "special://home/addons/plugin.video.fstream"
+            path = "special://home/addons/plugin.video.fStream"
             wd = XMLDialog('DialogCaptcha.xml', path, 'default', '720p')
             wd.doModal()
             del wd

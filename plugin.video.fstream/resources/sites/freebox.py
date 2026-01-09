@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
 import re
 import string
 
@@ -20,8 +20,8 @@ SITE_NAME = 'Free Télévision/Radio'
 SITE_DESC = 'Regarder la télévision'
 
 URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)
-URL_WEB = 'https://raw.githubusercontent.com/Kodi-fstream/venom-xbmc-addons/Beta/repo/resources/webtv2.m3u'
-URL_RADIO = 'https://raw.githubusercontent.com/Kodi-fstream/venom-xbmc-addons/master/repo/resources/radio.m3u'
+URL_WEB = 'https://raw.githubusercontent.com/Kodi-fStream/venom-xbmc-addons/Beta/repo/resources/webtv2.m3u'
+URL_RADIO = 'https://raw.githubusercontent.com/Kodi-fStream/venom-xbmc-addons/master/repo/resources/radio.m3u'
 
 TV_TV = (True, 'showMenuTV')
 CHAINE_TV = (URL_WEB, 'showWeb')
@@ -30,7 +30,7 @@ CHAINE_TV = (URL_WEB, 'showWeb')
 UA = 'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/48.0.2564.116 Chrome/48.0.2564.116 Safari/537.36'
 
 icon = 'tv.png'
-sRootArt = 'special://home/addons/plugin.video.fstream/resources/art/tv'
+sRootArt = 'special://home/addons/plugin.video.fStream/resources/art/tv'
 ADDON = addon()
 
 

@@ -1,5 +1,5 @@
 #-*- coding: utf-8 -*-
-#fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+#fStream https://github.com/Kodi-fStream/venom-xbmc-addons
 #tester le 30/10 ne fonctionne pas / SSL error
 return False
 from resources.lib.gui.hoster import cHosterGui

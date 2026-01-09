@@ -2,14 +2,14 @@
 <window id="130">
 	<defaultcontrol always="true">9000</defaultcontrol>
 <!-- 	<onload>PlayerControl(stop)</onload>  -->
-	<onload>SetProperty(vstream_menu,Home)</onload>
-	<onunload>SetProperty(vstream_menu,Home)</onunload>
+	<onload>SetProperty(fstream_menu,Home)</onload>
+	<onunload>SetProperty(fstream_menu,Home)</onunload>
     <!--<onunload>ClearProperty(TMDbHelper.WidgetContainer,Home)</onunload>-->
 	<allowoverlay>no</allowoverlay>
 	<controls>
 		<control type="group">
 			<visible>!Window.IsVisible(FileBrowser)</visible>
-			<!--<onload>ClearProperty(vstream_menu)</onload>-->
+			<!--<onload>ClearProperty(fstream_menu)</onload>-->
 			<!-- <animation effect="slide" start="1100,0" end="0,0" time="400" tween="quadratic" easing="out">WindowOpen</animation> -->
 			<!-- <animation effect="slide" start="0,0" end="1100,0" time="400" tween="quadratic" easing="out">WindowClose</animation> -->
             <!-- <animation effect="fade" start="100" end="0" time="800">WindowClose</animation> -->
@@ -208,7 +208,7 @@
 
 			<!--fullscreen-->
 			<control type="group" id="35">
-				<!--<visible>String.IsEqual(Window.Property(vstream_menu),Fullscreen) + Player.HasMedia</visible>-->
+				<!--<visible>String.IsEqual(Window.Property(fstream_menu),Fullscreen) + Player.HasMedia</visible>-->
 				<visible>Control.HasFocus(40) + Player.HasMedia</visible>
 				<control type="videowindow">
 					<aspectratio>scale</aspectratio>
@@ -274,7 +274,7 @@
 				<animation center="auto" easing="inout" effect="fade" end="0" start="100" time="400" tween="sine">Hidden</animation>
                 <top>133</top>
 				<left>522</left>
-				<visible>String.IsEqual(Window.Property(vstream_menu),Syno) + !Player.HasMedia</visible>
+				<visible>String.IsEqual(Window.Property(fstream_menu),Syno) + !Player.HasMedia</visible>
 
 				<control type="label" id="1">
 					<description>header label</description>
@@ -319,7 +319,7 @@
 				<animation center="auto" easing="inout" effect="fade" end="0" start="100" time="400" tween="sine">Hidden</animation>
                 <top>133</top>
 				<left>522</left>
-				<visible>String.IsEqual(Window.Property(vstream_menu),Home) + !Player.HasMedia</visible>
+				<visible>String.IsEqual(Window.Property(fstream_menu),Home) + !Player.HasMedia</visible>
 				
 				<control type="label" id="1">
 					<description>header label</description>
@@ -475,7 +475,7 @@
 				<animation center="auto" easing="inout" effect="fade" end="0" start="100" time="400" tween="sine">Hidden</animation>
                 <top>133</top>
 				<left>522</left>
-				<visible>String.IsEqual(Window.Property(vstream_menu),Person) + !Player.HasMedia</visible>
+				<visible>String.IsEqual(Window.Property(fstream_menu),Person) + !Player.HasMedia</visible>
 
 				<control type="label" id="1">
 					<description>header label</description>
@@ -688,8 +688,8 @@
 			<control type="group">
 				<animation center="auto" easing="inout" effect="fade" end="100" start="0" time="400" tween="sine">Visible</animation>
 				<animation center="auto" easing="inout" effect="fade" end="0" start="100" time="400" tween="sine">Hidden</animation>
-				<visible>String.IsEqual(Window.Property(vstream_menu),Cast) + !Player.HasMedia</visible>
-				<onclick>SetProperty(vstream_menu,Person)</onclick>
+				<visible>String.IsEqual(Window.Property(fstream_menu),Cast) + !Player.HasMedia</visible>
+				<onclick>SetProperty(fstream_menu,Person)</onclick>
 
 				<control type="label" id="1">
 					<left>520</left>
@@ -726,7 +726,7 @@
 					<onup>9000</onup>
 					<ondown>5200</ondown>
 					<align>left</align>
-					<onclick>SetProperty(vstream_menu,Person)</onclick>
+					<onclick>SetProperty(fstream_menu,Person)</onclick>
 					
 					
 					<!-- <autoscroll time="4000" delay="4000" repeat="2000">!Control.HasFocus(50)</autoscroll> -->
@@ -794,7 +794,7 @@
 							<height>230</height>
 							<width>153</width>
 							<left>40</left>
-							<!--<onclick>SetProperty(vstream_menu,Person)</onclick>-->
+							<!--<onclick>SetProperty(fstream_menu,Person)</onclick>-->
 
 
 
@@ -1010,7 +1010,7 @@
 			<control type="group" id="52200">
 				<animation center="auto" easing="inout" effect="fade" end="100" start="0" time="400" tween="sine">Visible</animation>
 				<animation center="auto" easing="inout" effect="fade" end="0" start="100" time="400" tween="sine">Hidden</animation>
-				<visible>String.IsEqual(Window.Property(vstream_menu),Simil) + !Player.HasMedia</visible>
+				<visible>String.IsEqual(Window.Property(fstream_menu),Simil) + !Player.HasMedia</visible>
 
 				<control type="label">
 					<left>520</left>
@@ -1353,10 +1353,10 @@
 				<orientation>horizontal</orientation>
 				<onleft>30</onleft>
 				<onright>30</onright>
-				<onup condition="String.IsEqual(Window.Property(vstream_menu),Cast)">5200</onup>
-				<onup condition="String.IsEqual(Window.Property(vstream_menu),Simil)">5210</onup>
-				<onup condition="String.IsEqual(Window.Property(vstream_menu),Person)">5215</onup>
-				<onup condition="String.IsEqual(Window.Property(vstream_menu),Home)">30</onup>
+				<onup condition="String.IsEqual(Window.Property(fstream_menu),Cast)">5200</onup>
+				<onup condition="String.IsEqual(Window.Property(fstream_menu),Simil)">5210</onup>
+				<onup condition="String.IsEqual(Window.Property(fstream_menu),Person)">5215</onup>
+				<onup condition="String.IsEqual(Window.Property(fstream_menu),Home)">30</onup>
 				<visible allowhiddenfocus="true">!Control.IsVisible(35)</visible>
 
 
@@ -1373,9 +1373,9 @@
 					<focusedcolor>FFFFFFFF</focusedcolor>
 					<texturenofocus border="10" diffuse="box.png" colordiffuse="D0FFFFFF">focus.png</texturenofocus>
 					<texturefocus border="10" diffuse="box.png" colordiffuse=$INFO[Window.Property(color)]>focus.png</texturefocus>
-					<onclick>SetProperty(vstream_menu,Home)</onclick>
+					<onclick>SetProperty(fstream_menu,Home)</onclick>
 					<animation reversible="false" center="auto" easing="inout" effect="zoom" end="100" start="90" time="400" tween="back">Focus</animation>
-					<visible>!String.IsEqual(Window.Property(vstream_menu),Home)</visible>
+					<visible>!String.IsEqual(Window.Property(fstream_menu),Home)</visible>
 					<visible>!Player.HasMedia</visible>
 				</control>
 
@@ -1392,9 +1392,9 @@
 					<focusedcolor>FFFFFFFF</focusedcolor>
 					<texturenofocus border="10" diffuse="box.png" colordiffuse="D0FFFFFF">focus.png</texturenofocus>
 					<texturefocus border="10" diffuse="box.png" colordiffuse=$INFO[Window.Property(color)]>focus.png</texturefocus>
-					<onclick>SetProperty(vstream_menu,Syno)</onclick>
+					<onclick>SetProperty(fstream_menu,Syno)</onclick>
 					<animation reversible="false" center="auto" easing="inout" effect="zoom" end="100" start="90" time="400" tween="back">Focus</animation>
-					<visible>String.IsEqual(Window.Property(vstream_menu),Home)</visible>
+					<visible>String.IsEqual(Window.Property(fstream_menu),Home)</visible>
 					<visible>!Player.HasMedia</visible>
 				</control>
 
@@ -1412,7 +1412,7 @@
 					<texturenofocus border="10" diffuse="box.png" colordiffuse="D0FFFFFF">focus.png</texturenofocus>
 					<texturefocus border="10" diffuse="box.png" colordiffuse=$INFO[Window.Property(color)]>focus.png</texturefocus>
 					<animation reversible="false" center="auto" easing="inout" effect="zoom" end="100" start="90" time="400" tween="back">Focus</animation>					
-					<onclick>SetProperty(vstream_menu,Cast)</onclick>
+					<onclick>SetProperty(fstream_menu,Cast)</onclick>
 					<visible>!Player.HasMedia</visible>
 				</control>
 
@@ -1430,7 +1430,7 @@
 					<texturenofocus border="10" diffuse="box.png" colordiffuse="D0FFFFFF">focus.png</texturenofocus>
 					<texturefocus border="10" diffuse="box.png" colordiffuse=$INFO[Window.Property(color)]>focus.png</texturefocus>
 					<animation reversible="false" center="auto" easing="inout" effect="zoom" end="100" start="90" time="400" tween="back">Focus</animation>					
-					<onclick>SetProperty(vstream_menu,Simil)</onclick>
+					<onclick>SetProperty(fstream_menu,Simil)</onclick>
 					<visible>!Player.HasMedia</visible>
 					<!--<onclick>SetFocus(5205)</onclick>-->
 				</control>
@@ -1466,7 +1466,7 @@
 					<texturenofocus border="10" diffuse="box.png" colordiffuse="D0FFFFFF">focus.png</texturenofocus>
 					<texturefocus border="10" diffuse="box.png" colordiffuse=$INFO[Window.Property(color)]>focus.png</texturefocus>
 					<animation reversible="false" center="auto" easing="inout" effect="zoom" end="100" start="90" time="400" tween="back">Focus</animation>					
-					<!--<onclick>SetProperty(vstream_menu,Bookmark)</onclick>-->
+					<!--<onclick>SetProperty(fstream_menu,Bookmark)</onclick>-->
 					<visible>!Player.HasMedia</visible>
 					<!--<onclick>SetFocus(5205)</onclick>-->
 				</control>

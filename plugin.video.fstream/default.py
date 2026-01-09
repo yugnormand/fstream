@@ -200,8 +200,8 @@ class main:
 def setSetting(addon_id, param, value):
     
     if addon_id:
-        if 'vstream_source_' in addon_id:
-            return siteManager().setProperty(addon_id.replace('vstream_source_', ''), param, value)
+        if 'fstream_source_' in addon_id:
+            return siteManager().setProperty(addon_id.replace('fstream_source_', ''), param, value)
         return addonManager().setSettingAddon(addon_id, param, value)
         
     addons = addon()

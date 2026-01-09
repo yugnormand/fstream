@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
 
 from resources.lib.gui.hoster import cHosterGui
 from resources.lib.gui.gui import cGui
@@ -357,7 +357,7 @@ def showMovies(sSearch=''):
             # sTitle = unicode(sTitle, errors='replace')
             # sTitle = sTitle.encode('ascii', 'ignore').decode('ascii')
 
-            # fstream don't work with unicode url for the moment
+            # fStream don't work with unicode url for the moment
             # sThumb = unicode(sThumb, 'UTF-8')
             # sThumb = sThumb.encode('ascii', 'ignore').decode('ascii')
             # sThumb = sThumb.decode('utf8')

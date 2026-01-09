@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
 import ssl
 import re, sys, requests, random, json, string
 import xbmcplugin, xbmcvfs, xbmc

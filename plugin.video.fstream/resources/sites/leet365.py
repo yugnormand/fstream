@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
 
 import ast
 import re
@@ -243,7 +243,7 @@ def showLink():
 
     oOutputParameterHandler = cOutputParameterHandler()
     
-    # jusqu'à 6 hosters, mais on fstream ne sait décoder que le 1 et le 5.
+    # jusqu'à 6 hosters, mais on fStream ne sait décoder que le 1 et le 5.
     hosters = [1, 5]
 #    for numHost in range(1, 7):
     i=0

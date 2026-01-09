@@ -1,5 +1,5 @@
 #-*- coding: utf-8 -*-
-#fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+#fStream https://github.com/Kodi-fStream/venom-xbmc-addons
 return False#au 18/03/2020
 from resources.lib.gui.hoster import cHosterGui
 from resources.lib.gui.gui import cGui

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
 # Arias800
 import re
 import time
@@ -416,7 +416,7 @@ def getHosterIframe(url, referer):
         return False
 
     # import xbmcvfs
-    # f = xbmcvfs.File('special://userdata/addon_data/plugin.video.fstream/test.txt','w')
+    # f = xbmcvfs.File('special://userdata/addon_data/plugin.video.fStream/test.txt','w')
     # f.write(sHtmlContent)
     # f.close()
     

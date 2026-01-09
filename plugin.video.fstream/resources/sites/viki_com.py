@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
 # uniquement format mpd disponible
 # Based on https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/extractor/viki.py
 

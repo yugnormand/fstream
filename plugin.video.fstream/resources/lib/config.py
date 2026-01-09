@@ -396,7 +396,7 @@ def WindowsBoxes(sTitle, siteUrl, metaType, year, sSite, sFav, sCat):
                 except:
                     return
                 # self.getControl(50).setVisible(True)
-                self.setProperty('vstream_menu', 'Person')
+                self.setProperty('fstream_menu', 'Person')
 
             # click sur similaire
             elif controlId == 9:

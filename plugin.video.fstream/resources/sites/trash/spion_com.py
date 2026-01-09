@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
 # Par jojotango
 return False
 import re
@@ -35,7 +35,7 @@ LOGO_CSA = 'http://a398.idata.over-blog.com/1/40/34/11/archives/0/16588469.jpg'
 
 def showCensure():
 
-    content = 'Pour activer le contenu (+18) mettre: \n[COLOR coral]SPION_CENSURE = False[/COLOR]\ndans le fichier:\n[COLOR coral]plugin.video.fstream/resources/sites/spion_com.py[/COLOR]'
+    content = 'Pour activer le contenu (+18) mettre: \n[COLOR coral]SPION_CENSURE = False[/COLOR]\ndans le fichier:\n[COLOR coral]plugin.video.fStream/resources/sites/spion_com.py[/COLOR]'
     dialog().VSok(content)
 
 

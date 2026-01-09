@@ -1,7 +1,7 @@
 return False # Désactivé le 08/04/2020
 
 # -*- coding: utf-8 -*-
-# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
 #
 from resources.lib.gui.hoster import cHosterGui
 from resources.lib.gui.gui import cGui
@@ -13,11 +13,11 @@ from resources.lib.util import cUtil
 
 from resources.lib.comaddon import progress#, VSlog
 
-SITE_IDENTIFIER = 'replaytvstreaming_com'
+SITE_IDENTIFIER = 'replaytfstreaming_com'
 SITE_NAME = 'Replay Tv Streaming'
 SITE_DESC = 'Replay TV'
 
-URL_MAIN = 'https://replaytvstreaming.com/'
+URL_MAIN = 'https://replaytfstreaming.com/'
 
 MOVIE_MOVIE = (URL_MAIN + 'film', 'showMovies')
 
@@ -156,7 +156,7 @@ def __checkForNextPage(sHtmlContent):
 
 
 def showLinks(page, video):
-    sUrl = 'http://replaytvstreaming.com/engine/ajax/re_video_part.php?block=video&page=' + page + '&id=' + video
+    sUrl = 'http://replaytfstreaming.com/engine/ajax/re_video_part.php?block=video&page=' + page + '&id=' + video
 
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()

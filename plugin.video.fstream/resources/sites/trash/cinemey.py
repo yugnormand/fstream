@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
 # source 27 https://cinemey.com/
 return False  # HS voir https://cinemay.cc/ memes films et series
 

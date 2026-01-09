@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
 # site HS desactivée le 15/10/2020 (les dernieres corrections sont adaptées au site 01 streaming qui n'est pas un clone)
 return False 
 import re

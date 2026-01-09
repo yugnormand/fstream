@@ -1,5 +1,5 @@
 #-*- coding: utf-8 -*-
-# https://github.com/Kodi-fstream/venom-xbmc-addons
+# https://github.com/Kodi-fStream/venom-xbmc-addons
 from resources.lib.gui.hoster import cHosterGui #systeme de recherche pour l'hote
 from resources.lib.gui.gui import cGui #systeme d'affichage pour xbmc
 from resources.lib.handler.inputParameterHandler import cInputParameterHandler #entree des parametres
