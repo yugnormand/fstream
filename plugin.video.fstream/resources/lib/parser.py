@@ -36,7 +36,7 @@ class cParser:
         sHtmlContent = self.__replaceSpecialCharacters(str(sHtmlContent))
         aMatches = re.compile(sPattern, re.IGNORECASE).findall(sHtmlContent)
 
-        # extrait la page html après retraitement fStream
+        # extrait la page html après retraitement vStream
         # fh = open('c:\\test.txt', "w")
         # fh.write(sHtmlContent)
         # fh.close()
@@ -75,6 +75,7 @@ class cParser:
         # usage2 oParser.abParse(sHtmlContent, 'start', 'end', 6)
         # ex youtube.py
 
+        sHtmlContent = self.__replaceSpecialCharacters(str(sHtmlContent))
         startIdx = sHtmlContent.find(start)
         if startIdx == -1:  # rien trouvé, on prend depuis le début
             startIdx = 0
