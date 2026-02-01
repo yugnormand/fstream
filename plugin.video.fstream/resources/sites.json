@@ -17,7 +17,7 @@
         "animesama": {
             "label": "Anime Sama",
             "active": "True",
-            "url": "https://anime-sama.eu/"
+            "url": "https://anime-sama.tv/"
         },
         "animeultime": {
             "label": "Anime Ultime",
@@ -350,12 +350,12 @@
         },
         "vostfree": {
             "label": "Vostfree",
-            "active": "False",
+            "active": "true",
             "url": "https://vostfree.ws/"
         },
         "wawacity": {
             "label": "Wawacity",
-            "active": "False",
+            "active": "true",
             "cloudflare": "True",
             "url": "https://www.wawacity.irish/"
         },
@@ -364,7 +364,7 @@
             "active": "True",
             "cloudflare": "False",
             "site_info": "https://www.wiflix-nouvelle-adresse.site/",
-            "url": "https://flemmix.bond/"
+            "url": "https://flemmix.irish/"
         },
         "wilifilm": {
             "label": "Wilifilm",
