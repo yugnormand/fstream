@@ -10,7 +10,7 @@ from resources.lib.parser import cParser
 
 
 SITE_IDENTIFIER = 'direct_stream'
-SITE_NAME = 'Favoris Sport 3 (Can 2025)'
+SITE_NAME = 'Favoris Sport 3'
 SITE_DESC = 'Chaines TV en directs'
 
 URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)
