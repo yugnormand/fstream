@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/yugnormand/fstream
+# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
 
 #
-# Modified version From https://github.com/yugnormand/fstream
+# Modified version From https://github.com/Kodi-fStream/venom-xbmc-addons
 #
 #
 # Unpacker for Dean Edward's p.a.c.k.e.r, a part of javascript beautifier
@@ -55,7 +55,7 @@ class cPacker():
                 return symtab[int(word)] if radix == 1 else symtab[unbase(word)] or word
             except:
                 return word
-            
+
         def getstring(c, a=radix):
             foo = chr(c % a + 161)
             if c < a:
@@ -121,7 +121,7 @@ class cPacker():
                 source = source.replace(variable % index, '"%s"' % value)
             return source[startpoint:]
         return source
-        
+
     def _replacejsstrings(self, source):
         """Strip JS string encodings and replace values in source."""
         match = re.findall(r'\\x([0-7][0-9A-F])', source)
@@ -146,7 +146,7 @@ class Unbaser(object):
     ALPHABET = {
         62: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
         95: (' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-             '[\]^_`abcdefghijklmnopqrstuvwxyz{|}~')
+                '[\]^_`abcdefghijklmnopqrstuvwxyz{|}~')
     }
 
     def __init__(self, base):

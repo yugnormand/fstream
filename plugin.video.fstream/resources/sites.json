@@ -64,7 +64,7 @@
         "coflix": {
             "label": "Coflix",
             "active": "True",
-            "url": "https://coflix.fi/"
+            "url": "https://coflix.observer/"
         },
         "cpasmal": {
             "label": "CpasMal",
@@ -84,7 +84,7 @@
         "darkiworld": {
             "label": "darkiworld",
             "active": "True",
-            "url": "https://darkiworld15.com/"
+            "url": "https://darkiworld2026.com/"
         },
         "debrid_link": {
             "label": "Debrid Link",
@@ -174,7 +174,7 @@
             "label": "French-stream",
             "active": "True",
             "site_info": "https://fstream.info/",
-            "url": "https://fs3.lol/"
+            "url": "https://fs9.lol/"
         },
         "french_stream_lol": {
             "label": "French-stream-lol",
@@ -227,7 +227,7 @@
         "livetv": {
             "label": "Live TV",
             "active": "True",
-            "url": "https://livetv872.me/"
+            "url": "https://livetv873.me/"
         },
         "monstream": {
             "label": "Mon Stream",
@@ -325,7 +325,7 @@
             "label": "top-stream",
             "active": "True",
             "cloudflare": "False",
-            "url": "https://top-stream.fit/"
+            "url": "https://top-stream.space/"
         },
         "vfilms": {
             "label": "VFilms",
@@ -364,7 +364,7 @@
             "active": "True",
             "cloudflare": "False",
             "site_info": "https://www.wiflix-nouvelle-adresse.site/",
-            "url": "https://flemmix.irish/"
+            "url": "https://flemmix.info/"
         },
         "wilifilm": {
             "label": "Wilifilm",

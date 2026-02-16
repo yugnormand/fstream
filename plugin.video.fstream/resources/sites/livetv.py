@@ -53,7 +53,7 @@ def showLive():
     oInputParameterHandler = cInputParameterHandler()
     sUrl = URL_MAIN + oInputParameterHandler.getValue('siteUrl')
 
-    oRequestHandler = cRequestHandler(sUrl)
+    oRequestHandler = cRequestHandler(sUrl, forceDNS=True)
     oRequestHandler.disableSSL()
     sHtmlContent = oRequestHandler.request()
 
@@ -105,7 +105,7 @@ def showGenres():  # affiche les catégories qui ont des lives'
     oInputParameterHandler = cInputParameterHandler()
     sUrl = URL_MAIN + oInputParameterHandler.getValue('siteUrl')
 
-    oRequestHandler = cRequestHandler(sUrl)
+    oRequestHandler = cRequestHandler(sUrl, forceDNS = True)
     sHtmlContent = oRequestHandler.request()
     sPattern = r'<a class="main" href="([^"]+)"><b>([^<]+)</b>.+?\s*</td>\s*<td width=.+?>\s*<a class="small" href=".+?"><b>([^<]+)</b></a>'
     oParser = cParser()
@@ -146,7 +146,7 @@ def showMovies():  # affiche les matchs en direct depuis la section showMovie
     oInputParameterHandler = cInputParameterHandler()
     sUrl2 = oInputParameterHandler.getValue('siteUrl2')
 
-    oRequestHandler = cRequestHandler(sUrl2)
+    oRequestHandler = cRequestHandler(sUrl2, forceDNS = True)
     sHtmlContent = oRequestHandler.request()
 
     sPattern = r'<a class="live" href="([^"]+)">([^<]+)</a>\s*(<br><img src=".+?/img/live.gif"><br>|<br>)\s*<span class="evdesc">([^<]+)\s*<br>\s*([^<]+)</span>'
@@ -198,7 +198,7 @@ def showMovies():  # affiche les matchs en direct depuis la section showMovie
                             heure -=1   # heure d'hiver
                             if heure == -1:
                                 heure = 23
-                        
+
                         sDate = '%02d/%02d %02d%s' % (int(sDateTime[0][0]), sMonth, heure, sDateTime[0][3])
                 except Exception as e:
                     pass
@@ -219,7 +219,7 @@ def showMovies3():  # affiche les videos disponible du live
     oInputParameterHandler = cInputParameterHandler()
     sUrl3 = oInputParameterHandler.getValue('siteUrl3')
 
-    oRequestHandler = cRequestHandler(sUrl3)
+    oRequestHandler = cRequestHandler(sUrl3, forceDNS=True)
     sHtmlContent = oRequestHandler.request()
     sMovieTitle2 = oInputParameterHandler.getValue('sMovieTitle2')
 
@@ -245,10 +245,10 @@ def showMovies3():  # affiche les videos disponible du live
             sUrl4 = aEntry[1]
             if not (sUrl4.startswith("http")):
                 sUrl4 = "http:" + sUrl4
-                
+
             if 'cdn' in sUrl4:
                 sUrl4 = re.sub('http:\/\/cdn\.livetv\d+\.me\/', URL_MAIN, sUrl4)
-                
+
             sTitle = ('%s (%s)') % (sMovieTitle2, sLang[:4])
             sThumb = ''
 
@@ -268,13 +268,13 @@ def showHosters():  # affiche les videos disponible du live
     sMovieTitle2 = oInputParameterHandler.getValue('sMovieTitle2')
     sThumb = oInputParameterHandler.getValue('sThumb')
 
-    oRequestHandler = cRequestHandler(sUrl)
+    oRequestHandler = cRequestHandler(sUrl, forceDNS=True)
     sHtmlContent = oRequestHandler.request()
 
     oParser = cParser()
 #    sPattern = '<iframe.+?(?:allowFullScreen=|width).+?src="([^"]+)".+?</iframe>'
     sPattern = r'<iframe +(?:allowFullScreen|width).+?src="([^"]+)".+?<\/iframe>'
-    
+
     aResult = oParser.parse(sHtmlContent, sPattern)
 
     if aResult[0]:
@@ -298,7 +298,7 @@ def showHosters():  # affiche les videos disponible du live
                 urlChannel = url2.replace('html', 'json')
                 oRequestHandler = cRequestHandler(urlChannel)
                 sHtmlContent = oRequestHandler.request()
-                
+
                 if not sHtmlContent.startswith('<!'):   # ce n'est pas du json
                     result = json.loads(sHtmlContent)
                     if 'id' in result:
@@ -493,7 +493,7 @@ def showHosters():  # affiche les videos disponible du live
             oRequestHandler.addHeaderEntry('User-Agent', UA)
             sHtmlContent2 = oRequestHandler.request()
             sPattern2 = 'source: *\'(.+?)\''
-            
+
             aResult = re.findall(sPattern2, sHtmlContent2)
             if aResult:
                 sHosterUrl = aResult[0] + '|User-Agent=' + UA + '&referer=' + Referer
@@ -735,7 +735,7 @@ def showHosters():  # affiche les videos disponible du live
                     aResult = re.findall(sPattern2, sHtmlContent2)
                     if aResult:
                         sHosterUrl = aResult[0]
-                                
+
 
         if 'acagem' in url:  # Pas terminé
             oRequestHandler = cRequestHandler(url)
@@ -758,7 +758,7 @@ def showHosters():  # affiche les videos disponible du live
                 site = 'https://' + aResult[0][1]
                 host = aResult[0][2]
                 url2 = '%s/%s?player=desktop&live=%s' % (site, host.replace('.js', '.php'), fid)
-                
+
                 Referer = url
                 oRequestHandler = cRequestHandler(url2)
                 oRequestHandler.addHeaderEntry('User-Agent', UA)
@@ -1067,7 +1067,7 @@ def showHosters():  # affiche les videos disponible du live
                         sHosterUrl = aResult1[0]
 
         if not sHosterUrl and (('shd' in url) or ('hd' in url and 'streamhd' not in url and 'hdsportslive' not in url and 'airhdx'
-                              not in url and 'wizhd' not in url)):
+                                not in url and 'wizhd' not in url)):
 
             urlApi = 'https://api.livesports24.online/gethost'
             sHtmlContent2 = ''
@@ -1356,7 +1356,7 @@ def getHosterIframe(url, referer):
 
     if 'getbanner.php' in url:
         return False
-    
+
     if not url.startswith('http'):
         url = URL_MAIN + url
 
@@ -1371,7 +1371,7 @@ def getHosterIframe(url, referer):
 def getUrl(sHtmlContent, url):
     referer = url
     oParser = cParser()
-    
+
     # import xbmcvfs
     # f = xbmcvfs.File('special://userdata/addon_data/plugin.video.fStream/test.txt','w')
     # f.write(sHtmlContent)
@@ -1406,7 +1406,7 @@ def getUrl(sHtmlContent, url):
                     return code + '|Referer=' + referer
             except Exception as e:
                 pass
-    
+
     sPattern = r"mimeType: *\"application\/x-mpegURL\",\r\nsource:'([^']+)"
     aResult = re.findall(sPattern, sHtmlContent)
     if aResult:
@@ -1414,7 +1414,7 @@ def getUrl(sHtmlContent, url):
         oRequestHandler.request()
         sHosterUrl = oRequestHandler.getRealUrl()
         return sHosterUrl + '|referer=' + referer
-    
+
     sPattern = '<iframe.+?src=["\']([^"\']+)["\']'
     aResult = re.findall(sPattern, sHtmlContent)
     if aResult:
@@ -1468,13 +1468,13 @@ def getUrl(sHtmlContent, url):
         oRequestHandler.request()
         sHosterUrl = oRequestHandler.getRealUrl()
         return sHosterUrl + '|referer=' + referer
-    
+
     sPattern = r'"streamurl":"(https.+?\.m3u8)["\']' # pour apl373.me
     aResult = oParser.parse(sHtmlContent, sPattern)
     if aResult[0]:
         link = aResult[1][0]
         return link + '|referer=' + referer
-    
+
     sPattern = r'https://(.+?\.xyz)/mono.php\?id=([0-9]+)'
     result = re.findall(sPattern, referer)
     hostname = None
@@ -1500,6 +1500,6 @@ def getUrl(sHtmlContent, url):
         serverKey = response['server_key']
         sHosterUrl = 'https://%s%s/%s/%s/mono.m3u8|Referer=%s' % (serverKey, newUrl, serverKey, channelKey, referer)
         return sHosterUrl
-    
-    
+
+
     return False

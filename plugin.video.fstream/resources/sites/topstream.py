@@ -19,15 +19,14 @@ SITE_DESC = 'Le meilleur du divertissement en streaming'
 URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)
 
 MOVIE_MOVIE = ('movies?type=movie', 'showMenuMovies')
-MOVIE_NEWS = ('filmstreaming/', 'showMovies')
+MOVIE_NEWS = ('trending?type=movie&sort=release_date', 'showMovies')
 MOVIE_GENRES = ('movies?type=movie&genre=%s&sort=created_at', 'showGenres')
-MOVIE_NEWS = ('filmstreaming/', 'showMovies')
 MOVIE_VIEWS = ('trending?type=movie&sort=like_count', 'showMovies')
 MOVIE_ANNEES = ('movies?type=movie&sort=release_date&release=%d', 'showMovieYears')
 
 
 SERIE_SERIES = ('type=tv', 'showMenuTvShows')
-SERIE_NEWS = ('seriestreaming/', 'showMovies')
+SERIE_NEWS = ('trending?type=tv&sort=release_date', 'showMovies')
 SERIE_VIEWS = ('trending?type=tv&sort=like_count', 'showMovies')
 SERIE_GENRES = ('tv-shows?type=tv&genre=%s&sort=created_at', 'showSeriesGenres')
 SERIE_ANNEES = ('tv-shows?type=tv&sort=release_date&release=%d', 'showMovies')
@@ -65,6 +64,9 @@ def showMenuMovies():
     oOutputParameterHandler.addParameter('siteUrl', URL_SEARCH_MOVIES[0])
     oGui.addDir(SITE_IDENTIFIER, 'showSearch', 'Rechercher', 'search-films.png', oOutputParameterHandler)
 
+    oOutputParameterHandler.addParameter('siteUrl', MOVIE_NEWS[0])
+    oGui.addDir(SITE_IDENTIFIER, MOVIE_NEWS[1], 'Nouveautés', 'news.png', oOutputParameterHandler)
+
     oOutputParameterHandler.addParameter('siteUrl', MOVIE_VIEWS[0])
     oGui.addDir(SITE_IDENTIFIER, MOVIE_VIEWS[1], 'Populaires', 'popular.png', oOutputParameterHandler)
 
@@ -83,6 +85,9 @@ def showMenuTvShows():
     oOutputParameterHandler = cOutputParameterHandler()
     oOutputParameterHandler.addParameter('siteUrl', URL_SEARCH_SERIES[0])
     oGui.addDir(SITE_IDENTIFIER, 'showSearch', 'Rechercher', 'search-series.png', oOutputParameterHandler)
+
+    oOutputParameterHandler.addParameter('siteUrl', SERIE_NEWS[0])
+    oGui.addDir(SITE_IDENTIFIER, SERIE_NEWS[1], 'Nouveautés', 'news.png', oOutputParameterHandler)
 
     oOutputParameterHandler.addParameter('siteUrl', SERIE_VIEWS[0])
     oGui.addDir(SITE_IDENTIFIER, SERIE_VIEWS[1], 'Populaires', 'popular.png', oOutputParameterHandler)
@@ -122,9 +127,10 @@ def showGenres():
     oGui = cGui()
 
     liste = [['Action', '1'], ['Animation', '5'], ['Aventure', '16'], ['Comédie', '6'],
-            ['Crime', '3'], ['Documentaire', '7'], ['Drame', '8'], ['Familial', '9'],
-            ['Fantastique', '10'], ['Guerre', '18'], ['Histoire', '11'], ['Horreur', '4'],
-            ['Mystère', '2'], ['Romance', '14'], ['Science-Fiction', '12'], ['Thriller', '13'] ]
+                ['Crime', '3'], ['Documentaire', '7'], ['Drame', '8'], ['Familial', '9'],
+                ['Fantastique', '10'], ['Guerre', '18'], ['Histoire', '11'], ['Horreur', '4'],
+                ['Mystère', '2'], ['Romance', '14'], ['Science-Fiction', '12'], ['Thriller', '13'] ]
+
     oOutputParameterHandler = cOutputParameterHandler()
     for sTitle, codeGenre in liste:
         oOutputParameterHandler.addParameter('siteUrl', MOVIE_GENRES[0] % codeGenre)
@@ -138,9 +144,11 @@ def showSeriesGenres():
 
 #japanime 15
 
-    liste = [['Action', '1'], ['Comédie', '6'],
-            ['Crime', '3'], ['Documentaire', '7'], ['Drame', '8'], ['Familial', '9'],
-            ['Mystère', '2'] ]
+    liste = [['Action', '1'], ['Animation', '5'], ['Comédie', '6'],
+                ['Crime', '3'], ['Documentaire', '7'], ['Drame', '8'], ['Familial', '9'],
+                ['Mystère', '2'], ['Télé-réalité', '19'] ]
+
+
     oOutputParameterHandler = cOutputParameterHandler()
     for sTitle, codeGenre in liste:
         oOutputParameterHandler.addParameter('siteUrl', SERIE_GENRES[0] % codeGenre)
@@ -323,6 +331,8 @@ def showEpisodes():
 
 def showHosters():
     oGui = cGui()
+    oParser = cParser()
+
     oInputParameterHandler = cInputParameterHandler()
     sUrl = oInputParameterHandler.getValue('siteUrl')
     sMovieTitle = oInputParameterHandler.getValue('sMovieTitle')
@@ -331,35 +341,39 @@ def showHosters():
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
 
-    oParser = cParser()
-
     # zone publicitaire !
-    # zonePub = oParser.abParse(sHtmlContent, '<div class="container">', '<style>')
-    # zonePub = zonePub.replace('\\', '')
-    # sPattern = '/(embed/\d+)'
-    # aResult = oParser.parse(zonePub, sPattern)
-    # if not aResult[0]:
-    #     # page sans pub
-    #     sPattern = '<iframe id="video-iframe".+?src="([^"]+)"'
-    #     aResult = oParser.parse(sHtmlContent, sPattern)
+    zonePub = oParser.abParse(sHtmlContent, '<div class="container">', '<style>')
+    zonePub = zonePub.replace('\\', '')
+    sPattern = '/(embed/\d+)'
+    aResult = oParser.parse(zonePub, sPattern)
+    if not aResult[0]:
+        # page sans pub
+        sPattern = '<iframe id="video-iframe".+?src="([^"]+)"'
+        aResult = oParser.parse(sHtmlContent, sPattern)
 
-    # if aResult[0]:
-    #     url = aResult[1][0]
-    #     if not 'http' in url:
-    #         url = URL_MAIN + url
-    #     oRequestHandler = cRequestHandler(url)
-    #     sHtmlContent = oRequestHandler.request()
-    #     aResult = oParser.parse(sHtmlContent, '<source src="([^"]+)"')
+    if aResult[0]:
+        url = aResult[1][0]
+        if not 'http' in url:
+            url = URL_MAIN + url
+        oRequestHandler = cRequestHandler(url)
+        sHtmlContent = oRequestHandler.request()
+        aResult = oParser.parse(sHtmlContent, 'Url = decodeHtmlEntities\(`([^`]+)')
 
-    sPattern = 'download\.php\?url=([^"]+)'
-    aResult = oParser.parse(sHtmlContent, sPattern)
+    if not aResult[0]:
+        sPattern = 'download\.php\?url=([^"]+)'
+        aResult = oParser.parse(sHtmlContent, sPattern)
+
     if aResult[0]:
         oHosterGui = cHosterGui()
         for sHosterUrl in aResult[1]:
             oHoster = oHosterGui.checkHoster(sHosterUrl)
-            if oHoster:
-                oHoster.setDisplayName(sMovieTitle)
-                oHoster.setFileName(sMovieTitle)
-                cHosterGui().showHoster(oGui, oHoster, sHosterUrl, sThumb)
+
+            # pas de hoster connu, on tente en lien direct
+            if not oHoster:
+                oHoster = oHosterGui.getHoster('lien_direct')
+            sHosterUrl += '|Referer=%s' % url
+            oHoster.setDisplayName(sMovieTitle)
+            oHoster.setFileName(sMovieTitle)
+            cHosterGui().showHoster(oGui, oHoster, sHosterUrl, sThumb)
 
     oGui.setEndOfDirectory()

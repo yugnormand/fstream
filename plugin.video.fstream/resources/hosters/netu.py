@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# https://github.com/yugnormand/fstream
+# https://github.com/Kodi-fStream/venom-xbmc-addons
 #
 # Code from https://github.com/movieshark/waaw
 #
@@ -10,7 +10,7 @@ from resources.hosters.hoster import iHoster
 from resources.lib.handler.requestHandler import cRequestHandler
 from resources.lib.parser import cParser
 from resources.lib.util import urlEncode, Quote
-from resources.lib.comaddon import dialog, VSlog
+from resources.lib.comaddon import dialog, VSlog, siteManager
 
 import codecs
 
@@ -42,11 +42,14 @@ class cHoster(iHoster):
         return host
 
     def setUrl(self, url):
-        host = self.__getHost(url)
+        if not url.startswith('http'):
+            host = siteManager().getUrlMain(self._pluginIdentifier)
+        else:
+            host = self.__getHost(url)
 
         if '&autoplay=' in url:
             url=url.split('&')[:-1][0]
-        
+
         if '=' in url:
             id  = url.split('=')[-1]
         else:
@@ -68,10 +71,10 @@ class cHoster(iHoster):
         return False
 
     def _getMediaLinkForGuest(self):
-        
+
         #VSlog(self._url)
         api_call = ''
-        
+
         oRequestHandler = cRequestHandler(self._url)
         oRequestHandler.addHeaderEntry('User-Agent', UA)
         oRequestHandler.addHeaderEntry('accept-language', 'en-US,en;q=0.9')
@@ -79,12 +82,12 @@ class cHoster(iHoster):
 
         videoid = videokey = adbn = ''
         oParser = cParser()
-        
+
         sPattern = "'videoid':\s*'([^']+)"
         aResult = oParser.parse(sHtmlContent, sPattern)
         if aResult[0]:
             videoid = aResult[1][0]
-            
+
         sPattern = "'videokey':\s*'([^']+)"
         aResult = oParser.parse(sHtmlContent, sPattern)
         if aResult[0]:
@@ -110,7 +113,7 @@ class cHoster(iHoster):
             oRequestHandler.addJSONEntry('videokey', videokey)
             oRequestHandler.addJSONEntry('width', 400)
             oRequestHandler.addJSONEntry('height', 400)
-            
+
             oRequestHandler.setRequestType(1)
             _json = oRequestHandler.request(jsonDecode=True)
 
@@ -118,15 +121,15 @@ class cHoster(iHoster):
                 hash_image = _json['hash_image']
                 image = _json['image'].replace('data:image/jpeg;base64,', '')
                 image = b64decode(image + "==")
-                
+
             window = captcha_window.CaptchaWindow(image, 400, 400)
             window.doModal()
 
             if window.finished:
-            
+
                 x = window.solution_x
                 y = window.solution_y
-                
+
                 url3 = self.__getHost(self._url) + '/player/get_md5.php'
                 oRequestHandler = cRequestHandler(url3)
                 oRequestHandler.addHeaderEntry('User-Agent', UA)
@@ -153,13 +156,13 @@ class cHoster(iHoster):
 
                 oRequestHandler.setRequestType(1)
                 _json = oRequestHandler.request(jsonDecode=True)
-                
+
                 if 'try_again' in _json and _json['try_again'] == '1':
                     VSlog("NETU : Captcha a refaire")
                     if dialog().VSyesno("La sélection n'est pas valide. Recommencer ?"):
                         return self._getMediaLinkForGuest()
 
-                
+
                 link = ''
                 if 'obf_link' in _json and _json['obf_link'] != '#':
                     api_call = "https:" + decrypt(_json['obf_link']) + '.mp4.m3u8'

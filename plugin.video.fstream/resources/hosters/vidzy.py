@@ -30,7 +30,7 @@ class cHoster(iHoster):
                 sPattern = '{src:\s*"([^"]+)"'
                 aResult = oParser.parse(sHtmlContent, sPattern)
                 if aResult[0]:
-                    api_call = aResult[1][0]
+                    api_call = aResult[1][0] + '|Referer=' + self._url
             except:
                 # unpack manuel en cas d'erreur
                 sPattern = 'div\|data\|(\d+)\|(\d+).+?contextMenu\|(\d+)\|(\d+)\|([^\|]+)\|mp4\|.+?sp\|([^\|]+)\|(.+?)\|m3u8\|master\|([^\|]+)\|([^\|]+)'
@@ -38,11 +38,11 @@ class cHoster(iHoster):
                 if aResult[0]:
                     p = aResult[1][0]
                     hashCode = p[6]
-                    
+
                     if '|' in hashCode:
                         hashCode = hashCode.split('|')
                         hashCode = '-'.join(hashCode[::-1])
-                    
+
                     api_call = 'https://%s.vidzy.org/%s/%02d/%05d/%s/master.m3u8?t=%s&s=%s&e=%s&f=%s&i=0.0&sp=0' % (p[4], p[8], int(p[3]), int(p[2]), p[7], hashCode, p[0], p[5], p[1])
                     # https://v4.vidzy.org/hls2/03/00024/hyjs6o5v8hct_n/master.m3u8?t=WCz8e4sUtTyDoLaTT9uHLMql01Z1QnclnTnRXrKI5UI&s=1764809497&e=172800&f=123080&i=0.0&sp=0
 

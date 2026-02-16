@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Code de depart par AnthonyBloomer
 # Modif pour fStream
-# https://github.com/yugnormand/fstream/
+# https://github.com/Kodi-fStream/venom-xbmc-addons/
 import re
 import string
 import xbmcvfs
@@ -59,7 +59,7 @@ class cTMDb:
 
     URL = 'https://api.themoviedb.org/%d/'
     URL_TRAILER = 'plugin://plugin.video.youtube/play/?video_id=%s' # ancien : 'plugin://plugin.video.youtube/?action=play_video&videoid=%s'
-    CACHE = 'special://home/userdata/addon_data/plugin.video.fstream/video_cache.db'
+    CACHE = 'special://home/userdata/addon_data/plugin.video.fStream/video_cache.db'
 
     # important seul xbmcvfs peux lire le special
     if not isMatrix():
@@ -112,29 +112,29 @@ class cTMDb:
             pass
 
         sql_create = "CREATE TABLE IF NOT EXISTS movie ("\
-                     "imdb_id TEXT, "\
-                     "tmdb_id TEXT, "\
-                     "title TEXT, "\
-                     "year INTEGER, "\
-                     "director TEXT, "\
-                     "writer TEXT, "\
-                     "tagline TEXT, "\
-                     "cast TEXT, "\
-                     "crew TEXT, "\
-                     "rating FLOAT, "\
-                     "votes TEXT, "\
-                     "duration INTEGER, "\
-                     "plot TEXT, "\
-                     "mpaa TEXT, "\
-                     "premiered TEXT, "\
-                     "genre TEXT, "\
-                     "studio TEXT, "\
-                     "status TEXT, "\
-                     "poster_path TEXT, "\
-                     "trailer TEXT, "\
-                     "backdrop_path TEXT, "\
-                     "UNIQUE(tmdb_id)"\
-                     ");"
+                        "imdb_id TEXT, "\
+                        "tmdb_id TEXT, "\
+                        "title TEXT, "\
+                        "year INTEGER, "\
+                        "director TEXT, "\
+                        "writer TEXT, "\
+                        "tagline TEXT, "\
+                        "cast TEXT, "\
+                        "crew TEXT, "\
+                        "rating FLOAT, "\
+                        "votes TEXT, "\
+                        "duration INTEGER, "\
+                        "plot TEXT, "\
+                        "mpaa TEXT, "\
+                        "premiered TEXT, "\
+                        "genre TEXT, "\
+                        "studio TEXT, "\
+                        "status TEXT, "\
+                        "poster_path TEXT, "\
+                        "trailer TEXT, "\
+                        "backdrop_path TEXT, "\
+                        "UNIQUE(tmdb_id)"\
+                        ");"
         try:
             self.dbcur.execute(sql_create)
             VSlog('table movie creee')
@@ -142,14 +142,14 @@ class cTMDb:
             VSlog('Error: Cannot create table movie')
 
         sql_create = "CREATE TABLE IF NOT EXISTS saga ("\
-                     "tmdb_id TEXT, "\
-                     "title TEXT, "\
-                     "plot TEXT, "\
-                     "genre TEXT, "\
-                     "poster_path TEXT, "\
-                     "backdrop_path TEXT, "\
-                     "UNIQUE(tmdb_id)"\
-                     ");"
+                        "tmdb_id TEXT, "\
+                        "title TEXT, "\
+                        "plot TEXT, "\
+                        "genre TEXT, "\
+                        "poster_path TEXT, "\
+                        "backdrop_path TEXT, "\
+                        "UNIQUE(tmdb_id)"\
+                        ");"
         try:
             self.dbcur.execute(sql_create)
             VSlog('table saga creee')
@@ -157,29 +157,29 @@ class cTMDb:
             VSlog('Error: Cannot create table saga')
 
         sql_create = "CREATE TABLE IF NOT EXISTS tvshow ("\
-                     "imdb_id TEXT, "\
-                     "tmdb_id TEXT, "\
-                     "title TEXT, "\
-                     "year INTEGER, "\
-                     "director TEXT, "\
-                     "writer TEXT, "\
-                     "cast TEXT, "\
-                     "crew TEXT, "\
-                     "rating FLOAT, "\
-                     "votes TEXT, "\
-                     "duration INTEGER, "\
-                     "plot TEXT, "\
-                     "mpaa TEXT, "\
-                     "premiered TEXT, "\
-                     "genre TEXT, "\
-                     "studio TEXT, "\
-                     "status TEXT, "\
-                     "poster_path TEXT, "\
-                     "trailer TEXT, "\
-                     "backdrop_path TEXT, "\
-                     "nbseasons INTEGER, "\
-                     "UNIQUE(tmdb_id)"\
-                     ");"
+                        "imdb_id TEXT, "\
+                        "tmdb_id TEXT, "\
+                        "title TEXT, "\
+                        "year INTEGER, "\
+                        "director TEXT, "\
+                        "writer TEXT, "\
+                        "cast TEXT, "\
+                        "crew TEXT, "\
+                        "rating FLOAT, "\
+                        "votes TEXT, "\
+                        "duration INTEGER, "\
+                        "plot TEXT, "\
+                        "mpaa TEXT, "\
+                        "premiered TEXT, "\
+                        "genre TEXT, "\
+                        "studio TEXT, "\
+                        "status TEXT, "\
+                        "poster_path TEXT, "\
+                        "trailer TEXT, "\
+                        "backdrop_path TEXT, "\
+                        "nbseasons INTEGER, "\
+                        "UNIQUE(tmdb_id)"\
+                        ");"
         try:
             self.dbcur.execute(sql_create)
             VSlog('table tvshow creee')
@@ -187,15 +187,15 @@ class cTMDb:
             VSlog('Error: Cannot create table tvshow')
 
         sql_create = "CREATE TABLE IF NOT EXISTS season ("\
-                     "tmdb_id TEXT, " \
-                     "season INTEGER, "\
-                     "year INTEGER, "\
-                     "premiered TEXT, "\
-                     "poster_path TEXT, "\
-                     "plot TEXT, "\
-                     "episode INTEGER, "\
-                     "UNIQUE(tmdb_id, season)"\
-                     ");"
+                        "tmdb_id TEXT, " \
+                        "season INTEGER, "\
+                        "year INTEGER, "\
+                        "premiered TEXT, "\
+                        "poster_path TEXT, "\
+                        "plot TEXT, "\
+                        "episode INTEGER, "\
+                        "UNIQUE(tmdb_id, season)"\
+                        ");"
         try:
             self.dbcur.execute(sql_create)
             VSlog('table season creee')
@@ -203,23 +203,23 @@ class cTMDb:
             VSlog('Error: Cannot create table season')
 
         sql_create = "CREATE TABLE IF NOT EXISTS episode ("\
-                     "tmdb_id TEXT, "\
-                     "originaltitle TEXT,"\
-                     "season INTEGER, "\
-                     "episode INTEGER, "\
-                     "year INTEGER, "\
-                     "title TEXT, "\
-                     "director TEXT, "\
-                     "writer TEXT, "\
-                     "guest_stars TEXT, "\
-                     "plot TEXT, "\
-                     "rating FLOAT, "\
-                     "votes TEXT, "\
-                     "premiered TEXT, "\
-                     "tagline TEXT, "\
-                     "poster_path TEXT, "\
-                     "UNIQUE(tmdb_id, season, episode)"\
-                     ");"
+                        "tmdb_id TEXT, "\
+                        "originaltitle TEXT,"\
+                        "season INTEGER, "\
+                        "episode INTEGER, "\
+                        "year INTEGER, "\
+                        "title TEXT, "\
+                        "director TEXT, "\
+                        "writer TEXT, "\
+                        "guest_stars TEXT, "\
+                        "plot TEXT, "\
+                        "rating FLOAT, "\
+                        "votes TEXT, "\
+                        "premiered TEXT, "\
+                        "tagline TEXT, "\
+                        "poster_path TEXT, "\
+                        "UNIQUE(tmdb_id, season, episode)"\
+                        ");"
 
         try:
             self.dbcur.execute(sql_create)
@@ -254,10 +254,9 @@ class cTMDb:
                 import qrcode
                 from resources.lib.librecaptcha.gui import cInputWindowYesNo
                 qr = qrcode.make(url + result['request_token'])
-                qr.save(VSPath('special://home/userdata/addon_data/plugin.video.fstream/qrcode.png'), scale=5)
-                oSolver = cInputWindowYesNo(captcha='special://home/userdata/addon_data/plugin.video.fstream/qrcode.png', msg="Scanner le QRCode pour acceder au lien d'autorisation", roundnum=1)
+                qr.save(VSPath('special://home/userdata/addon_data/plugin.video.fStream/qrcode.png'), scale=5)
+                oSolver = cInputWindowYesNo(captcha='special://home/userdata/addon_data/plugin.video.fStream/qrcode.png', msg="Scanner le QRCode pour acceder au lien d'autorisation", roundnum=1)
                 retArg = oSolver.get()
-                DIALOG = dialog()
                 if retArg == "N":
                     return False
 
@@ -305,9 +304,9 @@ class cTMDb:
 
     # Retourne le nom du média en français, depuis l'id
     def get_namebyid(self, mediaType, tmdbid):
-    
+
         meta = self._call('%s/%s' % (mediaType, tmdbid))
-    
+
         # si pas de résultat avec l'année, on teste sans l'année
         if 'title' in meta:
             return meta['title'] # titre de film
@@ -598,7 +597,7 @@ class cTMDb:
         if duration:
             _meta['duration'] = duration * 60
 
-        
+
         try:
             if _meta['year'] == 0:
                 _meta['year'] = int(_meta['premiered'][:4])
@@ -798,14 +797,14 @@ class cTMDb:
 
         elif media_type == 'season' and season:
             sql_select = 'SELECT *, season.poster_path, season.premiered, ' \
-                             'season.year, season.plot FROM season LEFT JOIN tvshow ON season.tmdb_id = tvshow.tmdb_id'
+                                'season.year, season.plot FROM season LEFT JOIN tvshow ON season.tmdb_id = tvshow.tmdb_id'
             if tmdb_id:
                 sql_select = sql_select + ' WHERE tvshow.tmdb_id = \'%s\'' % tmdb_id
             else:
                 sql_select = sql_select + ' WHERE tvshow.title = \'%s\'' % name
                 if year:
                     sql_select = sql_select + ' AND tvshow.year = %s' % year
-            
+
             sql_select = sql_select + ' AND season.season = \'%s\'' % season
 
         elif media_type == 'episode':
@@ -879,8 +878,8 @@ class cTMDb:
         if media_type == 'collection':
             return self._cache_save_collection(meta, name)
 
-            
-            
+
+
     # sauvegarde movie dans la BDD
     def _cache_save_movie(self, meta, name, year):
         # year n'est pas forcement l'année du film mais l'année utilisée pour la recherche
@@ -889,8 +888,8 @@ class cTMDb:
 
         try:
             sql = 'INSERT or IGNORE INTO movie (imdb_id, tmdb_id, title, year, cast, crew, writer, director, tagline, rating, votes, duration, ' \
-                  'plot, mpaa, premiered, genre, studio, status, poster_path, trailer, backdrop_path) ' \
-                  'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                    'plot, mpaa, premiered, genre, studio, status, poster_path, trailer, backdrop_path) ' \
+                    'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
             self._sqlExecute(sql, (meta['imdb_id'], meta['tmdb_id'], name, year, meta['cast'], meta['crew'], meta['writer'], meta['director'], meta['tagline'], meta['rating'], meta['votes'], str(meta['duration']), meta['plot'], meta['mpaa'], meta['premiered'], meta['genre'], meta['studio'], meta['status'], meta['poster_path'], meta['trailer'], meta['backdrop_path']))
         except Exception as e:
             VSlog(str(e))
@@ -917,8 +916,8 @@ class cTMDb:
         # sauvegarde tvshow dans la BDD
         try:
             sql = 'INSERT or IGNORE INTO tvshow (imdb_id, tmdb_id, title, year, cast, crew, writer, director, rating, votes, duration, ' \
-                  'plot, mpaa, premiered, genre, studio, status, poster_path, trailer, backdrop_path, nbseasons) ' \
-                  'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                    'plot, mpaa, premiered, genre, studio, status, poster_path, trailer, backdrop_path, nbseasons) ' \
+                    'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
             self._sqlExecute(sql, (meta['imdb_id'], meta['tmdb_id'], name, year, meta['cast'], meta['crew'], meta['writer'], meta['director'], meta['rating'], meta['votes'], meta['duration'], meta['plot'], meta['mpaa'], meta['premiered'], meta['genre'], meta['studio'], meta['status'], meta['poster_path'], meta['trailer'], meta['backdrop_path'], meta['nbseasons']))
         except Exception as e:
             VSlog(str(e))
@@ -968,7 +967,7 @@ class cTMDb:
 
         try:
             sql = 'INSERT or IGNORE INTO season (tmdb_id, season, year, premiered, poster_path, plot, episode) VALUES '\
-                  '(?, ?, ?, ?, ?, ?, ?)'
+                    '(?, ?, ?, ?, ?, ?, ?)'
             self._sqlExecute(sql, (meta['tmdb_id'], season, s_year, premiered, fanart, plot, meta.get('episode_count', 0)))
         except Exception as e:
             VSlog(str(e))
@@ -983,14 +982,14 @@ class cTMDb:
                     VSlog(str(e))
             else:
                 VSlog('SQL ERROR INSERT into table season')
-        
+
 
     # Cache pour les épisodes
     def _cache_save_episode(self, meta, name, season, episode):
         try:
             title = name + '_S' + season + 'E' + episode
             sql = 'INSERT or IGNORE INTO episode (tmdb_id, originaltitle, season, episode, year, title, premiered, poster_path, plot, rating, votes, director, writer, guest_stars, tagline) VALUES ' \
-                  '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                    '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
             self._sqlExecute(sql, (meta['tmdb_id'], title, season, episode, meta['year'], title, meta['premiered'], meta['poster_path'], meta['plot'], meta['rating'], meta['votes'], meta['director'], meta['writer'], ''.join(meta.get('guest_stars', "")), meta["tagline"]))
         except Exception as e:
             VSlog(str(e))
@@ -1007,7 +1006,7 @@ class cTMDb:
     def _cache_save_collection(self, meta, name):
         try:
             sql = 'INSERT or IGNORE INTO saga (tmdb_id, title, plot, genre, poster_path, backdrop_path) VALUES ' \
-                  '(?, ?, ?, ?, ?, ?)'
+                    '(?, ?, ?, ?, ?, ?)'
             self._sqlExecute(sql, (meta['tmdb_id'], name, meta['plot'], meta['genre'], meta['poster_path'], meta["backdrop_path"]))
         except Exception as e:
             VSlog(str(e))
@@ -1045,7 +1044,7 @@ class cTMDb:
         name = name.replace('VOSTFR','')
         name = re.sub('(\W|_|^)FR(\W|_|$)', '', name) # FR s'il n'est pas entouré de caractere
         cleanTitle = None
-        
+
         # VSlog('Attempting to retrieve meta data for %s: %s %s %s %s' % (media_type, name, year, imdb_id, tmdb_id))
 
         # recherche dans la base de données
@@ -1133,7 +1132,7 @@ class cTMDb:
         except:
             return False
         return result
-    
+
     def getPostUrl(self, url, post, API_VERSION = 3):
         # Execute une requete POST vers l'API
         # Utile pour :
@@ -1155,7 +1154,7 @@ class cTMDb:
         session_id = self.ADDON.getSetting('tmdb_session')
 
         urlapi = ('%s%s?api_key=%s&session_id=%s') %(self.URL % API_VERSION, url, self.api_key, session_id)
-        
+
         req = request.Request(urlapi, method="POST")
         req.add_header('Content-Type', 'application/json')
         data = json.dumps(post)
@@ -1164,7 +1163,7 @@ class cTMDb:
         response = r.read()
         r.close()
         data = json.loads(response)
-        return data    
+        return data
 
     def _call(self, action, append_to_response='', API_VERSION = 3):
         from resources.lib.handler.requestHandler import cRequestHandler
