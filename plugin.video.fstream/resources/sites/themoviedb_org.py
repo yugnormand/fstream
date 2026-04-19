@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# https://github.com/Kodi-fStream/venom-xbmc-addons
+# https://github.com/Kodi-vStream/venom-xbmc-addons
 
 from resources.lib.gui.gui import cGui
 from resources.lib.gui.guiElement import cGuiElement
@@ -246,12 +246,12 @@ def getContext():
     disp.append('addtolist')
     fow.append('addtolist')
     yn.append(True)
-    lang.append(addons.VSlang(31211))    
+    lang.append(addons.VSlang(31211))
 
     disp.append('addtonewlist')
     fow.append('addtonewlist')
     yn.append(True)
-    lang.append(addons.VSlang(31210))  
+    lang.append(addons.VSlang(31210))
 
     # supprimer de la liste de suivi
     disp.append('account/%s/watchlist' % tmdb_account)
@@ -310,7 +310,7 @@ def getAction():
     sSeason = oInputParameterHandler.getValue('sSeason')
     sEpisode = oInputParameterHandler.getValue('sEpisode')
     API_Version = 3
-    
+
     sCat = sCat.replace('1', 'movie').replace('2', 'tv')
 
     if not sTMDB:
@@ -343,7 +343,7 @@ def getAction():
         idliste = dialogs.VSselect(labels, addons.VSlang(31212))
         if idliste == -1 :
             return
-        
+
         idliste = result['results'][idliste]['id']
         sAction = 'list/%s/items' % (idliste)
         sPost = {"items": [{"media_type": sCat, "media_id": sTMDB}]}
@@ -484,7 +484,7 @@ def showGenreMovie():
 
     # if oInputParameterHandler.exist('genre'):
     #     term += '&with_genres=' + oInputParameterHandler.getValue('genre')
-    
+
 
     result = grab.getUrl(sUrl)
     total = len(result)
@@ -611,7 +611,7 @@ def showMoviesNews():
     term += 'vote_count.gte=10'
     showMovies(term=term)
 
-# TOP séries, selon la note / votes 
+# TOP séries, selon la note / votes
 def showMoviesTop():
     term = 'sort_by=vote_average.desc&vote_count.gte=4000&'
     showMovies(term=term)
@@ -639,13 +639,13 @@ def showMovies(sSearch='', term=''):
             term = oInputParameterHandler.getValue('term')
         else:
             term += 'with_original_language=en|fr'
-    
+
             # exclure les films à venir
             # term += '&with_status=3|4'
-    
+
             if oInputParameterHandler.exist('session_id'):
                 term += '&session_id=' + oInputParameterHandler.getValue('session_id')
-    
+
         sUrl = oInputParameterHandler.getValue('siteUrl')
         result = grab.getUrl(sUrl, iPage, term)
 
@@ -756,10 +756,10 @@ def showSagaMovies():
         if total > 0:
             movies = result['parts']
             for i in sorted(movies, key=lambda movie: movie['release_date']):
-                
+
                 if not i['release_date']:
                     continue    # pas sortie
-                
+
                 i = grab._format(i, '', "movie")
                 sId, sTitle, sGenre, sThumb, sFanart, sDesc, sYear = i['tmdb_id'], i['title'], i['genre'], i['poster_path'], i['backdrop_path'], i['plot'], i['year']
 
@@ -795,7 +795,7 @@ def showSeriesYears():
 def showYears(movie = False):
     oGui = cGui()
     import datetime
-    
+
     term = 'with_original_language=en|fr&'
     term += '&without_genres=10767|10763|10764'
     if movie:
@@ -807,8 +807,8 @@ def showYears(movie = False):
         func = 'showSeries'
         term += '&with_status=3|4'
         term += '&first_air_date_year=%d'
-        
-            
+
+
     oOutputParameterHandler = cOutputParameterHandler()  # Pas de lien après 2022
     for year in reversed(range(1960, int(datetime.datetime.now().year) + 1)):
 #         = str(i)
@@ -827,117 +827,20 @@ def showYears(movie = False):
 # par diffuseurs
 def showSeriesNetworks():
     oGui = cGui()
-    
+
     term = 'with_original_language=en|fr&'
     term += '&without_genres=10767|10763|10764'
     term += '&with_status=3|4'
     term += '&with_networks=%d'
-    
+
     for netID, name in sorted(DIFFUSEURS.items(), key=lambda diff: diff[1]):
-        oOutputParameterHandler = cOutputParameterHandler()
+        oOutputParameterHandler = cOutputParameterHandler()  # Pas de lien après 2022
         oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
         oOutputParameterHandler.addParameter('term', term % netID)
-        oOutputParameterHandler.addParameter('sTmdbId', netID)
-        oOutputParameterHandler.addParameter('network_id', netID)
-        oOutputParameterHandler.addParameter('network_name', name)
-        
-        oGui.addNetwork(SITE_IDENTIFIER, 'showNetworkMenu', name, 'host.png', oOutputParameterHandler)
-    oGui.setEndOfDirectory()
+        oOutputParameterHandler.addParameter('sTmdbId', netID)    # Utilisé par TMDB
+#        oOutputParameterHandler.addParameter('network', netID)    # Utilisé par TMDB
 
-
-# Menu pour chaque diffuseur (Nouveautés, Genres, Films, Séries)
-def showNetworkMenu():
-    oGui = cGui()
-    addons = addon()
-    
-    oInputParameterHandler = cInputParameterHandler()
-    network_id = oInputParameterHandler.getValue('network_id')
-    network_name = oInputParameterHandler.getValue('network_name')
-    
-    # Base term pour ce diffuseur
-    base_term = 'with_original_language=en|fr&'
-    base_term += '&without_genres=10767|10763|10764'
-    base_term += '&with_status=3|4'
-    base_term += '&with_networks=%s' % network_id
-    
-    oOutputParameterHandler = cOutputParameterHandler()
-    
-    # Nouveautés
-    oOutputParameterHandler = cOutputParameterHandler()
-    oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
-    oOutputParameterHandler.addParameter('term', base_term + '&sort_by=first_air_date.desc')
-    oOutputParameterHandler.addParameter('sTmdbId', network_id)
-    oOutputParameterHandler.addParameter('network_name', network_name)
-    oGui.addDir(SITE_IDENTIFIER, 'showSeries', addons.VSlang(30101), 'news.png', oOutputParameterHandler)
-    
-    # Populaires
-    oOutputParameterHandler = cOutputParameterHandler()
-    oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
-    oOutputParameterHandler.addParameter('term', base_term + '&sort_by=popularity.desc')
-    oOutputParameterHandler.addParameter('sTmdbId', network_id)
-    oOutputParameterHandler.addParameter('network_name', network_name)
-    oGui.addDir(SITE_IDENTIFIER, 'showSeries', addons.VSlang(30102), 'popular.png', oOutputParameterHandler)
-    
-    # Mieux notées
-    oOutputParameterHandler = cOutputParameterHandler()
-    oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
-    oOutputParameterHandler.addParameter('term', base_term + '&sort_by=vote_average.desc&vote_count.gte=100')
-    oOutputParameterHandler.addParameter('sTmdbId', network_id)
-    oOutputParameterHandler.addParameter('network_name', network_name)
-    oGui.addDir(SITE_IDENTIFIER, 'showSeries', addons.VSlang(30104), 'notes.png', oOutputParameterHandler)
-    
-    # Par genres
-    oOutputParameterHandler = cOutputParameterHandler()
-    oOutputParameterHandler.addParameter('siteUrl', 'genre/tv/list')
-    oOutputParameterHandler.addParameter('network_id', network_id)
-    oOutputParameterHandler.addParameter('network_name', network_name)
-    oGui.addDir(SITE_IDENTIFIER, 'showNetworkGenres', addons.VSlang(30105), 'genres.png', oOutputParameterHandler)
-    
-    # Toutes les séries
-    oOutputParameterHandler = cOutputParameterHandler()
-    oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
-    oOutputParameterHandler.addParameter('term', base_term)
-    oOutputParameterHandler.addParameter('sTmdbId', network_id)
-    oOutputParameterHandler.addParameter('network_name', network_name)
-    oGui.addDir(SITE_IDENTIFIER, 'showSeries', 'Toutes les series', 'series.png', oOutputParameterHandler)
-    
-    oGui.setEndOfDirectory()
-
-
-# Genres pour un diffuseur spécifique
-def showNetworkGenres():
-    oGui = cGui()
-    grab = cTMDb()
-    
-    oInputParameterHandler = cInputParameterHandler()
-    network_id = oInputParameterHandler.getValue('network_id')
-    network_name = oInputParameterHandler.getValue('network_name')
-    
-    # Récupérer la liste des genres TV
-    result = grab.getUrl('genre/tv/list', 1)
-    
-    if 'genres' in result:
-        for genre in result['genres']:
-            genre_id = genre['id']
-            genre_name = genre['name']
-            
-            # Exclure les genres non désirés (Talk, News, Reality)
-            if genre_id in [10767, 10763, 10764]:
-                continue
-            
-            term = 'with_original_language=en|fr&'
-            term += '&with_status=3|4'
-            term += '&with_networks=%s' % network_id
-            term += '&with_genres=%d' % genre_id
-            
-            oOutputParameterHandler = cOutputParameterHandler()
-            oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
-            oOutputParameterHandler.addParameter('term', term)
-            oOutputParameterHandler.addParameter('sTmdbId', network_id)
-            oOutputParameterHandler.addParameter('network_name', network_name)
-            
-            oGui.addDir(SITE_IDENTIFIER, 'showSeries', genre_name, 'genres.png', oOutputParameterHandler)
-    
+        oGui.addNetwork(SITE_IDENTIFIER, 'showSeries', name, 'host.png', oOutputParameterHandler)
     oGui.setEndOfDirectory()
 
 # Dernieres séries selon la date de sortie
@@ -951,7 +854,7 @@ def showSeriesViews():
     term = 'with_original_language=en|fr&'
     showSeries(term=term)
 
-# TOP séries, selon la note / votes 
+# TOP séries, selon la note / votes
 def showSeriesTop():
     term = 'with_original_language=en|fr&sort_by=vote_average.desc&vote_count.gte=1900&'
     showSeries(term=term)
@@ -971,7 +874,7 @@ def showAnimesNews():
         term += 'without_companies=125825&vote_count.gte=150&'
     showSeries(term=term)
 
-# TOP japanimes, selon la note / votes 
+# TOP japanimes, selon la note / votes
 def showAnimesTop():
     term = 'with_keywords=210024&sort_by=vote_average.desc&vote_count.gte=800&'
     if addon().getSetting('contenu_adulte') == 'false':
@@ -1003,16 +906,16 @@ def showSeries(sSearch='', term=''):
         if oInputParameterHandler.exist('term'):
             term = oInputParameterHandler.getValue('term')
         else:
-            
+
             # genre à exclure
             # grab.TMDB_GENRES
             # "Talk", "News", "Réalité" # 10767, 10763, 10764
             term += '&without_genres=10767|10763|10764'
-            
+
             # exclure les séries à venir, [0 .. 5]
             #['Returning Series', 'Planned', 'In Production', 'Ended', 'Canceled', 'Pilot']
             term += '&with_status=3|4'
-            
+
             if oInputParameterHandler.exist('session_id'):
                 term += '&session_id=' + oInputParameterHandler.getValue('session_id')
 
@@ -1070,7 +973,7 @@ def showSeries(sSearch='', term=''):
 
                 oGui.addFolder(oGuiElement, oOutputParameterHandler)
 
-            if int(iPage) > 0:
+            if int(iPage) < result['total_pages']:
                 iNextPage = int(iPage) + 1
                 oOutputParameterHandler = cOutputParameterHandler()
                 oOutputParameterHandler.addParameter('siteUrl', sUrl)
@@ -1273,7 +1176,7 @@ def searchActors(sSearch=''):
     sUrl = oInputParameterHandler.getValue('siteUrl')
     if not sUrl:
         sUrl = 'search/person'
-        
+
     iPage = 1
     if oInputParameterHandler.exist('page'):
         iPage = oInputParameterHandler.getValue('page')
@@ -1302,11 +1205,11 @@ def searchActors(sSearch=''):
             # Ne garder que les acteurs
             if actor.get('known_for_department', None) != 'Acting':
                 continue
-            
+
             # Ne pas garder garder les éléments non-genrés
             if actor['gender'] == 0:
                 continue
-            
+
             #les inconnus
             if actor['popularity'] < 0.6:
                 continue
@@ -1325,7 +1228,7 @@ def searchActors(sSearch=''):
             if len(actorFamous) > 10:
                 if len(actor['known_for']) < 3 or actor['popularity'] < 5.0:
                     continue
- 
+
             if sThumb:
                 POSTER_URL = grab.poster
                 sThumb = POSTER_URL + sThumb
@@ -1343,7 +1246,7 @@ def searchActors(sSearch=''):
             oOutputParameterHandler.addParameter('sTmdbId', actorId)    # Utilisé par TMDB
             oOutputParameterHandler.addParameter('siteUrl', 'person/' + actorId + '/movie_credits')
             oGui.addPerson(SITE_IDENTIFIER, 'showFilmActor', sTitle, 'actor.png', sThumb, oOutputParameterHandler)
-            
+
         if int(iPage) < int(nbrpage):
             iNextPage = int(iPage) + 1
             oOutputParameterHandler = cOutputParameterHandler()
@@ -1362,7 +1265,7 @@ def searchActors(sSearch=''):
 def showFilmActor():
     oGui = cGui()
     grab = cTMDb()
-    
+
     oInputParameterHandler = cInputParameterHandler()
     sUrl = oInputParameterHandler.getValue('siteUrl')
 
@@ -1377,17 +1280,17 @@ def showFilmActor():
         oOutputParameterHandler = cOutputParameterHandler()
 
         for i in result['cast']:
-            
+
             # exclure les documentaires, talk, animation
             genres = i['genre_ids']
             if len(genres) == 0 or 16 in genres or 99 in genres or 10767 in genres:
                 continue
-            
+
             # exclure les interventions, ou voix
             character = i['character']
             if '(voice' in character or '(archive' in character:
                 continue
-            
+
             # Mise en forme des infos (au format meta imdb)
             i = grab._format(i, '', "person")
 

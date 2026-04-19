@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
+# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
 # Nouvelle source de streaming FILMS ET SÉRIES
 import re
 
@@ -146,11 +146,11 @@ def showGenres():
     oInputParameterHandler = cInputParameterHandler()
     siteUrl = oInputParameterHandler.getValue('siteUrl')
     listeGenre = [['Action', 'action'], ['Animation', 'animation'], ['Aventure', 'aventure'],
-                  ['Biopic', 'biopic'], ['Comédie', 'comedie'], ['Documentaire', 'documentaire'],
-                  ['Drame', 'drame'], ['Famille', 'famille'], ['Fantastique', 'fantastique'],
-                  ['Guerre', 'guerre'], ['Historique', 'historique'], ['Epouvante et Horreur', 'epouvante-horreur'],
-                  ['Espionnage', 'espionnage'], ['Policier', 'policier'], ['Romance', 'romance'],
-                  ['Science-Fiction', 'science-fiction'], ['Thriller', 'thriller'], ['western', 'western']]
+                    ['Biopic', 'biopic'], ['Comédie', 'comedie'], ['Documentaire', 'documentaire'],
+                    ['Drame', 'drame'], ['Famille', 'famille'], ['Fantastique', 'fantastique'],
+                    ['Guerre', 'guerre'], ['Historique', 'historique'], ['Epouvante et Horreur', 'epouvante-horreur'],
+                    ['Espionnage', 'espionnage'], ['Policier', 'policier'], ['Romance', 'romance'],
+                    ['Science-Fiction', 'science-fiction'], ['Thriller', 'thriller'], ['western', 'western']]
 
     oOutputParameterHandler = cOutputParameterHandler()
     for sTitle, sUrl in listeGenre:
@@ -180,12 +180,12 @@ def showSeriesGenres():
     oInputParameterHandler = cInputParameterHandler()
     siteUrl = oInputParameterHandler.getValue('siteUrl')
     listeGenre = [['Action', 'action-s'], ['Animation', 'animation-s'], ['Aventure', 'aventure-s'],
-                  ['Biopic', 'biopic-s'], ['Comédie', 'comedie-s'], ['Documentaire', 'documentaire-s'],
-                  ['Drame', 'drame-s'], ['Famille', 'famille-s'], ['Fantastique', 'fantastique-s'],
-                  ['Guerre', 'guerre-s'], ['Historique', 'historique-s'], ['Horreur', 'horreur-s'],
-                  ['Judiciaire', 'judiciare-s'], ['Musique', 'musical-s'], ['Policier', 'policier-s'],
-                  ['Romance', 'romance-s'], ['Science-Fiction', 'science-fiction-s'],
-                  ['Télé-réalité', 'f/genre=reality'], ['Thriller', 'thriller-s'], ['western', 'western-s']]
+                    ['Biopic', 'biopic-s'], ['Comédie', 'comedie-s'], ['Documentaire', 'documentaire-s'],
+                    ['Drame', 'drame-s'], ['Famille', 'famille-s'], ['Fantastique', 'fantastique-s'],
+                    ['Guerre', 'guerre-s'], ['Historique', 'historique-s'], ['Horreur', 'horreur-s'],
+                    ['Judiciaire', 'judiciare-s'], ['Musique', 'musical-s'], ['Policier', 'policier-s'],
+                    ['Romance', 'romance-s'], ['Science-Fiction', 'science-fiction-s'],
+                    ['Télé-réalité', 'f/genre=reality'], ['Thriller', 'thriller-s'], ['western', 'western-s']]
 
     oOutputParameterHandler = cOutputParameterHandler()
     for sTitle, sUrl in listeGenre:

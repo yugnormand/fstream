@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
+# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
 # Makoto
 
 import re

@@ -1,5 +1,5 @@
 #-*- coding: utf-8 -*-
-#fStream https://github.com/yugnormand/fstream
+#Vstream https://github.com/Kodi-vStream/venom-xbmc-addons
 from resources.lib.handler.requestHandler import cRequestHandler
 from resources.lib.parser import cParser
 from resources.hosters.hoster import iHoster
@@ -26,7 +26,7 @@ class cHoster(iHoster):
         #lien indirect
         sPattern = '<iframe.+?src="([^"]+)"'
         aResult = oParser.parse(sHtmlContent, sPattern)
-        
+
         if aResult[0]:
             url2 = aResult[1][0]
             oRequest = cRequestHandler(url2)
@@ -38,13 +38,13 @@ class cHoster(iHoster):
             oRequest.addHeaderEntry('Sec-Fetch-Dest', "iframe")
             #oRequest.addHeaderEntry("Cookie", "file_id=xxxx; aff=44000; ref_url=xxx.com; _ym_uid=xxxxxx; _ym_d=xxxxx; _ym_isad=1")
             sHtmlContent = oRequest.request()
-            
+
             #ici je sais pas pourquoi mais cela ne marche que si je fais 2 requetes avec un delais
             xbmc.sleep(1000)
             oRequest = cRequestHandler(self._url)
             oRequest.addHeaderEntry('User-Agent', UA)
             sHtmlContent2 = oRequest.request()
-            
+
             oRequest.addHeaderEntry('Referer', self._url)
             oRequest.addHeaderEntry('User-Agent', UA)
             #oRequest.addHeaderEntry('Accept', "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
@@ -65,5 +65,16 @@ class cHoster(iHoster):
 
                 if aResult[0]:
                     return True, aResult[1][0] # + '|User-Agent=' + UA
+
+        # 2eme méthode
+        else:
+            url2 = self._url.replace('/e/', '/api/videos/') + '/embed/details'
+            oRequest = cRequestHandler(url2)
+            sHtmlContent2 = oRequest.request()
+            sPattern = '"embed_frame_url":"([^"]+)"'
+            aResult = oParser.parse(sHtmlContent2, sPattern)
+            if aResult[0]:
+                return True, aResult[1][0] # + '|User-Agent=' + UA
+
 
         return False, False

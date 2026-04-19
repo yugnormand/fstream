@@ -17,7 +17,7 @@
         "animesama": {
             "label": "Anime Sama",
             "active": "True",
-            "url": "https://anime-sama.tv/"
+            "url": "https://anime-sama.to/"
         },
         "animeultime": {
             "label": "Anime Ultime",
@@ -59,12 +59,12 @@
         "cloudproxy": {
             "label": "Proxy cloudflare",
             "active": "True",
-            "url": "https://corsproxy.io/?url="
+            "url": "https://corsproxy.io/?key=webdemo1&url="
         },
         "coflix": {
             "label": "Coflix",
             "active": "True",
-            "url": "https://coflix.observer/"
+            "url": "https://coflix.wales/"
         },
         "cpasmal": {
             "label": "CpasMal",
@@ -84,7 +84,7 @@
         "darkiworld": {
             "label": "darkiworld",
             "active": "True",
-            "url": "https://darkiworld2026.com/"
+            "url": "https://hydracker.com/"
         },
         "debrid_link": {
             "label": "Debrid Link",
@@ -119,7 +119,7 @@
         "dulourd": {
             "label": "DuLourd",
             "active": "True",
-            "url": "https://www.dulourd.boo/"
+            "url": "https://www.dulourd.cash/"
         },
         "elitegol": {
             "label": "Elitegol",
@@ -174,7 +174,7 @@
             "label": "French-stream",
             "active": "True",
             "site_info": "https://fstream.info/",
-            "url": "https://fs9.lol/"
+            "url": "https://fs18.lol/"
         },
         "french_stream_lol": {
             "label": "French-stream-lol",
@@ -323,9 +323,9 @@
         },
         "topstream": {
             "label": "top-stream",
-            "active": "True",
+            "active": "False",
             "cloudflare": "False",
-            "url": "https://top-stream.space/"
+            "url": "https://top-stream.wiki/"
         },
         "vfilms": {
             "label": "VFilms",
@@ -364,12 +364,17 @@
             "active": "True",
             "cloudflare": "False",
             "site_info": "https://www.wiflix-nouvelle-adresse.site/",
-            "url": "https://flemmix.info/"
+            "url": "https://flemmix.farm/"
         },
         "wilifilm": {
             "label": "Wilifilm",
             "active": "False",
             "url": "https://wilifilm.info/"
+        },
+        "witv": {
+            "label": "wiTV",
+            "active": "True",
+            "url": "https://witv.team/"
         },
         "youtitou_com": {
             "label": "YouTitou (Anim\u00e9s)",

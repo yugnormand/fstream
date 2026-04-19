@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# https://github.com/Kodi-fStream/venom-xbmc-addons
+# https://github.com/Kodi-vStream/venom-xbmc-addons
 
 from resources.lib.handler.requestHandler import cRequestHandler
 from resources.lib.parser import cParser
@@ -23,11 +23,19 @@ class cHoster(iHoster):
             oRequest = cRequestHandler(self._url)
             oRequest.addHeaderEntry('User-Agent', UA)
             sHtmlContent = oRequest.request()
-
             sPattern = 'iframe src="//([^"]+)"'
             aResult = oParser.parse(sHtmlContent, sPattern)
             if aResult[0]:
                 self._url = 'https://' + aResult[1][0]
+
+        elif '/v/' in self._url:
+            oRequest = cRequestHandler(self._url)
+            oRequest.addHeaderEntry('User-Agent', UA)
+            sHtmlContent = oRequest.request()
+            sPattern = 'iframe.+?src="([^"]+)"'
+            aResult = oParser.parse(sHtmlContent, sPattern)
+            if aResult[0]:
+                self._url = aResult[1][0]
 
         oRequest = cRequestHandler(self._url)
         oRequest.addHeaderEntry('User-Agent', UA)

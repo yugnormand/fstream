@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
+# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
 
 import re
 import xbmc
@@ -147,10 +147,10 @@ def ShowGenre():
     oGui = cGui()
 
     liste = ['action', 'aventure', 'comedie', 'crime', 'demons', 'drame', 'Ecchi', 'espace', 'fantastique', 'gore',
-             'harem', 'historique', 'horreur', 'jeu', 'lecole', 'magie', 'martial-arts', 'mecha', 'militaire',
-             'musique', 'mysterieux', 'Parodie', 'police', 'psychologique', 'romance', 'samurai', 'sci-fi', 'seinen',
-             'shoujo', 'shoujo-ai', 'shounen', 'shounen-ai', 'sport', 'super-power', 'surnaturel', 'suspense',
-             'thriller', 'tranche-de-vie']
+                'harem', 'historique', 'horreur', 'jeu', 'lecole', 'magie', 'martial-arts', 'mecha', 'militaire',
+                'musique', 'mysterieux', 'Parodie', 'police', 'psychologique', 'romance', 'samurai', 'sci-fi', 'seinen',
+                'shoujo', 'shoujo-ai', 'shounen', 'shounen-ai', 'sport', 'super-power', 'surnaturel', 'suspense',
+                'thriller', 'tranche-de-vie']
 
     oOutputParameterHandler = cOutputParameterHandler()
     for igenre in liste:

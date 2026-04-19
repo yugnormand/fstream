@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
+# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
 
 from resources.lib.comaddon import siteManager
 from resources.lib.gui.hoster import cHosterGui
@@ -280,7 +280,7 @@ def showSeries(sSearch=''):
 
     sPattern = 'mov clearfix.+?src="([^"]+)" *alt="([^"]+).+?data-link="([^"]+)'
     aResult = oParser.parse(sHtmlContent, sPattern)
-    
+
     if aResult[0]:
         oOutputParameterHandler = cOutputParameterHandler()
 
@@ -289,12 +289,12 @@ def showSeries(sSearch=''):
             if sThumb.startswith('/'):
                 sThumb = URL_MAIN[:-1] + aEntry[0]
 
-            sTitle = aEntry[1].replace('- Saison ', 'S').replace(' wiflix', '').replace(' flemmix', '')
-            
+            sTitle = aEntry[1].replace('- Saison ', 'S').replace('wiflix', '').replace('flemmix', '').strip()
+
             # Filtre de recherche
             if sSearch and not oUtil.CheckOccurence(sSearchText, sTitle):
                 continue
-            
+
             sDisplayTitle = sTitle
             sUrl = aEntry[2]
 
@@ -349,7 +349,7 @@ def showEpisodes():
                 oOutputParameterHandler.addParameter('siteUrl', '%s|%s' % (sUrl, aEntry[0]))
                 oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
                 oOutputParameterHandler.addParameter('sThumb', sThumb)
-    
+
                 oGui.addEpisode(SITE_IDENTIFIER, 'showHostersEpisode', sDisplayTitle, '', sThumb, '', oOutputParameterHandler)
 
     oGui.setEndOfDirectory()

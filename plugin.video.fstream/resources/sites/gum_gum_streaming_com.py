@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
+# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
 import re
 
 from resources.lib.gui.hoster import cHosterGui
@@ -18,7 +18,7 @@ SITE_DESC = 'Animés VF/VOSTFR'
 URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)
 
 ANIM_ANIMS = (True, 'load')
-ANIM_NEWS = ('showNews')
+ANIM_NEWS = ('/', 'showNews')
 ANIM_VFS = ('vf/', 'showAnimes')
 ANIM_VOSTFRS = ('vostfr/', 'showMenuVOSTFR')
 ANIM_MOVIES = ('films/', 'showAnimes')
@@ -32,7 +32,7 @@ def load():
     oOutputParameterHandler = cOutputParameterHandler()
     oOutputParameterHandler.addParameter('siteUrl', URL_SEARCH_ANIMS[0])
     oGui.addDir(SITE_IDENTIFIER, 'showSearch', 'Recherche', 'search-animes.png', oOutputParameterHandler)
-    
+
     oOutputParameterHandler.addParameter('siteUrl', ANIM_NEWS[0])
     oGui.addDir(SITE_IDENTIFIER, ANIM_NEWS[1], 'Derniers ajouts', 'news.png', oOutputParameterHandler)
 
@@ -98,7 +98,7 @@ def showNews():
     sHtmlContent = oRequestHandler.request()
 
     # desc url thumb title
-    sPattern = '<a class="fleft" title="Synopsis: (.+?)" href="([^"]+)".+?src="([^&]+).+?link="internal">([^<]+)'
+    sPattern = '<a class="fleft" title="Synopsis: (.+?)" href="([^"]+)".+?data-src="([^&]+).+?link="internal">([^<]+)'
     aResult = oParser.parse(sHtmlContent, sPattern)
 
     if aResult[0]:
@@ -141,13 +141,13 @@ def showAnimes(sSearch=''):
         oUtil = cUtil()
         sSearchText = sSearch.split('=')[1].replace('%20', ' ')
         sUrl = URL_MAIN + sSearch
-        sPattern = '<header class="entry-header"><h2 class="entry-title"><a href="([^"]+)" data-wpel-link="internal">([^<]+)'        
+        sPattern = '<header class="entry-header"><h2 class="entry-title"><a href="([^"]+)" data-wpel-link="internal">([^<]+)'
     else:
         oInputParameterHandler = cInputParameterHandler()
         sUrl = URL_MAIN + oInputParameterHandler.getValue('siteUrl')
         bFilm = '/films/' in sUrl
-        sPattern = 'Synopsis:([^"]+)" href="([^"]+).+?">([^<]+).+?data-lazy-src="([^"]+)'
-        
+        sPattern = 'Synopsis:([^"]+)" href="([^"]+).+?">([^<]+).+?data-src="([^"]+)'
+
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
     aResult = oParser.parse(sHtmlContent, sPattern)
@@ -203,10 +203,10 @@ def showAnimes(sSearch=''):
                 if bList:
                     oGui.addMovie(SITE_IDENTIFIER, 'showMovieList', sTitle, 'animes.png', sThumb, sDesc, oOutputParameterHandler)
                 else:
-                    oGui.addMovie(SITE_IDENTIFIER, 'showMovies', sTitle, 'animes.png', sThumb, sDesc, oOutputParameterHandler)
+                    oGui.addMovie(SITE_IDENTIFIER, 'showHosters', sTitle, 'animes.png', sThumb, sDesc, oOutputParameterHandler)
             else:
                 oGui.addAnime(SITE_IDENTIFIER, 'showEpisodes', sTitle, 'animes.png', sThumb, sDesc, oOutputParameterHandler)
-        
+
         progress_.VSclose(progress_)
 
     if not sSearch:
@@ -282,54 +282,6 @@ def showEpisodes():
     oGui.setEndOfDirectory()
 
 
-def showMovies():
-    oGui = cGui()
-    oParser = cParser()
-    oInputParameterHandler = cInputParameterHandler()
-    sUrl = oInputParameterHandler.getValue('siteUrl')
-    sTitle = oInputParameterHandler.getValue('sMovieTitle')
-
-    oRequestHandler = cRequestHandler(sUrl)
-    sHtmlContent = oRequestHandler.request()
-    
-    # NONE    hostName    urlHost
-    sPattern = 'color: (#00ccff;"|#00ff00;")>([^<]+).+?data-lazy-src="([^"]+)'
-    aResult = oParser.parse(sHtmlContent, sPattern)
-    bLang = True
-
-    if not aResult[0]:
-        sPattern = '"fitvidscompatible" data-lazy-src="([^"]+)'
-        aResult = oParser.parse(sHtmlContent, sPattern)
-        bLang = False
-
-    if aResult[0]:
-        oOutputParameterHandler = cOutputParameterHandler()
-        for aEntry in aResult[1]:
-            if bLang:
-                sHosterUrl = aEntry[2]
-                sHost, sLang = aEntry[1].split(' ')
-            else:
-                sHosterUrl = aEntry
-                sLang = ''
-            oHoster = cHosterGui().checkHoster(sHosterUrl)
-            if not oHoster:
-                continue
-            
-            sDisplayTitle = sTitle
-            if sLang:
-                sDisplayTitle += ' (%s)' % sLang
-            oOutputParameterHandler.addParameter('siteUrl', sHosterUrl)
-            oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
-            # if sTitle.lower().find('les films') != -1:
-            #     oGui.addMovie(SITE_IDENTIFIER, 'showMovieList', sDisplayTitle, 'animes.png', sThumb, sDesc, oOutputParameterHandler)
-            # else:
-            oHoster.setDisplayName(sDisplayTitle)
-            oHoster.setFileName(sTitle)
-            cHosterGui().showHoster(oGui, oHoster, sHosterUrl)
-
-    oGui.setEndOfDirectory()
-
-
 def showMovieList():
     oGui = cGui()
     oParser = cParser()
@@ -339,7 +291,7 @@ def showMovieList():
 
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
-    
+
     # url    title
 #    sPattern = '<h2 style="text-align: center;"><a[^<]+href="([^"]+)" data-wpel-link="internal">([^<]+)'
     sPattern = '<a[^<]+href="([^"]+)" data-wpel-link="internal">([^<]+)<\/a>(<br \/>|<\/h2)'
@@ -350,7 +302,7 @@ def showMovieList():
         for aEntry in aResult[1]:
             sUrl = aEntry[0]
             sDisplayTitle = sTitle = aEntry[1].replace('•', '')
-            
+
             epTitle = re.sub('Film \d+:', '', sTitle)
             if len(epTitle.replace(' ', ''))==0:
                 sDisplayTitle = sTitle + ' ' + sMovieTitle
@@ -369,7 +321,7 @@ def showHosters():
     sTitle = oInputParameterHandler.getValue('sMovieTitle')
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
-    sPattern = '<div class="video-container"> ?<iframe.+?data-lazy-src="([^"]+)'
+    sPattern = '<div class="video-container"> ?<iframe.+?data-litespeed-src="([^"]+)'
     aResult = oParser.parse(sHtmlContent, sPattern)
 
     sTexte = "[COLOR red]Animés dispo gratuitement et légalement sur :[/COLOR]"

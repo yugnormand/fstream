@@ -1,5 +1,5 @@
 # coding: utf-8
-# fStream https://github.com/yugnormand/fstream
+# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
 
 from resources.hosters.hoster import iHoster
 from resources.lib.handler.requestHandler import cRequestHandler
@@ -14,7 +14,9 @@ class cHoster(iHoster):
     def _getMediaLinkForGuest(self):
         oParser = cParser()
         oRequest = cRequestHandler(self._url)
+        oRequest.addHeaderEntry('Referer', 'https://lecteurvideo.com/')
         sHtmlContent = oRequest.request()
+
         sPattern = '(eval\(function\(p,a,c,k,e(?:.|\s)+?\))<\/script>'
         aResult = oParser.parse(sHtmlContent, sPattern)
         if aResult[0]:

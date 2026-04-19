@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
+# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
 import re
 
 from resources.lib.gui.hoster import cHosterGui
@@ -199,7 +199,7 @@ def showEpisodes():
 
     # Pour les liens sans http
     sHtmlContent = sHtmlContent.replace('!//', '!https://').replace(',//', ',https://')
-    
+
     sPattern = '([0-9]+)!|(https:.+?)[,|@]'
     aResult = oParser.parse(sHtmlContent, sPattern)
 
@@ -238,7 +238,7 @@ def showEpisodeLinks():
 
     # Pour les liens sans http
     sHtmlContent = sHtmlContent.replace('!//', '!https://').replace(',//', ',https://')
-    
+
     sPattern = '([0-9]+)!|(https:.+?)[,|@]'
     aResult = oParser.parse(sHtmlContent, sPattern)
 
