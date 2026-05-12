@@ -19,8 +19,8 @@ if isMatrix():
 
 
 # === Configuration heartbeat fStream ===
-HEARTBEAT_INTERVAL = 5 * 60   # secondes entre 2 heartbeats (5 min)
-ABORT_TICK         = 10       # granularité de réactivité à la fermeture Kodi
+HEARTBEAT_INTERVAL = 60       # secondes entre 2 heartbeats (1 min)
+ABORT_TICK         = 5        # granularité de réactivité à la fermeture Kodi
 
 
 def service():

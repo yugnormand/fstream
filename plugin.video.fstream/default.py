@@ -59,6 +59,14 @@ class main:
         if pluginPath == 'plugin://plugin.video.fstream/extrafanart/':
             return
 
+        # Heartbeat opportuniste : vérifie les notifs si le cooldown (30s) est passé.
+        # Garantit que les notifs Filament arrivent rapidement côté user.
+        try:
+            from resources.lib.heartbeat_hook import ping_if_due
+            ping_if_due()
+        except Exception:
+            pass
+
         oInputParameterHandler = cInputParameterHandler()
 
         if oInputParameterHandler.exist('function'):

@@ -2,16 +2,13 @@
 """
 fStream — Résolveur de sources pour chaînes Live TV
 
-Quand l'user clique sur "BeIN Sport 1", on a une liste de sources triées par priorité :
-  [{site: 'witv', ref: 'bein-sport-1-fr', ...},
-   {site: 'elitegol', ref: 'bein-1', ...},
-   {site: 'daddyhd', ref: 'bein_1_fr', ...}]
+Approche pragmatique : on utilise UNIQUEMENT les scrapers qui exposent
+un accès unitaire par identifiant. Aujourd'hui ça concerne daddyhd
+(table channels indexée par numéro).
 
-Le résolveur essaie chaque source dans l'ordre jusqu'à en trouver une qui fournit une URL valide.
-
-Pour chaque scraper, on définit un HANDLER qui sait extraire l'URL depuis la ref.
-Si un scraper ne dispose pas de handler dédié, on essaie le pattern générique
-'getMediaUrl(ref)' qui est la convention fStream la plus courante.
+Pour les autres sources non-unitaires (witv, freebox, livetv, etc.),
+elles ne sont pas adaptées à un système "auto-essai par ref" — l'user
+y accède via la "Bibliothèque IPTV" du menu principal (inchangée).
 """
 
 import xbmc
@@ -25,74 +22,89 @@ except Exception:
 
 
 # ──────────────────────────────────────────────────────────────────
-#  Handlers : un par scraper
-#
-#  Chaque handler reçoit (ref, meta) et doit retourner une URL jouable
-#  (str) ou None si la source ne peut pas fournir le flux.
-#
-#  Si tu ajoutes un nouveau scraper TV côté Kodi, déclare-le ici.
+#  Handlers — un par scraper supporté
 # ──────────────────────────────────────────────────────────────────
 
-def _handler_generic(scraper_module, ref, meta):
+def _handler_daddyhd(ref, meta):
     """
-    Handler générique : appelle scraper_module.getMediaUrl(ref) si la fonction existe.
-    Convention fStream la plus répandue.
+    DaddyHD : ref = numéro de chaîne (ex: "116" = BeIN Sport 1).
+
+    On utilise directement la table `channels` et `URL_LINK` du module
+    daddyhd. Si le scraper met à jour ses URLs, le resolver suit
+    automatiquement sans modification.
+
+    Si la chaîne n'est pas dans la table (numéro inconnu), on construit
+    quand même une URL fallback avec ddh1 comme préfixe par défaut.
     """
-    fn = getattr(scraper_module, 'getMediaUrl', None)
-    if callable(fn):
-        try:
-            return fn(ref)
-        except Exception as e:
-            VSlog('[live_tv resolver] %s.getMediaUrl failed: %s' % (scraper_module.__name__, e))
-    return None
+    try:
+        channel_id = int(ref)
+    except (TypeError, ValueError):
+        VSlog('[resolver daddyhd] ref invalide : %s' % ref)
+        return None
+
+    try:
+        from resources.sites import daddyhd as scraper
+    except Exception as e:
+        VSlog('[resolver daddyhd] Import scraper échoué : %s' % e)
+        return None
+
+    url_link = getattr(scraper, 'URL_LINK', 'https://ddh1.mizhls.ru/')
+    channels = getattr(scraper, 'channels', {})
+
+    channel = channels.get(channel_id)
+
+    if channel:
+        # channel = [label, relative_path, thumb_url]
+        path = channel[1]
+    else:
+        # Fallback si le numéro n'est pas dans la table : on suppose ddh1
+        path = 'ddh1/premium%d/tracks-v1a1/mono.m3u8' % channel_id
+        VSlog('[resolver daddyhd] Chaîne %d absente de la table, fallback ddh1' % channel_id)
+
+    referer = (meta or {}).get('referer') or 'https://weblivehdplay.ru/'
+    url = url_link.rstrip('/') + '/' + path.lstrip('/') + '|referer=' + referer
+
+    return url
 
 
-def _handler_witv(scraper_module, ref, meta):
-    """WiTV : ref = slug de chaîne sur witv.org."""
-    return _handler_generic(scraper_module, ref, meta)
+def _handler_direct_url(ref, meta):
+    """
+    URL m3u8 directe : ref = URL complète, on la passe telle quelle.
+    Pratique pour stocker n'importe quelle URL en DB.
+
+    Si meta contient referer/user_agent, on les concatène au format Kodi.
+    """
+    if not ref or not str(ref).startswith('http'):
+        return None
+
+    url = str(ref)
+    meta = meta or {}
+
+    extras = []
+    if meta.get('referer'):
+        extras.append('referer=' + meta['referer'])
+    if meta.get('user_agent'):
+        extras.append('User-Agent=' + meta['user_agent'])
+
+    if extras and '|' not in url:
+        url = url + '|' + '&'.join(extras)
+
+    return url
 
 
-def _handler_elitegol(scraper_module, ref, meta):
-    """EliteGol : ref = slug ou URL relative."""
-    return _handler_generic(scraper_module, ref, meta)
-
-
-def _handler_daddyhd(scraper_module, ref, meta):
-    """DaddyHD : ref = identifiant de chaîne."""
-    return _handler_generic(scraper_module, ref, meta)
-
-
-# Mapping scraper → handler
+# Mapping : scraper → handler
 HANDLERS = {
-    'witv':          _handler_witv,
-    'elitegol':      _handler_elitegol,
-    'daddyhd':       _handler_daddyhd,
-    'fullmatchtv':   _handler_generic,
-    'neymartv':      _handler_generic,
-    'livetv':        _handler_generic,
-    'channelstream': _handler_generic,
-    'freebox':       _handler_generic,
-    'pluto_tv':      _handler_generic,
-    'direct_stream': _handler_generic,
-    'directfr':      _handler_generic,
+    'daddyhd':    _handler_daddyhd,
+    'direct_url': _handler_direct_url,
 }
 
 
-def _load_scraper(site_name):
-    """Importe dynamiquement resources.sites.<site_name>."""
-    try:
-        mod = __import__('resources.sites.%s' % site_name, fromlist=[site_name])
-        return mod
-    except Exception as e:
-        VSlog('[live_tv resolver] Impossible de charger le scraper %s : %s' % (site_name, e))
-        return None
-
+# ──────────────────────────────────────────────────────────────────
+#  Résolution
+# ──────────────────────────────────────────────────────────────────
 
 def _try_source(source):
-    """
-    Tente d'extraire une URL jouable depuis une source.
-    Retourne l'URL (str) ou None.
-    """
+    """Tente d'extraire une URL jouable depuis une source. Retourne l'URL ou None."""
     site = source.get('site')
     ref  = source.get('ref')
     meta = source.get('meta') or {}
@@ -100,50 +112,40 @@ def _try_source(source):
     if not site or not ref:
         return None
 
-    handler = HANDLERS.get(site, _handler_generic)
-    scraper = _load_scraper(site)
-    if scraper is None:
+    handler = HANDLERS.get(site)
+    if handler is None:
+        VSlog('[resolver] Site non supporté : %s (utilisez daddyhd ou direct_url)' % site)
         return None
 
-    VSlog('[live_tv resolver] Essai source : %s / %s' % (site, ref))
+    VSlog('[resolver] Essai source : %s / %s' % (site, ref))
+
     try:
-        url = handler(scraper, ref, meta)
+        url = handler(ref, meta)
         if url:
-            VSlog('[live_tv resolver] ✓ Source OK : %s' % site)
+            VSlog('[resolver] ✓ Source OK : %s' % site)
             return url
-        VSlog('[live_tv resolver] ✗ Source vide : %s' % site)
+        VSlog('[resolver] ✗ Source vide : %s' % site)
     except Exception as e:
-        VSlog('[live_tv resolver] ✗ Exception %s : %s' % (site, e))
+        VSlog('[resolver] ✗ Exception %s : %s' % (site, e))
 
     return None
 
 
-# ──────────────────────────────────────────────────────────────────
-#  Point d'entrée public
-# ──────────────────────────────────────────────────────────────────
-
 def resolve_channel(channel):
     """
-    Essaie chaque source dans l'ordre de priorité.
+    Essaie chaque source dans l'ordre de priorité jusqu'à en trouver une qui marche.
+    Retourne (url, source_used) ou (None, None).
 
-    `channel` est un dict comme retourné par l'API Laravel :
-        {
-            'id': 'bein_sport_1',
-            'label': 'BeIN Sport 1',
-            'logo': '...',
-            'sources': [ {site, ref, meta, priority}, ... ]
-        }
-
-    Retourne (url, source_used) ou (None, None) si tout a échoué.
-    L'utilisateur ne voit AUCUN message tant qu'on a encore des sources à essayer.
+    Silencieux côté UI tant qu'il reste des sources à essayer.
     """
     sources = channel.get('sources', []) or []
     if not sources:
         return None, None
 
-    # Affichage subtil pendant l'essai (les sources peuvent prendre quelques secondes)
-    progress = xbmcgui.DialogProgressBG()
+    # Petite barre de progression discrète pendant les essais
+    progress = None
     try:
+        progress = xbmcgui.DialogProgressBG()
         progress.create('fStream', channel.get('label', '') + ' — recherche...')
     except Exception:
         progress = None
