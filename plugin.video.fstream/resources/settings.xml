@@ -9,7 +9,8 @@
      
      <category label="Connexion">
     <!-- Authentification API -->
-    <setting id="api_base_url" type="text" label="API Base URL" default="https://dev.studitaf.com/api" />
+    <setting id="api_base_url" type="text" label="URL API" default="https://fstream-api.studitaf.com/api/v1"/>
+    <setting id="auth_device_id" type="text" label="Device ID" default="" visible="false"/>
     <setting id="auth_username" type="text" label="Nom d'utilisateur" default="" />
     <setting id="auth_password" type="text" label="Mot de passe" default="" option="hidden"/>
     <setting id="auth_token" type="text" label="Token API" default="" visible="false" />

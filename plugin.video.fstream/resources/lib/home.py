@@ -826,10 +826,10 @@ class cHome:
 
         oOutputParameterHandler = cOutputParameterHandler()
         oGui.addDir(
-            SITE_IDENTIFIER,
-            "doLogout",
-            "[Deconnexion]",
-            "logout.png",
+            'cAccount',
+            'showAccount',
+            'Mon compte',
+            'profile.png',
             oOutputParameterHandler,
         )
         oGui.addDir(SITE_IDENTIFIER, "showVOD", self.addons.VSlang(30131), "vod.png")
@@ -1612,7 +1612,12 @@ class cHome:
     # ===== MÉTHODES IPTV =====
 
     def showDirect(self):
-        """Menu principal IPTV avec toutes les sources"""
+        """
+        Menu principal "En direct" — restructuré :
+          1. Chaînes TV (catalogue Laravel curaté Sport/Divertissement)
+          2. Bibliothèque IPTV (sources externes : pays, catégories, langues, free-tv)
+          3. Live TV événementiel (existant, scraper livetv.py)
+        """
         oGui = cGui()
 
         from resources.lib.comaddon import VSlog
@@ -1620,16 +1625,51 @@ class cHome:
 
         oOutputParameterHandler = cOutputParameterHandler()
 
-        # Option 1: Live TV (menu complet avec sous-menus)
+        # ★ NOUVEAU : Catalogue fStream curaté (Sport / Divertissement)
+        oGui.addDir(
+            'cLiveTV',
+            'showRoot',
+            '[B]Chaines TV[/B]',
+            'tv.png',
+            oOutputParameterHandler,
+        )
+
+        # ★ NOUVEAU : Sous-menu groupé pour les sources IPTV externes
+        oOutputParameterHandler = cOutputParameterHandler()
+        oGui.addDir(
+            SITE_IDENTIFIER,
+            'showIPTVLibrary',
+            'Bibliotheque IPTV',
+            'tv.png',
+            oOutputParameterHandler,
+        )
+
+        # Live TV événementiel (scraper existant, inchangé)
+        oOutputParameterHandler = cOutputParameterHandler()
         oGui.addDir(
             SITE_IDENTIFIER,
             'showMenuLiveTV',
             'Live TV (Evenements sportifs)',
             'tv.png',
-            oOutputParameterHandler
+            oOutputParameterHandler,
         )
 
-        # Option 2: Par pays (IPTV-org avec limite 50)
+        oGui.setEndOfDirectory()
+
+    def showIPTVLibrary(self):
+        """
+        Sous-menu groupant toutes les sources IPTV externes :
+          - Par pays
+          - Par catégorie (sport, news, films, ...)
+          - Par langue
+          - Sources légales Free-TV
+        """
+        oGui = cGui()
+
+        from resources.lib.comaddon import VSlog
+        VSlog("[HOME] showIPTVLibrary() appelee")
+
+        # Par pays (en premier, c'est le plus parlant)
         oOutputParameterHandler = cOutputParameterHandler()
         oGui.addDir(
             SITE_IDENTIFIER,
@@ -1639,13 +1679,12 @@ class cHome:
             oOutputParameterHandler,
         )
 
-        # Séparateur
-        oGui.addText("fStream", "=== Categories ===")
-
         # Charger toutes les sources depuis get_iptv_sources()
         sources = get_iptv_sources()
 
-        # Filtrer et afficher uniquement les catégories principales
+        # === Catégories ===
+        oGui.addText("fStream", "=== Categories ===")
+
         main_categories = [
             "IPTV-ORG-SPORT",
             "IPTV-ORG-NEWS",
@@ -1654,7 +1693,7 @@ class cHome:
             "IPTV-ORG-ENTERTAINMENT",
             "IPTV-ORG-MUSIC",
             "IPTV-ORG-KIDS",
-            "IPTV-ORG-DOCUMENTARY"
+            "IPTV-ORG-DOCUMENTARY",
         ]
 
         for source_id in main_categories:
@@ -1671,15 +1710,14 @@ class cHome:
                     oOutputParameterHandler,
                 )
 
-        # Séparateur
+        # === Langues ===
         oGui.addText("fStream", "=== Langues ===")
 
-        # Afficher les sources par langue
         language_sources = [
             "IPTV-ORG-FRENCH",
             "IPTV-ORG-ENGLISH",
             "IPTV-ORG-SPANISH",
-            "IPTV-ORG-ARABIC"
+            "IPTV-ORG-ARABIC",
         ]
 
         for source_id in language_sources:
@@ -1696,14 +1734,13 @@ class cHome:
                     oOutputParameterHandler,
                 )
 
-        # Séparateur
+        # === Sources légales ===
         oGui.addText("fStream", "=== Sources legales ===")
 
-        # Afficher Free-TV
         legal_sources = [
             "FREE-TV-FRANCE",
             "FREE-TV-USA",
-            "FREE-TV-UK"
+            "FREE-TV-UK",
         ]
 
         for source_id in legal_sources:
@@ -1720,136 +1757,12 @@ class cHome:
                     oOutputParameterHandler,
                 )
 
-        # Option avancée: Toutes les sources
+        # Option avancée
         oOutputParameterHandler = cOutputParameterHandler()
         oGui.addDir(
             SITE_IDENTIFIER,
             "showIPTV_AllSources",
             "--- Toutes les sources ---",
-            "tv.png",
-            oOutputParameterHandler,
-        )
-
-        oGui.setEndOfDirectory()
-        """Menu principal IPTV avec plusieurs sources vérifiées"""
-        oGui = cGui()
-
-        from resources.lib.comaddon import VSlog
-        VSlog("[HOME] showDirect() appelee")
-
-        oOutputParameterHandler = cOutputParameterHandler()
-
-        # Option 1: Live TV (source existante livetv.py)
-        oGui.addDir(
-            'livetv',
-            'load',
-            'Live TV (Evenements sportifs)',
-            'tv.png',
-            oOutputParameterHandler
-        )
-
-        # Option 2: Par pays (IPTV-org)
-        oOutputParameterHandler = cOutputParameterHandler()
-        oGui.addDir(
-            SITE_IDENTIFIER,
-            "showIPTV_AllCountries",
-            "Par pays (Toutes chaines)",
-            "flags.png",
-            oOutputParameterHandler,
-        )
-
-        # Option 3: Chaînes Sport uniquement
-        oOutputParameterHandler = cOutputParameterHandler()
-        oOutputParameterHandler.addParameter("source_url", "https://iptv-org.github.io/iptv/categories/sports.m3u")
-        oOutputParameterHandler.addParameter("source_name", "Sport")
-        oGui.addDir(
-            SITE_IDENTIFIER,
-            "showIPTV_FromURL",
-            "Sport (Mondial)",
-            "sport.png",
-            oOutputParameterHandler,
-        )
-
-        # Option 4: Chaînes News uniquement
-        oOutputParameterHandler = cOutputParameterHandler()
-        oOutputParameterHandler.addParameter("source_url", "https://iptv-org.github.io/iptv/categories/news.m3u")
-        oOutputParameterHandler.addParameter("source_name", "News")
-        oGui.addDir(
-            SITE_IDENTIFIER,
-            "showIPTV_FromURL",
-            "News (Mondial)",
-            "news.png",
-            oOutputParameterHandler,
-        )
-
-        # Option 5: Chaînes Movies
-        oOutputParameterHandler = cOutputParameterHandler()
-        oOutputParameterHandler.addParameter("source_url", "https://iptv-org.github.io/iptv/categories/movies.m3u")
-        oOutputParameterHandler.addParameter("source_name", "Movies")
-        oGui.addDir(
-            SITE_IDENTIFIER,
-            "showIPTV_FromURL",
-            "Films (Mondial)",
-            "films.png",
-            oOutputParameterHandler,
-        )
-
-        # Option 6: Chaînes Entertainment
-        oOutputParameterHandler = cOutputParameterHandler()
-        oOutputParameterHandler.addParameter("source_url", "https://iptv-org.github.io/iptv/categories/entertainment.m3u")
-        oOutputParameterHandler.addParameter("source_name", "Entertainment")
-        oGui.addDir(
-            SITE_IDENTIFIER,
-            "showIPTV_FromURL",
-            "Divertissement",
-            "vod.png",
-            oOutputParameterHandler,
-        )
-
-        # Option 7: Chaînes Music
-        oOutputParameterHandler = cOutputParameterHandler()
-        oOutputParameterHandler.addParameter("source_url", "https://iptv-org.github.io/iptv/categories/music.m3u")
-        oOutputParameterHandler.addParameter("source_name", "Music")
-        oGui.addDir(
-            SITE_IDENTIFIER,
-            "showIPTV_FromURL",
-            "Musique",
-            "genres.png",
-            oOutputParameterHandler,
-        )
-
-        # Option 8: Chaînes Kids
-        oOutputParameterHandler = cOutputParameterHandler()
-        oOutputParameterHandler.addParameter("source_url", "https://iptv-org.github.io/iptv/categories/kids.m3u")
-        oOutputParameterHandler.addParameter("source_name", "Kids")
-        oGui.addDir(
-            SITE_IDENTIFIER,
-            "showIPTV_FromURL",
-            "Enfants",
-            "enfants.png",
-            oOutputParameterHandler,
-        )
-
-        # Option 9: France (langue française)
-        oOutputParameterHandler = cOutputParameterHandler()
-        oOutputParameterHandler.addParameter("source_url", "https://iptv-org.github.io/iptv/languages/fra.m3u")
-        oOutputParameterHandler.addParameter("source_name", "Francais")
-        oGui.addDir(
-            SITE_IDENTIFIER,
-            "showIPTV_FromURL",
-            "Chaines francophones",
-            "fr.png",
-            oOutputParameterHandler,
-        )
-
-        # Option 10: Free-TV (Chaînes légales uniquement)
-        oOutputParameterHandler = cOutputParameterHandler()
-        oOutputParameterHandler.addParameter("source_url", "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlists/playlist_france_full.m3u8")
-        oOutputParameterHandler.addParameter("source_name", "Free-TV France")
-        oGui.addDir(
-            SITE_IDENTIFIER,
-            "showIPTV_FromURL",
-            "Free-TV France (Legal)",
             "tv.png",
             oOutputParameterHandler,
         )

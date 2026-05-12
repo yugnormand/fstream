@@ -146,6 +146,12 @@ class main:
             if isSearch(sSiteName, sFunction):
                 return
 
+            if isLiveTV(sSiteName, sFunction):
+                return
+
+            if isAccount(sSiteName, sFunction):
+                return
+
             if sSiteName == 'globalRun':
                 __import__('resources.lib.runscript', fromlist=['runscript'])
                 # function = getattr(plugins, sFunction)
@@ -321,6 +327,28 @@ def isSearch(sSiteName, sFunction):
     if sSiteName == 'globalSearch':
         oSearch = cSearch()
         exec("oSearch.searchGlobal()")
+        return True
+    return False
+
+
+def isLiveTV(sSiteName, sFunction):
+    """Dispatch les actions du nouveau module Live TV (Sport / Divertissement)."""
+    if sSiteName == 'cLiveTV':
+        from resources.lib.live_tv.ui import cLiveTV
+        oLiveTV = cLiveTV()
+        function = getattr(oLiveTV, sFunction)
+        function()
+        return True
+    return False
+
+
+def isAccount(sSiteName, sFunction):
+    """Dispatch les actions du module Mon compte (cAccount)."""
+    if sSiteName == 'cAccount':
+        from resources.lib.account import cAccount
+        oAccount = cAccount()
+        function = getattr(oAccount, sFunction)
+        function()
         return True
     return False
 
