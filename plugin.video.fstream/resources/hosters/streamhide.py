@@ -1,5 +1,5 @@
 # coding: utf-8
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
 
 from resources.hosters.hoster import iHoster
 from resources.lib.handler.requestHandler import cRequestHandler

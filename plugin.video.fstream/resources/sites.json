@@ -143,7 +143,7 @@
             "label": "filmsetvideos",
             "active": "False",
             "url": "https://filmsetvideos.com/"
-        },
+        }                           ,
         "filmspourenfants": {
             "label": "Films pour Enfants",
             "active": "True",
@@ -174,13 +174,13 @@
             "label": "French-stream",
             "active": "True",
             "site_info": "https://fstream.info/",
-            "url": "https://fs18.lol/"
+            "url": "https://fs17.lol/"
         },
         "french_stream_lol": {
             "label": "French-stream-lol",
-            "active": "False",
+            "active": "True",
             "cloudflare": "True",
-            "url": "https://vvw.french-stream.bio/"
+            "url": "https://vvw.french-stream.one/"
         },
         "frenchanimes": {
             "label": "French Animes",
@@ -210,7 +210,7 @@
         },
         "juststream": {
             "label": "JustStream",
-            "active": "False",
+            "active": "True",
             "cloudflare": "True",
             "url": "https://juststream.pics/"
         },
@@ -350,21 +350,21 @@
         },
         "vostfree": {
             "label": "Vostfree",
-            "active": "true",
+            "active": "True",
             "url": "https://vostfree.ws/"
         },
         "wawacity": {
             "label": "Wawacity",
             "active": "true",
             "cloudflare": "True",
-            "url": "https://www.wawacity.irish/"
+            "url": "https://www.wawacity.win/"
         },
         "wiflix": {
             "label": "WiFlix",
             "active": "True",
             "cloudflare": "False",
             "site_info": "https://www.wiflix-nouvelle-adresse.site/",
-            "url": "https://flemmix.casa/"
+            "url": "https://flemmix.win/"
         },
         "wilifilm": {
             "label": "Wilifilm",
