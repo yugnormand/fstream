@@ -1649,7 +1649,7 @@ class cHome:
         oGui.addDir(
             SITE_IDENTIFIER,
             'showMenuLiveTV',
-            'Live TV (Evenements sportifs)',
+            'Coupe du Monde 2026',
             'tv.png',
             oOutputParameterHandler,
         )
