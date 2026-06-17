@@ -14,14 +14,14 @@ class cHoster(iHoster):
         oRequest.setRequestType(cRequestHandler.REQUEST_TYPE_POST)
         data = oRequest.request(jsonDecode=True)
         token = data.get("data", {}).get("token")
-
+        
         # web token
         oRequest = cRequestHandler('https://gofile.io/dist/js/config.js')
         sHtmlContent = oRequest.request()
         aResult = cParser().parse(sHtmlContent, 'appdata.wt = "([^"]+)')
         if not aResult[0]:
             return False, False
-
+        
         webToken = aResult[1][0]
         mediaId = self._url.split('/')[-1]
         urlAPI = 'https://api.gofile.io/contents/%s?wt=%s&cache=true' % (mediaId, webToken)
@@ -37,7 +37,7 @@ class cHoster(iHoster):
 
         # le lien du premier fichier
         childs = data['data']['children']
-        for file in childs:
+        for file in childs:       
             return True, childs.get(file).get('link') + '|cookie=accountToken%3D' + token
-
+        
         return False, False

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# https://github.com/yugnormand/fstream
+# https://github.com/Kodi-fstream/venom-xbmc-addons
 #
 
 from resources.hosters.hoster import iHoster

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# https://github.com/yugnormand/fstream
+# https://github.com/Kodi-fstream/venom-xbmc-addons
 # https://forums.tvaddons.ag/tknorris-release-repository/10792-debugging-daclips-2.html
 
 import re

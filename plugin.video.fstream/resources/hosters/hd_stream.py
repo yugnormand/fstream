@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/yugnormand/fstream
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 # Venom
 # Hoster pour les liens https://hd-stream.xyz/embed/
 from resources.lib.handler.requestHandler import cRequestHandler

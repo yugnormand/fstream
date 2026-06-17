@@ -64,7 +64,7 @@
         "coflix": {
             "label": "Coflix",
             "active": "True",
-            "url": "https://coflix.wales/"
+            "url": "https://coflix.band/"
         },
         "cpasmal": {
             "label": "CpasMal",
@@ -174,7 +174,7 @@
             "label": "French-stream",
             "active": "True",
             "site_info": "https://fstream.info/",
-            "url": "https://fs17.lol/"
+            "url": "https://fs15.lol/"
         },
         "french_stream_lol": {
             "label": "French-stream-lol",
@@ -227,13 +227,24 @@
         "livetv": {
             "label": "Live TV",
             "active": "True",
-            "url": "https://livetv.club/"
+            "url": "https://livetv899.me/"
+        },
+        "livewatch": {
+            "label": "livewatch",
+            "active": "True",
+            "url": "https://livewatch.top/",
+            "url_api": "https://livewatch.top/api/"
         },
         "monstream": {
             "label": "Mon Stream",
             "active": "False",
             "cloudflare": "True",
             "url": "https://monstream.archi/"
+        },
+        "movix": {
+            "label": "movix",
+            "active": "True",
+            "url": "https://movix.bet/"
         },
         "mysteriam": {
             "label": "MySteriam",
@@ -244,6 +255,11 @@
             "label": "NeymarTV",
             "active": "True",
             "url": "https://v1.messitv.net/"
+        },
+        "netu": {
+            "label": "Hoster NETU",
+            "active": "True",
+            "url": "https://waaw.to/"
         },
         "o1streaming": {
             "label": "O1 streaming",
@@ -299,6 +315,12 @@
             "label": "Sky-Animes",
             "active": "True",
             "url": "http://www.sky-animes.com/"
+        },
+        "sportplus": {
+            "label": "sportplus",
+            "active": "True",
+            "url": "https://fr.sportplus.live/",
+            "url_API": "https://apisplus.live/"
         },
         "streamizseries": {
             "label": "Streamiz S\u00e9ries",

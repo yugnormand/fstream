@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 # Nouvelle source de streaming FILMS ET SÉRIES
 import re
 
@@ -490,7 +490,7 @@ def showMovieLinks():
     sDesc = 'JustStream'
 
     if aResult[0]:
-        sDesc = ('[I][COLOR grey]%s[/COLOR][/I] %s') % ('Synopsis : ', aResult[1][0])
+        sDesc = aResult[1][0]
     sStart = '<ul class="player-list">'
     sEnd = '<div class="full-ser-keywords">'
     sHtmlContent = oParser.abParse(sHtmlContent, sStart, sEnd)

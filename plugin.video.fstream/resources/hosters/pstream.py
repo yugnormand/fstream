@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/yugnormand/fstream
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 # https://www.pstream.net/e/xxxxx
 import base64
 import json

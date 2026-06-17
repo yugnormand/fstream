@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/yugnormand/fstream
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 #
 # alors la j'ai pas le courage
 import re

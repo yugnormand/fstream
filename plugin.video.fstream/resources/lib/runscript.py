@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/yugnormand/fstream
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 
-# fStream = xbmcaddon.Addon('plugin.video.fstream')
-# sLibrary = VSPath(fStream.getAddonInfo("path")).decode("utf-8")
+# fstream = xbmcaddon.Addon('plugin.video.fstream')
+# sLibrary = VSPath(fstream.getAddonInfo("path")).decode("utf-8")
 # sys.path.append (sLibrary)
 import json
 import xbmcvfs
@@ -44,12 +44,12 @@ class cClear:
             addon('script.module.urlresolver').openSettings()
             return
 
-        elif (env == 'metahandler'):
+        if (env == 'metahandler'):
             addon('script.module.metahandler').openSettings()
             return
 
-        elif (env == 'changelog_old'):
-            sUrl = 'https://yugnormand.github.io/fstream/plugin.video.fstream/changelog.txt'
+        if (env == 'changelog_old'):
+            sUrl = 'https://raw.githubusercontent.com/Kodi-fstream/venom-xbmc-addons/master/plugin.video.fstream/changelog.txt'
             try:
                 oRequest = urllib2.Request(sUrl)
                 oResponse = urllib2.urlopen(oRequest)
@@ -60,12 +60,12 @@ class cClear:
                 else:
                     sContent = oResponse.read()
 
-                self.TextBoxes('fStream Changelog', sContent)
+                self.TextBoxes('fstream Changelog', sContent)
             except:
                 self.DIALOG.VSerror("%s, %s" % (self.ADDON.VSlang(30205), sUrl))
             return
 
-        elif (env == 'changelog'):
+        if (env == 'changelog'):
 
             class XMLDialog(xbmcgui.WindowXMLDialog):
 
@@ -81,7 +81,7 @@ class cClear:
                     self.getControl(1).setLabel('ChangeLog')
                     self.button.setLabel('OK')
 
-                    sUrl = 'https://api.github.com/repos/yugnormand/fstream/commits'
+                    sUrl = 'https://api.github.com/repos/Kodi-fstream/venom-xbmc-addons/commits'
                     oRequest = urllib2.Request(sUrl)
                     oResponse = urllib2.urlopen(oRequest)
 
@@ -127,8 +127,8 @@ class cClear:
             del wd
             return
 
-        elif (env == 'soutient'):
-            sUrl = 'https://raw.githubusercontent.com/yugnormand/fstream/master/plugin.video.fstream/soutient.txt'
+        if (env == 'soutient'):
+            sUrl = 'https://raw.githubusercontent.com/Kodi-fstream/venom-xbmc-addons/master/plugin.video.fstream/soutient.txt'
             try:
                 oRequest = urllib2.Request(sUrl)
                 oResponse = urllib2.urlopen(oRequest)
@@ -139,36 +139,12 @@ class cClear:
                 else:
                     sContent = oResponse.read()
 
-                self.TextBoxes('fStream Soutient', sContent)
+                self.TextBoxes('fstream Soutient', sContent)
             except:
                 self.DIALOG.VSerror("%s, %s" % (self.ADDON.VSlang(30205), sUrl))
             return
 
-        elif (env == 'addon'):  # Vider le cache des métadonnées
-            if self.DIALOG.VSyesno(self.ADDON.VSlang(30456)):
-                cached_Cache = "special://home/userdata/addon_data/plugin.video.fstream/video_cache.db"
-                # important seul xbmcvfs peux lire le special
-                try:
-                    cached_Cache = VSPath(cached_Cache).decode("utf-8")
-                except AttributeError:
-                    cached_Cache = VSPath(cached_Cache)
-
-                try:
-                    db = sqlite.connect(cached_Cache)
-                    dbcur = db.cursor()
-                    dbcur.execute('DELETE FROM movie')
-                    dbcur.execute('DELETE FROM tvshow')
-                    dbcur.execute('DELETE FROM season')
-                    dbcur.execute('DELETE FROM episode')
-                    db.commit()
-                    dbcur.close()
-                    db.close()
-                    self.DIALOG.VSinfo(self.ADDON.VSlang(30090))
-                except:
-                    self.DIALOG.VSerror(self.ADDON.VSlang(30091))
-            return
-
-        elif (env == 'clean'):
+        if (env == 'clean'):
             liste = ['Historiques des recherches', 'Marque-Pages', 'En cours de lecture',
                      'Niveau de lecture', 'Marqués vues', 'Téléchargements']
             ret = self.DIALOG.VSselect(liste, self.ADDON.VSlang(30110))
@@ -209,28 +185,8 @@ class cClear:
                     VSlog("Exception runscript sql_drop: {0}".format(err))
             return
 
-        elif (env == 'xbmc'):
-            if self.DIALOG.VSyesno(self.ADDON.VSlang(30456)):
-                path = "special://temp/"
-                try:
-                    xbmcvfs.rmdir(path, True)
-                    self.DIALOG.VSok(self.ADDON.VSlang(30092))
-                except:
-                    self.DIALOG.VSerror(self.ADDON.VSlang(30093))
-            return
-
-        elif (env == 'fi'):
-            if self.DIALOG.VSyesno(self.ADDON.VSlang(30456)):
-                path = "special://temp/archive_cache/"
-                try:
-                    xbmcvfs.rmdir(path, True)
-                    self.DIALOG.VSok(self.ADDON.VSlang(30095))
-                except:
-                    self.DIALOG.VSerror(self.ADDON.VSlang(30096))
-            return
-
         # activer toutes les sources
-        elif (env == 'enableSources'):
+        if (env == 'enableSources'):
             if self.DIALOG.VSyesno(self.ADDON.VSlang(30456)):
                 sitesManager = siteManager()
                 sitesManager.enableAll()
@@ -240,7 +196,7 @@ class cClear:
             return
 
         # désactiver toutes les sources
-        elif (env == 'disableSources' or env == 'disableSourcesSilent' ):
+        if (env == 'disableSources' or env == 'disableSourcesSilent' ):
             if env == 'disableSources' and not self.DIALOG.VSyesno(self.ADDON.VSlang(30456)):
                 return
             sitesManager = siteManager()
@@ -250,7 +206,7 @@ class cClear:
             return
 
         # aciver/désactiver les sources
-        elif (env == 'search'):
+        if (env == 'search'):
 
             from resources.lib.handler.pluginHandler import cPluginHandler
             valid = '[COLOR green][x][/COLOR]'
@@ -337,9 +293,70 @@ class cClear:
             del wd
             return
 
-        elif (env == 'thumb'):
+        if (env == 'sauv'):
+            select = self.DIALOG.VSselect(['Import', 'Export'])
+            DB = "special://home/userdata/addon_data/plugin.video.fstream/fstream.db"
+            if select >= 0:
+                try:
+                    if select == 0:
+                        # sélection d'un fichier
+                        new = self.DIALOG.VSbrowse(1, 'fstream', "files")
+                        if new:
+                            xbmcvfs.delete(DB)
+                            xbmcvfs.copy(new, DB)
+                            self.DIALOG.VSinfo(self.ADDON.VSlang(30099))
+                    elif select == 1:
+                        # sélection d'un répertoire
+                        new = self.DIALOG.VSbrowse(3, 'fstream', "files")
+                        if new:
+                            xbmcvfs.copy(DB, new + 'fstream.db')
+                            self.DIALOG.VSinfo(self.ADDON.VSlang(30099))
+                except:
+                    self.DIALOG.VSerror(self.ADDON.VSlang(30100))
 
-            if self.DIALOG.VSyesno(self.ADDON.VSlang(30098)):
+                return
+
+        if (env == 'testpremium'):    # tester un compte premium
+            from resources.lib.gui.hoster import cHosterGui
+            oHoster = cHosterGui().getHoster("alldebrid")
+            oHoster.testPremium()
+            return
+
+        if (env == 'addon' or env == 'cleanAll'):  # Vider le cache des métadonnées
+            if env == 'cleanAll' or self.DIALOG.VSyesno(self.ADDON.VSlang(30456)):
+                from resources.lib.tmdb import cTMDb
+                try:
+                    if cTMDb.purge_cache(log=False):
+                        if env != 'cleanAll':
+                            self.DIALOG.VSinfo(self.ADDON.VSlang(30090))
+                    else:
+                        self.DIALOG.VSerror(self.ADDON.VSlang(30091))
+                except:
+                    self.DIALOG.VSerror(self.ADDON.VSlang(30091))
+
+        if (env == 'xbmc' or env == 'cleanAll'):
+            if env == 'cleanAll' or self.DIALOG.VSyesno(self.ADDON.VSlang(30456)):
+                path = "special://temp/"
+                try:
+                    xbmcvfs.rmdir(path, True)
+                    if env != 'cleanAll':
+                        self.DIALOG.VSok(self.ADDON.VSlang(30092))
+                except:
+                    self.DIALOG.VSerror(self.ADDON.VSlang(30093))
+
+        if (env == 'fi' or env == 'cleanAll'):
+            if env == 'cleanAll' or self.DIALOG.VSyesno(self.ADDON.VSlang(30456)):
+                path = "special://temp/archive_cache/"
+                try:
+                    xbmcvfs.rmdir(path, True)
+                    if env != 'cleanAll':
+                        self.DIALOG.VSok(self.ADDON.VSlang(30095))
+                except:
+                    self.DIALOG.VSerror(self.ADDON.VSlang(30096))
+
+        if (env == 'thumb' or env == 'cleanAll'):
+
+            if env == 'cleanAll' or self.DIALOG.VSyesno(self.ADDON.VSlang(30098)):
 
                 text = False
                 path = "special://userdata/Thumbnails/"
@@ -361,42 +378,9 @@ class cClear:
                         except:
                             text += 'Clear Thumbnail DB, Error[CR]'
 
-                if text:
-                    text = "%s (Important relancer Kodi)" % text
+                text = "%s [CR][COLOR Red]IMPORTANT[/COLOR] - Redémarrer Kodi" % text
+                if env != 'cleanAll':
                     self.DIALOG.VSok(text)
-            return
-
-        elif (env == 'sauv'):
-            select = self.DIALOG.VSselect(['Import', 'Export'])
-            DB = "special://home/userdata/addon_data/plugin.video.fstream/fstream.db"
-            if select >= 0:
-                try:
-                    if select == 0:
-                        # sélection d'un fichier
-                        new = self.DIALOG.VSbrowse(1, 'fStream', "files")
-                        if new:
-                            xbmcvfs.delete(DB)
-                            xbmcvfs.copy(new, DB)
-                            self.DIALOG.VSinfo(self.ADDON.VSlang(30099))
-                    elif select == 1:
-                        # sélection d'un répertoire
-                        new = self.DIALOG.VSbrowse(3, 'fStream', "files")
-                        if new:
-                            xbmcvfs.copy(DB, new + 'fstream.db')
-                            self.DIALOG.VSinfo(self.ADDON.VSlang(30099))
-                except:
-                    self.DIALOG.VSerror(self.ADDON.VSlang(30100))
-
-                return
-
-        elif (env == 'testpremium'):    # tester un compte premium
-            from resources.lib.gui.hoster import cHosterGui
-            oHoster = cHosterGui().getHoster("alldebrid")
-            oHoster.testPremium()
-            return
-
-        else:
-            return
 
         return
 

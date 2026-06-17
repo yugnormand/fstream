@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # https://vidzi.tv/xxx.html
-# fStream https://github.com/yugnormand/fstream
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 import re
 
 from resources.lib.handler.requestHandler import cRequestHandler

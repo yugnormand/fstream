@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/yugnormand/fstream
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 import copy
 import json
 import threading
@@ -7,7 +7,7 @@ import xbmc
 import xbmcplugin
 import sys
 
-from resources.lib.comaddon import listitem, addon, dialog, window, isNexus, progress, VSlog
+from resources.lib.comaddon import listitem, addon, dialog, window, isNexus, progress, VSlog, siteManager
 from resources.lib.gui.contextElement import cContextElement
 from resources.lib.gui.guiElement import cGuiElement
 from resources.lib.handler.inputParameterHandler import cInputParameterHandler
@@ -25,6 +25,7 @@ class cGui:
     thread_listing = []
     episodeListing = []  # Pour gérer l'enchainement des episodes
     ADDON = addon()
+    oUtil = cUtil()
     displaySeason = ADDON.getSetting('display_season_title')
 
     # Gérer les résultats de la recherche
@@ -36,6 +37,8 @@ class cGui:
 
     def addNewDir(self, Type, sId, sFunction, sLabel, sIcon, sThumbnail='', sDesc='', oOutputParameterHandler=cOutputParameterHandler(), sMeta=0, sCat=None):
         oGuiElement = cGuiElement()
+        globalSearch = window(10101).getProperty('search')
+
         # dir ou link => CONTENT par défaut = files
         if Type != 'dir' and Type != 'link':
             cGui.CONTENT = Type
@@ -57,18 +60,42 @@ class cGui:
         oInputParameterHandler = None
         if Type == 'link':
             oInputParameterHandler = cInputParameterHandler()
-            sCat = oInputParameterHandler.getValue('sCat')
-            if sCat:
-                sCat = int(sCat)
-                oGuiElement.setCat(sCat)
 
-            sMeta = oInputParameterHandler.getValue('sMeta')
-            if sMeta:
-                sMeta = int(sMeta)
-                oGuiElement.setMeta(sMeta)
+            sCat_in = oInputParameterHandler.getValue('sCat')
+            if sCat_in:
+                try:
+                    sCat_in = int(sCat_in)
+                    oGuiElement.setCat(sCat_in)
+                    sCat = sCat_in
+                except:
+                    pass
+
+            sMeta_in = oInputParameterHandler.getValue('sMeta')
+            if sMeta_in:
+                try:
+                    sMeta_in = int(sMeta_in)
+                    oGuiElement.setMeta(sMeta_in)
+                    sMeta = sMeta_in
+                except:
+                    pass
         else:
             oOutputParameterHandler.addParameter('sMeta', sMeta)
             oGuiElement.setMeta(sMeta)
+
+        # pour les saisons, on garde le titre TMDB si on vient de la série
+        # on arrive directement sur des saisons avec certaines sources, ou par la fonction "poursuivre la lecture"
+        if sCat == 4:
+            # pas pendant la recherche globale
+            if not globalSearch:
+                oInputParameterHandler = cInputParameterHandler()
+                sCatFrom = oInputParameterHandler.getValue('sCat')
+                if sCatFrom:
+                    try:
+                        sCatFrom = int(sCatFrom)
+                        if sCatFrom == 2: #Série
+                            oGuiElement.setTitleTMDB(True)
+                    except:
+                        pass
 
         # a faire après avoir déterminé la cat et le meta
         oGuiElement.setTitle(sLabel)
@@ -78,16 +105,21 @@ class cGui:
         sTmdbId = oOutputParameterHandler.getValue('sTmdbId')
         if sCat and not sTmdbId:
             # pas pendant la recherche globale
-            if window(10101).getProperty('search') != 'true':
+            if not globalSearch:
                 if not sMeta:
                     if not oInputParameterHandler:
                         oInputParameterHandler = cInputParameterHandler()
-                    sMeta = int(oInputParameterHandler.getValue('sMeta'))
+                    try:
+                        sMeta = int(oInputParameterHandler.getValue('sMeta'))
+                    except:
+                        sMeta = 0
+
                 if 0 < sMeta < 7:
                     if not oInputParameterHandler:
                         oInputParameterHandler = cInputParameterHandler()
                     sTmdbId = oInputParameterHandler.getValue('sTmdbId')
-                    if sTmdbId:
+                    sMetaParent = oInputParameterHandler.getValue('sMeta')
+                    if sMetaParent and sMetaParent != '8' and sTmdbId:  # Ne pas prendre l'id si on vient d'un diffuseur 
                         oOutputParameterHandler.addParameter('sTmdbId', sTmdbId)
 
         oOutputParameterHandler.addParameter('sFav', sFunction)
@@ -108,9 +140,37 @@ class cGui:
         else:
             oGuiElement.setFileName(sLabel)
 
-        # si pas d'info fourni en spécifique, récupéré celle de la navigation précédente
-        if sCat and not sThumbnail and not sTmdbId:
-            oGuiElement.getInfoLabel()
+        # les épisodes ont quasi toujours un thumb (still) => getInfoLabel jamais appelé
+        # => fanart/backdrop de série ne descend pas sur le dossier épisodes.
+        # pour les episodes, on appelle getInfoLabel même si thumb existe,
+        # mais on restaure le thumb/poster d'épisode après.
+        try:
+            sCat_i = int(sCat) if sCat is not None else None
+        except:
+            sCat_i = None
+
+        if sCat:
+            # Cas général inchangé
+            if not sThumbnail and not sTmdbId:
+                oGuiElement.getInfoLabel()
+
+            # Cas EPISODE: on force la meta pour récupérer fanart/backdrop (série),
+            # tout en conservant le thumb d'épisode.
+            elif sCat_i == 8 and not globalSearch:
+                old_thumb = oGuiElement.getThumbnail()
+                old_poster = oGuiElement.getPoster()
+
+                oGuiElement.getInfoLabel()
+
+                # On restaure le visuel d'épisode (thumb/still) si ça a été écrasé
+                if old_thumb:
+                    oGuiElement.setThumbnail(old_thumb)
+                if old_poster:
+                    oGuiElement.setPoster(old_poster)
+                else:
+                    # si poster non défini mais thumb oui, on garde une cohérence
+                    if old_thumb:
+                        oGuiElement.setPoster(old_thumb)
 
         try:
             return self.addFolder(oGuiElement, oOutputParameterHandler)
@@ -177,12 +237,17 @@ class cGui:
         return self.addNewDir('sets', sId, sFunction, sLabel, 'no-image.png', sThumbnail, sDesc, oOutputParameterHandler, 3, 7)
 
     def addGenre(self, sId, sFunction, sLabel, oOutputParameterHandler='', sDesc=""):
-        sIcon = 'genres/%s.png' % str(cUtil().formatUTF8(sLabel))
+        sIcon = 'genres/%s.png' % str(self.oUtil.formatUTF8(sLabel))
         sIcon = sIcon.replace(' & ', '_').replace(' ', '_').replace("'", '_').replace("-", '_')
         return self.addNewDir('dir', sId, sFunction, sLabel, sIcon, '', sDesc, oOutputParameterHandler, 0, None)
 
-    def addDir(self, sId, sFunction, sLabel, sIcon, oOutputParameterHandler=cOutputParameterHandler(), sDesc=""):
-        return self.addNewDir('dir', sId, sFunction, sLabel, sIcon, '', sDesc, oOutputParameterHandler, 0, None)
+    def addDir(self, sId, sFunction, sLabel, sIcon, oOutputParameterHandler=cOutputParameterHandler(), sDesc = ''):
+        sDesc = sLabel if not sDesc else ''
+        sThumb = ''
+        # générer une icone par défaut
+        if not sIcon:
+            sIcon = sThumb = self.oUtil.getIconDefault(sLabel)
+        return self.addNewDir('dir', sId, sFunction, sLabel, sIcon, sThumb, sDesc, oOutputParameterHandler, 0, None)
 
     def addLink(self, sId, sFunction, sLabel, sThumbnail, sDesc, oOutputParameterHandler=''):
         # Pour gérer l'enchainement des épisodes
@@ -429,18 +494,27 @@ class cGui:
                 else:
                     data['cast'].append((i['name'], i['character'], i['order'], i.get('thumbnail', "")))
 
+        # Fournir la resolution si connue
+        width = None
+        if sRes:
+            if '2160' in sRes:
+                width = 3840
+                height = 2160
+            elif '1080' in sRes:
+                width = 1920
+                height = 1080
+            elif '720' in sRes:
+                width = 1280
+                height = 720
+            elif '480' in sRes:
+                width = 720
+                height = 576
+            
         if not isNexus():
             # voir : https://kodi.wiki/view/InfoLabels
             oListItem.setInfo(oGuiElement.getType(), data)
-            if sRes:
-                if '2160' in sRes:
-                    oListItem.addStreamInfo('video', {'width': 3840, 'height': 2160})
-                elif '1080' in sRes:
-                    oListItem.addStreamInfo('video', {'width': 1920, 'height': 1080})
-                elif '720' in sRes:
-                    oListItem.addStreamInfo('video', {'width': 1280, 'height': 720})
-                elif '480' in sRes:
-                    oListItem.addStreamInfo('video', {'width': 720, 'height': 576})
+            if width:
+                oListItem.addStreamInfo('video', {'width': width, 'height': height})
         else:
             videoInfoTag = oListItem.getVideoInfoTag()
             videoInfoTag.setMediaType(data.get('mediatype', ''))
@@ -450,17 +524,22 @@ class cGui:
             videoInfoTag.setTvShowTitle(data.get('tvshowtitle', ''))
             # oListItem.setInfo(oGuiElement.getType(), data)
 
+            # ID TMDB, pour les films et les séries 
             tmdbID = oGuiElement.getTmdbId()
-            if tmdbID:
-                videoInfoTag.setUniqueIDs({'tmdb': tmdbID, 'tvshow.tmdb': tmdbID}, None)
-            # https://alwinesch.github.io/class_x_b_m_c_addon_1_1xbmc_1_1_info_tag_video.html
-            # https://alwinesch.github.io/group__python___info_tag_video.html
+            if tmdbID not in (None, '', 0, '0'):
+                try:
+                    tmdb_str = str(tmdbID)  # au format texte
+                    videoInfoTag.setUniqueIDs({'tmdb': tmdb_str, 'tvshow.tmdb': tmdb_str}, 'tmdb')
+                except TypeError:
+                    pass  # En cas de type exotique, on évite de faire planter le thread
 
-            # les infos récupérées par fStream
+            # On RENSEIGNE TOUJOURS les métadonnées, même si un ID TMDb est présent
+            # => le synopsis/local data de fstream/pastebin reste utilisable.
             videoInfoTag.setOriginalTitle(data.get('originaltitle', ""))
             videoInfoTag.setPlot(data.get('plot', ""))
             videoInfoTag.setPlotOutline(data.get('tagline', ""))
             videoInfoTag.setYear(int(data.get('year', 0)))
+            videoInfoTag.setPremiered(data.get('premiered', ''))
             videoInfoTag.setRating(float(data.get('rating', 0.0)))
             videoInfoTag.setMpaa(data.get('mpaa', ""))
             videoInfoTag.setDuration(int(data.get('duration', 0)))
@@ -476,33 +555,31 @@ class cGui:
             videoInfoTag.setResumePoint(float(data.get('resumetime', 0.0)), float(data.get('totaltime', 0.0)))
             videoInfoTag.setCast(data.get('cast', []))
         
-            if sRes:
-                width = None
-                height = None
-                if '2160' in sRes:
-                    width = 3840
-                    height = 2160
-                elif '1080' in sRes:
-                    width = 1920
-                    height = 1080
-                elif '720' in sRes:
-                    width = 1280
-                    height = 720
-                elif '480' in sRes:
-                    width = 720
-                    height = 576
-                
-                if width:
-                    # [width, height, aspect, duration, codec, stereoMode, language])
-                    videoStreamDetail = xbmc.VideoStreamDetail(width=width, height=height)
-                    videoInfoTag.addVideoStream(videoStreamDetail)
+            if width:
+                # [width, height, aspect, duration, codec, stereoMode, language])
+                videoStreamDetail = xbmc.VideoStreamDetail(width=width, height=height)
+                videoInfoTag.addVideoStream(videoStreamDetail)
 
     
-        oListItem.setArt({
-                          'poster': oGuiElement.getPoster(),
-                          'thumb': oGuiElement.getThumbnail(),
-                          'icon': oGuiElement.getIcon(),
-                          'fanart': oGuiElement.getFanart()})
+        art = {
+               'poster': oGuiElement.getPoster(),
+               'thumb': oGuiElement.getThumbnail(),
+               'icon': oGuiElement.getIcon(),
+               # FANART = backdrop (idéalement sans texte)
+               'fanart': oGuiElement.getFanart(),
+               # LANDSCAPE = backdrop "avec texte" (langue TMDb, fallback EN)
+               'landscape': oGuiElement.getItemValue('landscape_path')
+              }
+
+        clearlogo_url = oGuiElement.getItemValue('clearlogo') or oGuiElement.getItemValue('tvshow.clearlogo') or oGuiElement.getItemValue('logo_path')
+        if clearlogo_url:
+            meta_type = oGuiElement.getMeta()
+            if meta_type in (1, 3):
+                art['clearlogo'] = clearlogo_url
+            if meta_type in (2, 4, 5, 6):
+                art['tvshow.clearlogo'] = clearlogo_url
+
+        oListItem.setArt(art)
 
         aProperties = oGuiElement.getItemProperties()
         for sPropertyKey, sPropertyValue in aProperties.items():
@@ -672,8 +749,11 @@ class cGui:
     def setEndOfDirectory(self, forceViewMode=False):
         iHandler = cPluginHandler().getPluginHandle()
 
+        # Notification si aucun élément
         if not self.listing:
-            self.addText('cGui')
+            self.showNofication(self.ADDON.VSlang(30204))
+            xbmcplugin.endOfDirectory(iHandler, succeeded=False, cacheToDisc=False)
+            return
 
         # attendre l'arret des thread utilisés pour récupérer les métadonnées
         total = len(self.thread_listing)
@@ -767,7 +847,7 @@ class cGui:
             sCleanTitle = oInputParameterHandler.getValue('sFileName') 
         else:
             sCleanTitle = oInputParameterHandler.getValue('sTitle') if oInputParameterHandler.exist('sTitle') else xbmc.getInfoLabel('ListItem.Title')
-            # sCleanTitle = cUtil().titleWatched(sCleanTitle)
+            # sCleanTitle = oUtil.titleWatched(sCleanTitle)
             
         sCat = oInputParameterHandler.getValue('sCat') if oInputParameterHandler.exist('sCat') else xbmc.getInfoLabel('ListItem.Property(sCat)')
 
@@ -841,7 +921,7 @@ class cGui:
 
     def setWatched(self):
         if True:
-            # Use fStream database
+            # Use fstream database
             oInputParameterHandler = cInputParameterHandler()
             sSite = oInputParameterHandler.getValue('sId')
             sSiteUrl = oInputParameterHandler.getValue('siteUrl')
@@ -910,8 +990,14 @@ class cGui:
     def openSettings(self):
         return False
 
-    def showNofication(self, sTitle, iSeconds=0):
-        return False
+    def showNofication(self, sDesc, sTitle='fstream', iSeconds=3):
+        # Pas de notif  lors des recherches globales
+        if window(10101).getProperty('search') == 'true':
+            return
+        oInputParameterHandler = cInputParameterHandler()
+        sSite = oInputParameterHandler.getValue('site')
+        siteName = siteManager().getProperty(sSite, siteManager.LABEL)
+        return dialog().VSinfo(sDesc, siteName, iSeconds)
 
     def showError(self, sTitle, sDescription, iSeconds=0):
         return False
@@ -942,3 +1028,4 @@ class cGui:
         cGui.searchResultsSemaphore.acquire()
         cGui.searchResults = {}
         cGui.searchResultsSemaphore.release()
+

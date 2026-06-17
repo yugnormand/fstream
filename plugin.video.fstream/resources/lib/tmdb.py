@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Code de depart par AnthonyBloomer
-# Modif pour fStream
-# https://github.com/Kodi-fStream/venom-xbmc-addons/
+# Modif pour fstream
+# https://github.com/Kodi-fstream/venom-xbmc-addons/
 import re
 import string
 import xbmcvfs
@@ -59,7 +59,9 @@ class cTMDb:
 
     URL = 'https://api.themoviedb.org/%d/'
     URL_TRAILER = 'plugin://plugin.video.youtube/play/?video_id=%s' # ancien : 'plugin://plugin.video.youtube/?action=play_video&videoid=%s'
-    CACHE = 'special://home/userdata/addon_data/plugin.video.fStream/video_cache.db'
+    CACHE = 'special://home/userdata/addon_data/plugin.video.fstream/video_cache.db'
+    TMDB_CACHE_SCHEMA = 2
+    LOGO_TMDB_SIZE = 'original'
 
     # important seul xbmcvfs peux lire le special
     if not isMatrix():
@@ -85,7 +87,10 @@ class cTMDb:
                 self.db.row_factory = sqlite.Row
                 self.dbcur = self.db.cursor()
                 self.dbcur.execute('pragma journal_mode=wal')
+                self.__migrate_logo_path()
+                self.__migrate_landscape_path()
                 self.__createdb()
+                self.__check_cache_schema()
                 return
         except:
             VSlog('Error: Unable to write on %s' % self.REALCACHE)
@@ -98,9 +103,41 @@ class cTMDb:
             self.db.row_factory = sqlite.Row
             self.dbcur = self.db.cursor()
             self.dbcur.execute('pragma journal_mode=wal')
+            self.__migrate_logo_path()
+            self.__migrate_landscape_path()
+            self.__check_cache_schema()
         except:
             VSlog('Error: Unable to connect to %s' % self.REALCACHE)
             pass
+
+    @staticmethod
+    def purge_cache(log=True):
+        """Vide les tables metadonnees TMDB (video_cache.db)."""
+        try:
+            db = sqlite.connect(cTMDb.REALCACHE, isolation_level=None)
+            dbcur = db.cursor()
+            for table in ('movie', 'tvshow', 'saga', 'season', 'episode'):
+                dbcur.execute('DELETE FROM %s' % table)
+            db.commit()
+            dbcur.close()
+            db.close()
+            if log:
+                VSlog('Cache TMDB vide (purge_cache)')
+            return True
+        except Exception as e:
+            VSlog('purge_cache error: %s' % e)
+            return False
+
+    def __check_cache_schema(self):
+        try:
+            stored = int(self.ADDON.getSetting('tmdb_cache_schema') or 0)
+        except (TypeError, ValueError):
+            stored = 0
+
+        if stored < self.TMDB_CACHE_SCHEMA:
+            if self.purge_cache(log=False):
+                self.ADDON.setSetting('tmdb_cache_schema', str(self.TMDB_CACHE_SCHEMA))
+                VSlog("fstream TMDB : Purge automatique du cache exécutée (mise à jour du schéma %s -> %s)" % (stored, self.TMDB_CACHE_SCHEMA))
 
     def __createdb(self, dropTable=''):
         try:
@@ -112,29 +149,31 @@ class cTMDb:
             pass
 
         sql_create = "CREATE TABLE IF NOT EXISTS movie ("\
-                        "imdb_id TEXT, "\
-                        "tmdb_id TEXT, "\
-                        "title TEXT, "\
-                        "year INTEGER, "\
-                        "director TEXT, "\
-                        "writer TEXT, "\
-                        "tagline TEXT, "\
-                        "cast TEXT, "\
-                        "crew TEXT, "\
-                        "rating FLOAT, "\
-                        "votes TEXT, "\
-                        "duration INTEGER, "\
-                        "plot TEXT, "\
-                        "mpaa TEXT, "\
-                        "premiered TEXT, "\
-                        "genre TEXT, "\
-                        "studio TEXT, "\
-                        "status TEXT, "\
-                        "poster_path TEXT, "\
-                        "trailer TEXT, "\
-                        "backdrop_path TEXT, "\
-                        "UNIQUE(tmdb_id)"\
-                        ");"
+                     "imdb_id TEXT, "\
+                     "tmdb_id TEXT, "\
+                     "title TEXT, "\
+                     "year INTEGER, "\
+                     "director TEXT, "\
+                     "writer TEXT, "\
+                     "tagline TEXT, "\
+                     "cast TEXT, "\
+                     "crew TEXT, "\
+                     "rating FLOAT, "\
+                     "votes TEXT, "\
+                     "duration INTEGER, "\
+                     "plot TEXT, "\
+                     "mpaa TEXT, "\
+                     "premiered TEXT, "\
+                     "genre TEXT, "\
+                     "studio TEXT, "\
+                     "status TEXT, "\
+                     "poster_path TEXT, "\
+                     "trailer TEXT, "\
+                     "backdrop_path TEXT, "\
+                     "landscape_path TEXT, "\
+                     "logo_path TEXT, "\
+                     "UNIQUE(tmdb_id)"\
+                     ");"
         try:
             self.dbcur.execute(sql_create)
             VSlog('table movie creee')
@@ -142,14 +181,16 @@ class cTMDb:
             VSlog('Error: Cannot create table movie')
 
         sql_create = "CREATE TABLE IF NOT EXISTS saga ("\
-                        "tmdb_id TEXT, "\
-                        "title TEXT, "\
-                        "plot TEXT, "\
-                        "genre TEXT, "\
-                        "poster_path TEXT, "\
-                        "backdrop_path TEXT, "\
-                        "UNIQUE(tmdb_id)"\
-                        ");"
+                     "tmdb_id TEXT, "\
+                     "title TEXT, "\
+                     "plot TEXT, "\
+                     "genre TEXT, "\
+                     "poster_path TEXT, "\
+                     "backdrop_path TEXT, "\
+                     "landscape_path TEXT, "\
+                     "logo_path TEXT, "\
+                     "UNIQUE(tmdb_id)"\
+                     ");"
         try:
             self.dbcur.execute(sql_create)
             VSlog('table saga creee')
@@ -157,29 +198,31 @@ class cTMDb:
             VSlog('Error: Cannot create table saga')
 
         sql_create = "CREATE TABLE IF NOT EXISTS tvshow ("\
-                        "imdb_id TEXT, "\
-                        "tmdb_id TEXT, "\
-                        "title TEXT, "\
-                        "year INTEGER, "\
-                        "director TEXT, "\
-                        "writer TEXT, "\
-                        "cast TEXT, "\
-                        "crew TEXT, "\
-                        "rating FLOAT, "\
-                        "votes TEXT, "\
-                        "duration INTEGER, "\
-                        "plot TEXT, "\
-                        "mpaa TEXT, "\
-                        "premiered TEXT, "\
-                        "genre TEXT, "\
-                        "studio TEXT, "\
-                        "status TEXT, "\
-                        "poster_path TEXT, "\
-                        "trailer TEXT, "\
-                        "backdrop_path TEXT, "\
-                        "nbseasons INTEGER, "\
-                        "UNIQUE(tmdb_id)"\
-                        ");"
+                     "imdb_id TEXT, "\
+                     "tmdb_id TEXT, "\
+                     "title TEXT, "\
+                     "year INTEGER, "\
+                     "director TEXT, "\
+                     "writer TEXT, "\
+                     "cast TEXT, "\
+                     "crew TEXT, "\
+                     "rating FLOAT, "\
+                     "votes TEXT, "\
+                     "duration INTEGER, "\
+                     "plot TEXT, "\
+                     "mpaa TEXT, "\
+                     "premiered TEXT, "\
+                     "genre TEXT, "\
+                     "studio TEXT, "\
+                     "status TEXT, "\
+                     "poster_path TEXT, "\
+                     "trailer TEXT, "\
+                     "backdrop_path TEXT, "\
+                     "landscape_path TEXT, "\
+                     "logo_path TEXT, "\
+                     "nbseasons INTEGER, "\
+                     "UNIQUE(tmdb_id)"\
+                     ");"
         try:
             self.dbcur.execute(sql_create)
             VSlog('table tvshow creee')
@@ -187,15 +230,16 @@ class cTMDb:
             VSlog('Error: Cannot create table tvshow')
 
         sql_create = "CREATE TABLE IF NOT EXISTS season ("\
-                        "tmdb_id TEXT, " \
-                        "season INTEGER, "\
-                        "year INTEGER, "\
-                        "premiered TEXT, "\
-                        "poster_path TEXT, "\
-                        "plot TEXT, "\
-                        "episode INTEGER, "\
-                        "UNIQUE(tmdb_id, season)"\
-                        ");"
+                     "tmdb_id TEXT, " \
+                     "season INTEGER, "\
+                     "year INTEGER, "\
+                     "premiered TEXT, "\
+                     "season_title TEXT, " \
+                     "poster_path TEXT, "\
+                     "plot TEXT, "\
+                     "episode INTEGER, "\
+                     "UNIQUE(tmdb_id, season)"\
+                     ");"
         try:
             self.dbcur.execute(sql_create)
             VSlog('table season creee')
@@ -203,29 +247,80 @@ class cTMDb:
             VSlog('Error: Cannot create table season')
 
         sql_create = "CREATE TABLE IF NOT EXISTS episode ("\
-                        "tmdb_id TEXT, "\
-                        "originaltitle TEXT,"\
-                        "season INTEGER, "\
-                        "episode INTEGER, "\
-                        "year INTEGER, "\
-                        "title TEXT, "\
-                        "director TEXT, "\
-                        "writer TEXT, "\
-                        "guest_stars TEXT, "\
-                        "plot TEXT, "\
-                        "rating FLOAT, "\
-                        "votes TEXT, "\
-                        "premiered TEXT, "\
-                        "tagline TEXT, "\
-                        "poster_path TEXT, "\
-                        "UNIQUE(tmdb_id, season, episode)"\
-                        ");"
+                     "tmdb_id TEXT, "\
+                     "originaltitle TEXT,"\
+                     "season INTEGER, "\
+                     "episode INTEGER, "\
+                     "year INTEGER, "\
+                     "title TEXT, "\
+                     "director TEXT, "\
+                     "writer TEXT, "\
+                     "guest_stars TEXT, "\
+                     "plot TEXT, "\
+                     "rating FLOAT, "\
+                     "votes TEXT, "\
+                     "premiered TEXT, "\
+                     "tagline TEXT, "\
+                     "poster_path TEXT, "\
+                     "UNIQUE(tmdb_id, season, episode)"\
+                     ");"
 
         try:
             self.dbcur.execute(sql_create)
             VSlog('table episode creee')
         except:
             VSlog('Error: Cannot create table episode')
+
+    def __migrate_logo_path(self):
+        for table in ('movie', 'tvshow', 'saga'):
+            try:
+                self.dbcur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table,))
+                if not self.dbcur.fetchone():
+                    continue
+                self.dbcur.execute("PRAGMA table_info(%s)" % table)
+                columns = [row[1] for row in self.dbcur.fetchall()]
+                if 'logo_path' not in columns:
+                    self.dbcur.execute("ALTER TABLE %s ADD COLUMN logo_path TEXT DEFAULT ''" % table)
+                    self.db.commit()
+                    VSlog('Migration: logo_path ajoute a %s' % table)
+            except Exception as e:
+                VSlog('Migration logo_path impossible pour %s: %s' % (table, e))
+
+    def __migrate_landscape_path(self):
+        for table in ('movie', 'tvshow', 'saga'):
+            try:
+                self.dbcur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table,))
+                if not self.dbcur.fetchone():
+                    continue
+                self.dbcur.execute("PRAGMA table_info(%s)" % table)
+                columns = [row[1] for row in self.dbcur.fetchall()]
+                if 'landscape_path' not in columns:
+                    self.dbcur.execute("ALTER TABLE %s ADD COLUMN landscape_path TEXT DEFAULT ''" % table)
+                    self.db.commit()
+                    VSlog('Migration: landscape_path ajoute a %s' % table)
+            except Exception as e:
+                VSlog('Migration landscape_path impossible pour %s: %s' % (table, e))
+
+    def _normalize_cache_meta(self, row, media_type=''):
+        """Normalise un dict issu du cache SQLite (cles images, URLs relatives)."""
+        if not row:
+            return row
+        meta = dict(row)
+        poster = meta.get('poster_path') or meta.get('poster_thumb') or ''
+        if poster and not meta.get('poster_path'):
+            meta['poster_path'] = poster
+        for key in ('logo_path', 'landscape_path', 'backdrop_path', 'poster_path'):
+            if key not in meta or meta[key] is None:
+                meta[key] = meta.get(key) or ''
+        if meta.get('poster_path') and str(meta['poster_path']).startswith('/'):
+            meta['poster_path'] = self.poster + meta['poster_path']
+        if meta.get('backdrop_path') and str(meta['backdrop_path']).startswith('/'):
+            meta['backdrop_path'] = self.fanart + meta['backdrop_path']
+        if meta.get('landscape_path') and str(meta['landscape_path']).startswith('/'):
+            meta['landscape_path'] = self.fanart + meta['landscape_path']
+        if meta.get('logo_path') and str(meta['logo_path']).startswith('/'):
+            meta['logo_path'] = self._build_logo_url(meta['logo_path'])
+        return meta
 
     def __del__(self):
         """ Cleanup db when object destroyed """
@@ -254,8 +349,8 @@ class cTMDb:
                 import qrcode
                 from resources.lib.librecaptcha.gui import cInputWindowYesNo
                 qr = qrcode.make(url + result['request_token'])
-                qr.save(VSPath('special://home/userdata/addon_data/plugin.video.fStream/qrcode.png'), scale=5)
-                oSolver = cInputWindowYesNo(captcha='special://home/userdata/addon_data/plugin.video.fStream/qrcode.png', msg="Scanner le QRCode pour acceder au lien d'autorisation", roundnum=1)
+                qr.save(VSPath('special://home/userdata/addon_data/plugin.video.fstream/qrcode.png'), scale=5)
+                oSolver = cInputWindowYesNo(captcha='special://home/userdata/addon_data/plugin.video.fstream/qrcode.png', msg="Scanner le QRCode pour acceder au lien d'autorisation", roundnum=1)
                 retArg = oSolver.get()
                 if retArg == "N":
                     return False
@@ -304,9 +399,9 @@ class cTMDb:
 
     # Retourne le nom du média en français, depuis l'id
     def get_namebyid(self, mediaType, tmdbid):
-
+    
         meta = self._call('%s/%s' % (mediaType, tmdbid))
-
+    
         # si pas de résultat avec l'année, on teste sans l'année
         if 'title' in meta:
             return meta['title'] # titre de film
@@ -502,13 +597,13 @@ class cTMDb:
         return meta
 
     # Get the basic movie information for a specific movie id.
-    def search_movie_id(self, movie_id, append_to_response='append_to_response=trailers,credits,release_dates'):
+    def search_movie_id(self, movie_id, append_to_response='append_to_response=trailers,credits,release_dates,images'):
         result = self._call('movie/' + str(movie_id), append_to_response)
         result['tmdb_id'] = movie_id
         return result  # obj(**self._call('movie/' + str(movie_id), append_to_response))
 
     # Get the primary information about a TV series by id.
-    def search_tvshow_id(self, show_id, append_to_response='append_to_response=external_ids,videos,credits,release_dates'):
+    def search_tvshow_id(self, show_id, append_to_response='append_to_response=external_ids,videos,credits,release_dates,images'):
         result = self._call('tv/' + str(show_id), append_to_response)
         result['tmdb_id'] = show_id
         return result
@@ -597,7 +692,7 @@ class cTMDb:
         if duration:
             _meta['duration'] = duration * 60
 
-
+        
         try:
             if _meta['year'] == 0:
                 _meta['year'] = int(_meta['premiered'][:4])
@@ -746,11 +841,62 @@ class cTMDb:
             except:
                 pass
 
-        if _meta['poster_path']:
+        # Images
+        # Sécurise le préfixe (évite de préfixer deux fois quand ça vient du cache)
+        if _meta.get('poster_path') and str(_meta['poster_path']).startswith('/'):
             _meta['poster_path'] = self.poster + _meta['poster_path']
 
-        if _meta['backdrop_path']:
+        if _meta.get('backdrop_path') and str(_meta['backdrop_path']).startswith('/'):
             _meta['backdrop_path'] = self.fanart + _meta['backdrop_path']
+
+        # LANDSCAPE = backdrop "avec texte" si dispo dans la langue demandée (fallback EN puis sans langue)
+        # FANART = backdrop sans langue en priorité (souvent sans texte)
+        _meta.setdefault('landscape_path', '')
+        _meta.setdefault('logo_path', '')
+        try:
+            images = meta.get('images') if isinstance(meta, dict) else None
+            if images is not None and not isinstance(images, dict):
+                images = {}
+            primary = (self.lang or 'fr-FR').split('-')[0].lower()
+            preferred_langs = [primary, 'en', None]
+
+            backdrops = images.get('backdrops', []) if images else []
+            if backdrops:
+
+                # landscape : fr -> en -> null
+                landscape_fp = self._select_backdrop_by_lang(backdrops, preferred_langs)
+                landscape_url = self._build_backdrop_url(landscape_fp)
+                if landscape_url:
+                    _meta['landscape_path'] = landscape_url
+
+                # fanart : null -> fr -> en (si jamais)
+                if not _meta.get('backdrop_path'):
+                    fanart_fp = self._select_backdrop_by_lang(backdrops, [None, primary, 'en'])
+                    fanart_url = self._build_backdrop_url(fanart_fp)
+                    if fanart_url:
+                        _meta['backdrop_path'] = fanart_url
+                        
+            logos = images.get('logos', []) if images else []
+            if logos:
+                logo_fp = self._select_backdrop_by_lang(logos, preferred_langs)
+                logo_url = self._build_logo_url(logo_fp)
+                if logo_url:
+                    _meta['logo_path'] = logo_url
+
+            # Si on n'a pas de landscape, on fallback sur fanart (au moins le skin a quelque chose)
+            if not _meta.get('landscape_path'):
+                _meta['landscape_path'] = _meta.get('backdrop_path', '') or ''
+        except Exception:
+            # Fallback silencieux
+            if not _meta.get('landscape_path'):
+                _meta['landscape_path'] = _meta.get('backdrop_path', '') or ''
+
+        # Si la valeur vient du cache et est déjà une URL, on ne touche pas.
+        if _meta.get('landscape_path') and str(_meta['landscape_path']).startswith('/'):
+            _meta['landscape_path'] = self.fanart + _meta['landscape_path']
+        if _meta.get('logo_path') and str(_meta['logo_path']).startswith('/'):
+            _meta['logo_path'] = self._build_logo_url(_meta['logo_path'])
+
         return _meta
 
     def _clean_title(self, title):
@@ -796,22 +942,55 @@ class cTMDb:
                     sql_select = sql_select + ' AND tvshow.year = %s' % year
 
         elif media_type == 'season' and season:
-            sql_select = 'SELECT *, season.poster_path, season.premiered, ' \
-                                'season.year, season.plot FROM season LEFT JOIN tvshow ON season.tmdb_id = tvshow.tmdb_id'
+            sql_select = (
+                "SELECT "
+                "tvshow.backdrop_path, "
+                "tvshow.landscape_path, "
+                "tvshow.logo_path, "
+                "CASE WHEN season.poster_path IS NULL OR season.poster_path = '' "
+                "THEN tvshow.poster_path ELSE season.poster_path END AS poster_path, "
+                "season.season_title AS title, "
+                "season.tmdb_id, "
+                "season.season, "
+                "season.year, "
+                "season.premiered, "
+                "season.plot, "
+                "season.episode "
+                "FROM season LEFT JOIN tvshow ON season.tmdb_id = tvshow.tmdb_id"
+            )
             if tmdb_id:
                 sql_select = sql_select + ' WHERE tvshow.tmdb_id = \'%s\'' % tmdb_id
             else:
                 sql_select = sql_select + ' WHERE tvshow.title = \'%s\'' % name
                 if year:
                     sql_select = sql_select + ' AND tvshow.year = %s' % year
-
+            
             sql_select = sql_select + ' AND season.season = \'%s\'' % season
 
         elif media_type == 'episode':
-            sql_select = 'SELECT tvshow.backdrop_path, season.poster_path, episode.title, episode.tmdb_id, episode.poster_path as poster_thumb, episode.premiered, '\
-                'episode.guest_stars, episode.year, episode.plot, episode.tagline, '\
-                'episode.director, episode.writer, episode.rating, episode.votes '\
-                'FROM episode LEFT JOIN tvshow ON episode.tmdb_id = tvshow.tmdb_id LEFT JOIN season ON episode.tmdb_id = season.tmdb_id'
+            sql_select = (
+                "SELECT "
+                "tvshow.backdrop_path, "
+                "tvshow.landscape_path, "
+                "tvshow.logo_path, "
+                "season.poster_path, "
+                "episode.title, "
+                "episode.tmdb_id, "
+                "episode.poster_path AS poster_thumb, "
+                "episode.premiered, "
+                "episode.guest_stars, "
+                "episode.year, "
+                "episode.plot, "
+                "episode.tagline, "
+                "episode.director, "
+                "episode.writer, "
+                "episode.rating, "
+                "episode.votes "
+                "FROM episode "
+                "LEFT JOIN tvshow ON episode.tmdb_id = tvshow.tmdb_id "
+                "LEFT JOIN season ON episode.tmdb_id = season.tmdb_id AND episode.season = season.season"
+            )
+
             if tmdb_id:
                 sql_select += ' WHERE tvshow.tmdb_id = \'%s\'' % tmdb_id
             else:
@@ -848,7 +1027,7 @@ class cTMDb:
 
         if matchedrow:
             # VSlog('Found meta information by name in cache table')
-            return dict(matchedrow)
+            return self._normalize_cache_meta(matchedrow, media_type)
         else:
             # VSlog('No match in local DB')
             return None
@@ -878,8 +1057,8 @@ class cTMDb:
         if media_type == 'collection':
             return self._cache_save_collection(meta, name)
 
-
-
+            
+            
     # sauvegarde movie dans la BDD
     def _cache_save_movie(self, meta, name, year):
         # year n'est pas forcement l'année du film mais l'année utilisée pour la recherche
@@ -888,9 +1067,9 @@ class cTMDb:
 
         try:
             sql = 'INSERT or IGNORE INTO movie (imdb_id, tmdb_id, title, year, cast, crew, writer, director, tagline, rating, votes, duration, ' \
-                    'plot, mpaa, premiered, genre, studio, status, poster_path, trailer, backdrop_path) ' \
-                    'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-            self._sqlExecute(sql, (meta['imdb_id'], meta['tmdb_id'], name, year, meta['cast'], meta['crew'], meta['writer'], meta['director'], meta['tagline'], meta['rating'], meta['votes'], str(meta['duration']), meta['plot'], meta['mpaa'], meta['premiered'], meta['genre'], meta['studio'], meta['status'], meta['poster_path'], meta['trailer'], meta['backdrop_path']))
+                  'plot, mpaa, premiered, genre, studio, status, poster_path, trailer, backdrop_path, landscape_path, logo_path) ' \
+                  'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+            self._sqlExecute(sql, (meta['imdb_id'], meta['tmdb_id'], name, year, meta['cast'], meta['crew'], meta['writer'], meta['director'], meta['tagline'], meta['rating'], meta['votes'], str(meta['duration']), meta['plot'], meta['mpaa'], meta['premiered'], meta['genre'], meta['studio'], meta['status'], meta['poster_path'], meta['trailer'], meta['backdrop_path'], meta.get('landscape_path', ''), meta.get('logo_path', '')))
         except Exception as e:
             VSlog(str(e))
             if 'no such column' in str(e) or 'no column named' in str(e) or "no such table" in str(e):
@@ -898,7 +1077,7 @@ class cTMDb:
                 VSlog('Table recreated')
 
                 # Deuxieme tentative
-                self._sqlExecute(sql, (meta['imdb_id'], meta['tmdb_id'], name, year, meta['cast'], meta['crew'], meta['writer'], meta['director'], meta['tagline'], meta['rating'], meta['votes'], str(meta['duration']), meta['plot'], meta['mpaa'], meta['premiered'], meta['genre'], meta['studio'], meta['status'], meta['poster_path'], meta['trailer'], meta['backdrop_path']))
+                self._sqlExecute(sql, (meta['imdb_id'], meta['tmdb_id'], name, year, meta['cast'], meta['crew'], meta['writer'], meta['director'], meta['tagline'], meta['rating'], meta['votes'], str(meta['duration']), meta['plot'], meta['mpaa'], meta['premiered'], meta['genre'], meta['studio'], meta['status'], meta['poster_path'], meta['trailer'], meta['backdrop_path'], meta.get('landscape_path', ''), meta.get('logo_path', '')))
             else:
                 VSlog('SQL ERROR INSERT into table movie')
             pass
@@ -906,9 +1085,12 @@ class cTMDb:
     # Cache pour les séries (et animes)
     def _cache_save_tvshow(self, meta, name, season, year):
         # Ecrit les saisons dans le cache
-        for s_meta in meta['season']:
-            s_meta['tmdb_id'] = meta['tmdb_id']
-            self._cache_save_season(s_meta, season)
+        seasons = meta.get('season') or []
+        if isinstance(seasons, list):
+            for s_meta in seasons:
+                if isinstance(s_meta, dict):
+                    s_meta['tmdb_id'] = meta['tmdb_id']
+                    self._cache_save_season(s_meta, season)
 
         if not year and 'year' in meta:
             year = meta['year']
@@ -916,9 +1098,9 @@ class cTMDb:
         # sauvegarde tvshow dans la BDD
         try:
             sql = 'INSERT or IGNORE INTO tvshow (imdb_id, tmdb_id, title, year, cast, crew, writer, director, rating, votes, duration, ' \
-                    'plot, mpaa, premiered, genre, studio, status, poster_path, trailer, backdrop_path, nbseasons) ' \
-                    'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-            self._sqlExecute(sql, (meta['imdb_id'], meta['tmdb_id'], name, year, meta['cast'], meta['crew'], meta['writer'], meta['director'], meta['rating'], meta['votes'], meta['duration'], meta['plot'], meta['mpaa'], meta['premiered'], meta['genre'], meta['studio'], meta['status'], meta['poster_path'], meta['trailer'], meta['backdrop_path'], meta['nbseasons']))
+                  'plot, mpaa, premiered, genre, studio, status, poster_path, trailer, backdrop_path, landscape_path, nbseasons, logo_path) ' \
+                  'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+            self._sqlExecute(sql, (meta['imdb_id'], meta['tmdb_id'], name, year, meta['cast'], meta['crew'], meta['writer'], meta['director'], meta['rating'], meta['votes'], meta['duration'], meta['plot'], meta['mpaa'], meta['premiered'], meta['genre'], meta['studio'], meta['status'], meta['poster_path'], meta['trailer'], meta['backdrop_path'], meta.get('landscape_path', ''), meta['nbseasons'],  meta.get('logo_path', '')))
         except Exception as e:
             VSlog(str(e))
             if 'no such column' in str(e) or 'no column named' in str(e):
@@ -926,7 +1108,7 @@ class cTMDb:
                 VSlog('Table recreated')
 
                 # Deuxieme tentative
-                self._sqlExecute(sql, (meta['imdb_id'], meta['tmdb_id'], name, year, meta['cast'], meta['crew'], meta['writer'], meta['director'], meta['rating'], meta['votes'], meta['duration'], meta['plot'], meta['mpaa'], meta['premiered'], meta['genre'], meta['studio'], meta['status'], meta['poster_path'], meta['trailer'], meta['backdrop_path'], meta['nbseasons']))
+                self._sqlExecute(sql, (meta['imdb_id'], meta['tmdb_id'], name, year, meta['cast'], meta['crew'], meta['writer'], meta['director'], meta['rating'], meta['votes'], meta['duration'], meta['plot'], meta['mpaa'], meta['premiered'], meta['genre'], meta['studio'], meta['status'], meta['poster_path'], meta['trailer'], meta['backdrop_path'], meta.get('landscape_path', ''), meta['nbseasons'], meta.get('logo_path', '')))
             else:
                 VSlog('SQL ERROR INSERT into table tvshow')
             pass
@@ -965,10 +1147,12 @@ class cTMDb:
         else:
             fanart = ""
 
+        season_title = meta.get('title') or meta.get('name') or ''
+
         try:
-            sql = 'INSERT or IGNORE INTO season (tmdb_id, season, year, premiered, poster_path, plot, episode) VALUES '\
-                    '(?, ?, ?, ?, ?, ?, ?)'
-            self._sqlExecute(sql, (meta['tmdb_id'], season, s_year, premiered, fanart, plot, meta.get('episode_count', 0)))
+            sql = 'INSERT or IGNORE INTO season (tmdb_id, season, year, premiered, season_title, poster_path, plot, episode) VALUES ' \
+                  '(?, ?, ?, ?, ?, ?, ?, ?)'
+            self._sqlExecute(sql, (meta['tmdb_id'], season, s_year, premiered, season_title, fanart, plot, meta.get('episode_count', 0)))
         except Exception as e:
             VSlog(str(e))
             if 'no such column' in str(e) or 'no column named' in str(e):
@@ -977,19 +1161,19 @@ class cTMDb:
 
                 # Deuxieme tentative
                 try:
-                    self._sqlExecute(sql, (meta['tmdb_id'], season, s_year, premiered, fanart, plot, meta.get('episode_count', 0)))
+                    self._sqlExecute(sql, (meta['tmdb_id'], season, s_year, premiered, season_title, fanart, plot, meta.get('episode_count', 0)))
                 except Exception as e:
                     VSlog(str(e))
             else:
                 VSlog('SQL ERROR INSERT into table season')
-
+        
 
     # Cache pour les épisodes
     def _cache_save_episode(self, meta, name, season, episode):
         try:
             title = name + '_S' + season + 'E' + episode
             sql = 'INSERT or IGNORE INTO episode (tmdb_id, originaltitle, season, episode, year, title, premiered, poster_path, plot, rating, votes, director, writer, guest_stars, tagline) VALUES ' \
-                    '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                  '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
             self._sqlExecute(sql, (meta['tmdb_id'], title, season, episode, meta['year'], title, meta['premiered'], meta['poster_path'], meta['plot'], meta['rating'], meta['votes'], meta['director'], meta['writer'], ''.join(meta.get('guest_stars', "")), meta["tagline"]))
         except Exception as e:
             VSlog(str(e))
@@ -1005,9 +1189,9 @@ class cTMDb:
     # Cache pour les sagas
     def _cache_save_collection(self, meta, name):
         try:
-            sql = 'INSERT or IGNORE INTO saga (tmdb_id, title, plot, genre, poster_path, backdrop_path) VALUES ' \
-                    '(?, ?, ?, ?, ?, ?)'
-            self._sqlExecute(sql, (meta['tmdb_id'], name, meta['plot'], meta['genre'], meta['poster_path'], meta["backdrop_path"]))
+            sql = 'INSERT or IGNORE INTO saga (tmdb_id, title, plot, genre, poster_path, backdrop_path, logo_path) VALUES ' \
+                  '(?, ?, ?, ?, ?, ?, ?)'
+            self._sqlExecute(sql, (meta['tmdb_id'], name, meta['plot'], meta['genre'], meta['poster_path'], meta["backdrop_path"], meta.get('logo_path', '')))
         except Exception as e:
             VSlog(str(e))
             if 'no such column' in str(e) or 'no column named' in str(e) or "no such table" in str(e):
@@ -1015,7 +1199,7 @@ class cTMDb:
                 VSlog('Table recreated')
 
                 # Deuxieme tentative
-                self._sqlExecute(sql, (meta['tmdb_id'], name, meta['plot'], meta['genre'], meta['poster_path'], meta["backdrop_path"]))
+                self._sqlExecute(sql, (meta['tmdb_id'], name, meta['plot'], meta['genre'], meta['poster_path'], meta["backdrop_path"], meta.get('logo_path', '')))
             else:
                 VSlog('SQL ERROR INSERT into table saga')
             pass
@@ -1044,7 +1228,7 @@ class cTMDb:
         name = name.replace('VOSTFR','')
         name = re.sub('(\W|_|^)FR(\W|_|$)', '', name) # FR s'il n'est pas entouré de caractere
         cleanTitle = None
-
+        
         # VSlog('Attempting to retrieve meta data for %s: %s %s %s %s' % (media_type, name, year, imdb_id, tmdb_id))
 
         # recherche dans la base de données
@@ -1110,6 +1294,17 @@ class cTMDb:
         # Mise en forme des metas si trouvé
         if meta and 'tmdb_id' in meta:
             meta = self._format(meta, name, media_type)
+            # Fallback POSTER SAISON:
+            # Si la saison n'a pas de poster, on reprend celui de la série (quand dispo en cache).
+            if meta.get('media_type') == 'season' and not meta.get('poster_path'):
+                try:
+                    show_id = meta.get('tmdb_id')
+                    if show_id:
+                        show_meta = self._cache_search('tvshow', name, tmdb_id=str(show_id))
+                        if show_meta and show_meta.get('poster_path'):
+                            meta['poster_path'] = show_meta.get('poster_path')
+                except:
+                    pass
             # sauvegarde dans un cache
             if not cleanTitle:
                 cleanTitle = self._clean_title(name)
@@ -1132,7 +1327,7 @@ class cTMDb:
         except:
             return False
         return result
-
+    
     def getPostUrl(self, url, post, API_VERSION = 3):
         # Execute une requete POST vers l'API
         # Utile pour :
@@ -1154,7 +1349,7 @@ class cTMDb:
         session_id = self.ADDON.getSetting('tmdb_session')
 
         urlapi = ('%s%s?api_key=%s&session_id=%s') %(self.URL % API_VERSION, url, self.api_key, session_id)
-
+        
         req = request.Request(urlapi, method="POST")
         req.add_header('Content-Type', 'application/json')
         data = json.dumps(post)
@@ -1163,13 +1358,94 @@ class cTMDb:
         response = r.read()
         r.close()
         data = json.loads(response)
-        return data
+        return data    
+
+
+    def _tmdb_image_langs(self):
+        """Retourne une valeur compatible TMDb pour include_image_language.
+        Ex: 'fr,en,null' (fallback EN puis images sans langue).
+        """
+        try:
+            primary = (self.lang or 'fr-FR').split('-')[0].lower()
+        except Exception:
+            primary = 'fr'
+        if not primary:
+            primary = 'fr'
+        # Toujours fallback EN puis null (images sans langue)
+        if primary == 'en':
+            return 'en,null'
+        return '%s,en,null' % primary
+
+    def _select_backdrop_by_lang(self, backdrops, preferred_langs):
+        """Choisit un backdrop selon iso_639_1 dans l'ordre preferred_langs.
+        preferred_langs peut contenir None (pour 'null' TMDb).
+        """
+        if not backdrops:
+            return ''
+        # Index par langue
+        by_lang = {}
+        for b in backdrops:
+            if not b.get('file_path'):
+                continue
+            lang = b.get('iso_639_1', None)
+            if not lang:
+                continue
+            country = b.get('iso_3166_1', None)
+            if lang == 'fr' and country != 'FR':    # de préference FR de France
+                continue
+            by_lang.setdefault(lang, []).append(b)
+
+        for lang in preferred_langs:
+            if lang in by_lang and by_lang[lang]:
+                fp = by_lang[lang][0].get('file_path')
+                if fp:
+                    return fp
+
+        # Sinon, n'importe quoi
+        for b in backdrops:
+            fp = b.get('file_path')
+            if fp:
+                return fp
+        return ''
+
+    def _build_logo_url(self, file_path):
+        if not file_path:
+            return ''
+        if str(file_path).startswith('http'):
+            return file_path
+        if not str(file_path).startswith('/'):
+            file_path = '/' + str(file_path)
+        return 'https://image.tmdb.org/t/p/%s' % (self.LOGO_TMDB_SIZE,) + file_path
+
+    def _build_backdrop_url(self, file_path):
+        if not file_path:
+            return ''
+        # file_path TMDb commence par /....
+        if str(file_path).startswith('http'):
+            return file_path
+        if not str(file_path).startswith('/'):
+            file_path = '/' + str(file_path)
+        return self.fanart + file_path
 
     def _call(self, action, append_to_response='', API_VERSION = 3):
         from resources.lib.handler.requestHandler import cRequestHandler
         url = '%s%s?language=%s&api_key=%s' % (self.URL % API_VERSION, action, self.lang, self.api_key)
         if append_to_response:
             url += '&%s' % append_to_response
+
+        # IMPORTANT: images localisées (backdrops avec texte, etc.)
+        # On ajoute include_image_language uniquement quand on appelle des images (append_to_response=...images...)
+        try:
+            wants_images = False
+            if isinstance(append_to_response, str) and ('append_to_response=' in append_to_response) and ('images' in append_to_response):
+                wants_images = True
+            if isinstance(action, str) and action.endswith('/images'):
+                wants_images = True
+
+            if wants_images and 'include_image_language=' not in url:
+                url += '&include_image_language=%s' % self._tmdb_image_langs()
+        except Exception:
+            pass
 
         oRequestHandler = cRequestHandler(url)
         data = oRequestHandler.request(jsonDecode=True)

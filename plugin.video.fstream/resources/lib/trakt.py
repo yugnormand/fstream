@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/yugnormand/fstream
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 import datetime
 import re
 import time
 import unicodedata
 import xbmc
+import json
 
 from resources.lib.comaddon import addon, dialog, addonManager, VSlog
 from resources.lib.db import cDb
@@ -52,7 +53,7 @@ class cTrakt:
         oRequestHandler = cRequestHandler(URL_API + 'oauth/device/code')
         oRequestHandler.setRequestType(1)
         oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-        oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+        oRequestHandler.addHeaderEntry('User-Agent', 'fstream')
         oRequestHandler.addJSONEntry('client_id', API_KEY)
         sHtmlContent = oRequestHandler.request(jsonDecode=True)
 
@@ -71,7 +72,7 @@ class cTrakt:
                     oRequestHandler = cRequestHandler(URL_API + 'oauth/device/token')
                     oRequestHandler.setRequestType(1)
                     oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-                    oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+                    oRequestHandler.addHeaderEntry('User-Agent', 'fstream')
                     oRequestHandler.addJSONEntry('client_id', API_KEY)
                     oRequestHandler.addJSONEntry('client_secret', API_SECRET)
                     oRequestHandler.addJSONEntry('code', sHtmlContent['device_code'])
@@ -87,7 +88,7 @@ class cTrakt:
                         self.ADDON.setSetting('token_time', str(time.time()))
                         self.DIALOG.VSinfo(self.ADDON.VSlang(30000))
 
-                        # si l'addon est installé, le lier et désactiver le suivi fStream  
+                        # si l'addon est installé, le lier et désactiver le suivi fstream  
                         if addonManager().isAddonExists('script.trakt'):
                             self.ADDON.setSetting('install_trakt_addon', 'true')
                             self.ADDON.setSetting('trakt_movies_activate_scrobbling', 'false')
@@ -121,7 +122,7 @@ class cTrakt:
             oRequestHandler = cRequestHandler(URL_API + 'oauth/token')
             oRequestHandler.setRequestType(1)  # POST
             oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-            oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+            oRequestHandler.addHeaderEntry('User-Agent', 'fstream')
             oRequestHandler.addJSONEntry('refresh_token', refresh_token)
             oRequestHandler.addJSONEntry('client_id', API_KEY)
             oRequestHandler.addJSONEntry('client_secret', API_SECRET)
@@ -165,7 +166,7 @@ class cTrakt:
             try:
                 oRequestHandler = cRequestHandler(URL_API + 'users/me')
                 oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-                oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+                oRequestHandler.addHeaderEntry('User-Agent', 'fstream')
                 oRequestHandler.addHeaderEntry('trakt-api-key', API_KEY)
                 oRequestHandler.addHeaderEntry('trakt-api-version', API_VERS)
                 oRequestHandler.addHeaderEntry('Authorization', 'Bearer %s' % bstoken)
@@ -379,7 +380,7 @@ class cTrakt:
         sUrl = URL_API + 'search/list?query=' + sSearchText
         oRequestHandler = cRequestHandler(sUrl)
         oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-        oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+        oRequestHandler.addHeaderEntry('User-Agent', 'fstream')
         oRequestHandler.addHeaderEntry('trakt-api-key', API_KEY)
         oRequestHandler.addHeaderEntry('trakt-api-version', API_VERS)
         
@@ -425,7 +426,7 @@ class cTrakt:
 
         oRequestHandler = cRequestHandler(URL_API + sUrl)
         oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-        oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+        oRequestHandler.addHeaderEntry('User-Agent', 'fstream')
         oRequestHandler.addHeaderEntry('trakt-api-key', API_KEY)
         oRequestHandler.addHeaderEntry('trakt-api-version', API_VERS)
         if 'users/' in sUrl or '/sync/' in sUrl:
@@ -475,7 +476,7 @@ class cTrakt:
                 if not found:
                     oRequestHandler = cRequestHandler(URL_API + sUrl)
                     oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-                    oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+                    oRequestHandler.addHeaderEntry('User-Agent', 'fstream')
                     oRequestHandler.addHeaderEntry('trakt-api-key', API_KEY)
                     oRequestHandler.addHeaderEntry('trakt-api-version', API_VERS)
                     oRequestHandler.addHeaderEntry('Authorization', 'Bearer %s' % self.ADDON.getSetting('bstoken'))
@@ -524,7 +525,7 @@ class cTrakt:
 
         oRequestHandler = cRequestHandler(sUrl)
         oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-        oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+        oRequestHandler.addHeaderEntry('User-Agent', 'fstream')
         oRequestHandler.addHeaderEntry('trakt-api-key', API_KEY)
         oRequestHandler.addHeaderEntry('trakt-api-version', API_VERS)
         oRequestHandler.addHeaderEntry('Authorization', 'Bearer %s' % self.ADDON.getSetting('bstoken'))
@@ -577,7 +578,7 @@ class cTrakt:
 
         oRequestHandler = cRequestHandler(traktUrl)
         oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-        oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+        oRequestHandler.addHeaderEntry('User-Agent', 'fstream')
         oRequestHandler.addHeaderEntry('trakt-api-key', API_KEY)
         oRequestHandler.addHeaderEntry('trakt-api-version', API_VERS)
         if '/users/' in sUrl or '/sync/' in sUrl or '/my/' in sUrl or '/recommendations/' in sUrl:
@@ -976,7 +977,7 @@ class cTrakt:
         # oRequestHandler = cRequestHandler(URL_API + 'sync/playback/' + ('movies' if sCat == '1' else 'episodes'))
         oRequestHandler = cRequestHandler(URL_API + 'sync/playback/episodes')
         oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-        oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+        oRequestHandler.addHeaderEntry('User-Agent', 'fstream')
         oRequestHandler.addHeaderEntry('trakt-api-key', API_KEY)
         oRequestHandler.addHeaderEntry('trakt-api-version', API_VERS)
         oRequestHandler.addHeaderEntry('Authorization', 'Bearer %s' % self.ADDON.getSetting('bstoken'))
@@ -1092,7 +1093,7 @@ class cTrakt:
         return
 
 
-    # progression dans le cache fStream selon l'état dans trakt
+    # progression dans le cache fstream selon l'état dans trakt
     def setMediaProgress(self, sTmdb, sTitle, sSeason, sEpisode, progress):
         # il faut au moins 5% de lecture pour proposer la reprise
         if progress < 5:
@@ -1135,7 +1136,7 @@ class cTrakt:
 
         oRequestHandler = cRequestHandler(sUrl)
         oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-        oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+        oRequestHandler.addHeaderEntry('User-Agent', 'fstream')
         oRequestHandler.addHeaderEntry('trakt-api-key', API_KEY)
         oRequestHandler.addHeaderEntry('trakt-api-version', API_VERS)
         oRequestHandler.addHeaderEntry('Authorization', 'Bearer %s' % self.ADDON.getSetting('bstoken'))
@@ -1205,7 +1206,7 @@ class cTrakt:
 
         oRequestHandler = cRequestHandler(sUrl)
         oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-        oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+        oRequestHandler.addHeaderEntry('User-Agent', 'fstream')
         oRequestHandler.addHeaderEntry('trakt-api-key', API_KEY)
         oRequestHandler.addHeaderEntry('trakt-api-version', API_VERS)
         oRequestHandler.addHeaderEntry('Authorization', 'Bearer %s' % self.ADDON.getSetting('bstoken'))
@@ -1428,51 +1429,51 @@ class cTrakt:
         oRequestHandler = cRequestHandler(sAction)
         oRequestHandler.setRequestType(requestType)
         oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-        oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+        oRequestHandler.addHeaderEntry('User-Agent', 'fstream')
         oRequestHandler.addHeaderEntry('trakt-api-key', API_KEY)
         oRequestHandler.addHeaderEntry('trakt-api-version', API_VERS)
         oRequestHandler.addHeaderEntry('Authorization', 'Bearer %s' % self.ADDON.getSetting('bstoken'))
         for a in sPost:
             oRequestHandler.addJSONEntry(a, sPost[a])
         
-        jsonDecode = requestType in [cRequestHandler.REQUEST_TYPE_POST, cRequestHandler.REQUEST_TYPE_GET]
-        sHtmlContent = oRequestHandler.request(jsonDecode = jsonDecode)
+        sHtmlContent = oRequestHandler.request()
 
         sText = "Aucune action réalisée"
-        
-        if sHtmlContent == '':
-            sText = ''
-            
-        try:
-            # point de reprise
-            if sHtmlContent['action'] == 'pause':
-                sText = 'Progression enregistrée'
-        except:
-            pass
+        if sHtmlContent != '':
+            jsonDecode = requestType in [cRequestHandler.REQUEST_TYPE_POST, cRequestHandler.REQUEST_TYPE_GET]
+            if jsonDecode:
+                sHtmlContent = json.loads(sHtmlContent)
 
-        try:
-            if sHtmlContent['added']['movies'] > 0 or sHtmlContent['added']['episodes'] > 0 or sHtmlContent['added']['shows'] > 0:
-                sText = 'Ajouté avec succès'
-        except:
-            pass
-
-        try:
-            if sHtmlContent['updated']['movies'] > 0 or sHtmlContent['updated']['episodes'] > 0 or sHtmlContent['updated']['shows'] > 0:
-                sText = 'Mise à jour avec succès'
-        except:
-            pass
-
-        try:
-            if sHtmlContent['deleted']['movies'] > 0 or sHtmlContent['deleted']['episodes'] > 0:
-                sText = 'Supprimé avec succès'
-        except:
-            pass
-
-        try:
-            if sHtmlContent['existing']['movies'] > 0 or sHtmlContent['existing']['episodes'] > 0 or sHtmlContent['existing']['seasons'] > 0 or sHtmlContent['existing']['shows'] > 0:
-                sText = 'Entrée déjà présente'
-        except:
-            pass
+            try:
+                # point de reprise
+                if sHtmlContent['action'] == 'pause':
+                    sText = 'Progression enregistrée'
+            except:
+                pass
+    
+            try:
+                if sHtmlContent['added']['movies'] > 0 or sHtmlContent['added']['episodes'] > 0 or sHtmlContent['added']['shows'] > 0:
+                    sText = 'Ajouté avec succès'
+            except:
+                pass
+    
+            try:
+                if sHtmlContent['updated']['movies'] > 0 or sHtmlContent['updated']['episodes'] > 0 or sHtmlContent['updated']['shows'] > 0:
+                    sText = 'Mise à jour avec succès'
+            except:
+                pass
+    
+            try:
+                if sHtmlContent['deleted']['movies'] > 0 or sHtmlContent['deleted']['episodes'] > 0:
+                    sText = 'Supprimé avec succès'
+            except:
+                pass
+    
+            try:
+                if sHtmlContent['existing']['movies'] > 0 or sHtmlContent['existing']['episodes'] > 0 or sHtmlContent['existing']['seasons'] > 0 or sHtmlContent['existing']['shows'] > 0:
+                    sText = 'Entrée déjà présente'
+            except:
+                pass
 
 
         bReload = oInputParameterHandler.exist('sReload')
@@ -1485,10 +1486,10 @@ class cTrakt:
                 self.getAction(URL_API + 'sync/playback/' + sID, requestType = cRequestHandler.REQUEST_TYPE_DELETE)
                 sText = 'Supprimé avec succès'
            
-            # suppression du point de reprise dans fStream
+            # suppression du point de reprise dans fstream
             cViewing().delViewing()
                 
-            # suppression de l'indicateur VU dans fStream
+            # suppression de l'indicateur VU dans fstream
             meta = {}
             meta['titleWatched'] = oInputParameterHandler.getValue('sTitleWatched')
             meta['tmdbId'] = sTMDB
@@ -1496,7 +1497,7 @@ class cTrakt:
                 db.del_watched(meta)
             
         elif 'sync/history' in sAction:    # ajout du marqueur VU
-            # Ajout de l'indicateur VU dans fStream
+            # Ajout de l'indicateur VU dans fstream
             if sType == '1':    # seulement pour les films
                 bReload = True
 

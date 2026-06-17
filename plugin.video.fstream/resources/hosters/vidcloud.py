@@ -1,5 +1,5 @@
 # coding: utf-8
-# fStream https://github.com/yugnormand/fstream
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 # Vidcloud / vcstream.to
 from resources.lib.handler.requestHandler import cRequestHandler
 from resources.lib.parser import cParser

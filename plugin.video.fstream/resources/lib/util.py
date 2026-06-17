@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# https://github.com/yugnormand/fstream
+# https://github.com/Kodi-fstream/venom-xbmc-addons
 from resources.lib.comaddon import isMatrix
 
 try:        # python 2
@@ -216,6 +216,11 @@ class cUtil:
             return sTitle, True
 
         return sTitle, False
+
+    def getIconDefault(self, sTitle):
+        URL_ICON_DEFAULT = 'https://placehold.co/900x270/12052b/00FFD1.png?font=montserrat&text='
+        sTitle = QuotePlus(sTitle)
+        return URL_ICON_DEFAULT + sTitle
 
     def EvalJSString(self, s):
         s = s.replace(' ', '')

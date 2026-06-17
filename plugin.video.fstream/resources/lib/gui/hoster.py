@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/yugnormand/fstream
+# https://github.com/Kodi-fstream/venom-xbmc-addons
 # Venom.
 from resources.lib.gui.gui import cGui
 from resources.lib.gui.guiElement import cGuiElement
@@ -235,9 +235,10 @@ class cHosterGui:
                             'giga', 'vidbom', 'cloudvid', 'megadrive', 'downace', 'clickopen', 'supervideo', 'turbovid',
                             'jawcloud', 'kvid', 'soundcloud', 'mixcloud', 'ddlfr', 'vupload', 'dwfull', 'vidzstore',
                             'pdj', 'rapidstream', 'archive', 'dustreaming', 'viki', 'flix555', 'onlystream', 'filemoon',
-                            'upstream', 'pstream', 'vudeo', 'vidia', 'streamtape', 'vidbem', 'uplea', 'vido', 'vidmoly',
+                            'upstream', 'pstream', 'vudeo', 'vidia', 'streamtape', 'vidbem', 'uplea', 'vido', 'vidmoly', 'vidsonic',
                             'sibnet', 'vidplayer', 'userload', 'aparat', 'evoload', 'vidshar', 'abcvideo', 'plynow', 'smoothpre',
-                            'tomacloud', 'videovard', 'viewsb', 'yourvid', 'vf-manga', 'darkibox', 'mustardshock']
+                            'tomacloud', 'videovard', 'viewsb', 'yourvid', 'vf-manga', 'darkibox', 'mustardshock', 'lulustream',
+                            'daisukianime', 'xtremestream', 'gofile'] 
 
 # désactivé 'uptostream', 'uptobox'
 
@@ -255,8 +256,8 @@ class cHosterGui:
         if ('guccihide' in sHostName) or ('streamhide' in sHostName) or ('wishonly' in sHostName):
             return self.getHoster('streamhide')
 
-        # if ('youtube' in sHostName) or ('youtu.be' in sHostName):
-        #     return self.getHoster('youtube')
+        #if ('youtube' in sHostName) or ('youtu.be' in sHostName):
+        #    return self.getHoster('youtube')
 
         if ('oneupload' in sHostName) or ('tipfly' in sHostName):
             return self.getHoster('oneupload')
@@ -266,10 +267,22 @@ class cHosterGui:
 
         if ('vidguard' in sHostName) or ('fertoto' in sHostName) or ('vgembed' in sHostName) or ('vgfplay' in sHostName) or ('jetload' in sHostName):
             return self.getHoster('vidguard')
+            
+        if ('vidara' in sHostName):
+            return self.getHoster('vidara')
 
-        if ('filelions' in sHostName) or ('shoooot' in sHostName) or ('vidhide' in sHostName) or ('nejma' in sHostName) or ('earnvids' in sHostName):
-            return self.getHoster('filelions')
+        if ('filelions' in sHostName) or ('shoooot' in sHostName) or ('vidhide' in sHostName) or ('nejma' in sHostName) or ('earnvids' in sHostName) or ('minochinos' in sHostName):
+            return self.getHoster('filelions')        
+            
+        if ('lulustream' in sHostName) or ('luluvid' in sHostName) or ('luluvdo' in sHostName) or ('lulu.st' in sHostName) or ('streamhihi' in sHostName):
+            return self.getHoster('lulustream')         
 
+        if ('savefiles' in sHostName) or ('streamhls' in sHostName):
+            return self.getHoster('savefiles')      
+            
+        if ('swish' in sHostName) or ('hanerix' in sHostName) or ('hgcloud' in sHostName):
+            return self.getHoster('swish')
+        
         if ('playvidto' in sHostName):
             return self.getHoster('vidto')
 
@@ -279,10 +292,8 @@ class cHosterGui:
         if ('vcstream' in sHostName):
             return self.getHoster('vidcloud')
 
-        if ('livestream' in sHostName):
-            return self.getHoster('lien_direct')
-
-        if ('mustardshock' in sHostName):
+        # Hosts utilisant lien_direct
+        if any(x in sHostName for x in ['livestream', 'mustardshock']):
             return self.getHoster('lien_direct')
 
         # vidtodo et clone
@@ -346,8 +357,8 @@ class cHosterGui:
         if ('clipwatching' in sHostName) or ('highstream' in sHostName):
             return self.getHoster('clipwatching')
 
-        # if ('flixeo' in sHostName):
-        #     return self.getHoster('allow_redirects')
+        if ('kokoflix' in sHostName):
+            return self.getHoster('allow_redirects')
 
         if ('bigwarp' in sHostName):
             return self.getHoster('flix555')
@@ -364,8 +375,8 @@ class cHosterGui:
             return self.getHoster('allow_redirects')
 
         # le catptcha ne fonctionne pas
-        # if ('netu' in sHostName) or ('waaw' in sHostName) or ('hqq' in sHostName) or ('doplay' in sHostName) or ('vizplay' in sHostName) or ('netzues' in sHostName):
-        #     return self.getHoster('netu')
+        if ('netu' in sHostName) or ('waaw' in sHostName) or ('hqq' in sHostName) or ('doplay' in sHostName) or ('vizplay' in sHostName) or ('netzues' in sHostName):
+            return self.getHoster('netu')
 
         if ('tapepops' in sHostName):
             return self.getHoster('streamtape')
@@ -403,7 +414,7 @@ class cHosterGui:
                 if 'content="VOE">' in html or re.search(r'voe', html, re.I):
                     # Reconstruit l'URL pour voe
                     sHosterUrl2 = 'https://voe.com/%s' % (fullURL.split('/e/', 1)[1])
-                elif 'filemoon' in html or 'filmoon' in html:
+                elif 'filemoon' in html or 'filmoon' in html or 'Byse' in html:
                     sHosterUrl2 = 'https://filemoon.com/%s' % (fullURL.split('/e/', 1)[1])
                 elif 'vidhide' in html:
                     sHosterUrl2 = 'https://earnvids.com/%s' % (fullURL.split('/v/', 1)[1])

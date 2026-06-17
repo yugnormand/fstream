@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/yugnormand/fstream
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 # Meme code que thevideo
 # https://vidup.me/embed-xxx-703x405.html
 # https://vidup.me/embed/xxx-703x405.html
