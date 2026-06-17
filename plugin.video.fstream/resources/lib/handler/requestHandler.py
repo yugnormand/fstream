@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
 #
 from requests import post, Session, Request, RequestException, ConnectionError
 from resources.lib.comaddon import addon, dialog, VSlog, VSPath, isMatrix
@@ -51,7 +51,7 @@ class cRequestHandler:
 
     def allowed_gai_family(self):
         """
-         https://github.com/shazow/urllib3/blob/master/urllib3/util/connection.py
+            https://github.com/shazow/urllib3/blob/master/urllib3/util/connection.py
         """
         family = socket.AF_INET
         if urllib3_cn.HAS_IPV6:
@@ -214,7 +214,7 @@ class cRequestHandler:
             if self.__sUrl != self.__sRealUrl and self.oResponse.status_code in [301]:
                 self.__sUrl = self.__sRealUrl
                 return self.__callRequest(jsonDecode, paramGet)
-            
+
         except ConnectionError as e:
             errorMsg = str(e)
             # Erreur SSL
@@ -223,9 +223,9 @@ class cRequestHandler:
                 return self.__callRequest(jsonDecode)
             # Retry with DNS only if addon is present
             elif self.__enableDNS == False and ('getaddrinfo failed' in errorMsg or
-                                                 'Failed to establish a new connection' in errorMsg or
-                                                 'Failed to resolve' in errorMsg or
-                                                 'Timeout' in errorMsg):
+                                                    'Failed to establish a new connection' in errorMsg or
+                                                    'Failed to resolve' in errorMsg or
+                                                    'Timeout' in errorMsg):
                 # Retry with DNS only if addon is present
                 import xbmcvfs
                 if xbmcvfs.exists('special://home/addons/script.module.dnspython/'):
@@ -275,7 +275,7 @@ class cRequestHandler:
             if self.oResponse.status_code in [503, 403]:
                 if 'Forbidden' not in sContent:# and 'Just a moment' not in sContent :
                 # si on peut lire Forbidden c'est que la page est accessible mais pas le contenu
-                    
+
                     urlHost = self.__sRealUrl
                     if self.__sUrl != self.__sRealUrl: # On tente sur l'adresse réelle
                         self.__sUrl = self.__sRealUrl
@@ -312,7 +312,7 @@ class cRequestHandler:
                                 self.__sUrl = cloudProxyUrl + QuotePlus(self.__sRealUrl)
                                 self.addHeaderEntry('Referer', cloudProxyUrl)
                                 return self.__callRequest(jsonDecode, False)
-    
+
                         # Tenter par FlareSolverr
                         if addon().getSetting('use_flaresolverr') == 'true':
                             CLOUDPROXY_ENDPOINT = 'http://' + addon().getSetting('ipaddress') + ':8191/v1'
@@ -325,14 +325,14 @@ class cRequestHandler:
                                 }
                                 if 'postData' in self.__aParamaters:
                                     paramJson['postData'] = self.__aParamaters['postData']
-                                
+
                                 json_response = post(CLOUDPROXY_ENDPOINT, headers=self.__aHeaderEntries, json=paramJson)
                                 if json_response:
                                     response = json_response.json()
                                     if 'solution' in response:
                                         if self.__sUrl != response['solution']['url']:
                                             self.__sRealUrl = response['solution']['url']
-                
+
                                         sContent = response['solution']['response']
                             except:
                                 dialog().VSerror("%s (%s)" % ("Page protegee malgré FlareSolverr", urlHostName(urlHost)))
@@ -382,7 +382,7 @@ class cRequestHandler:
             resolver = dns.resolver.Resolver(configure=False)
             # Résolveurs DNS ouverts: https://www.fdn.fr/actions/dns/
             # + Résolveurs CloudFlare
-            
+
             URL_MAIN = siteManager().getUrlMain(self.SITE_IDENTIFIER)
             if URL_MAIN == '':
                 URL_MAIN = "['1.1.1.1', '2606:4700:4700::1111', '80.67.169.12', '2001:910:800::12', '80.67.169.40', '2001:910:800::40']"

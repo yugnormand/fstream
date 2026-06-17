@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# https://github.com/Kodi-fstream/venom-xbmc-addons
+# https://github.com/yugnormand/fstream
 
 
 from resources.lib.comaddon import addon, siteManager
@@ -22,7 +22,7 @@ class cUpdate:
         time_service = self.__strptime(setting_time)
         time_sleep = datetime.timedelta(hours = 10)
         if time_now - time_service > time_sleep:
-            sUrl = 'https://raw.githubusercontent.com/Kodi-fstream/venom-xbmc-addons/Beta/plugin.video.fstream/resources/sites.json'
+            sUrl = 'https://raw.githubusercontent.com/yugnormand/fstream/refs/heads/master/plugin.video.fstream/resources/sites.json'
             oRequestHandler = cRequestHandler(sUrl)
             properties = oRequestHandler.request(jsonDecode=True)
             if properties == "":

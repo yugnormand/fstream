@@ -3,7 +3,7 @@
 # *********************************************************************************************************************
 # TinyJSParser https://github.com/TmpName/TinyJSParser
 #
-# A basic JS interpreter in python, made for the Kodi addon fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# A basic JS interpreter in python, made for the Kodi addon fStream https://github.com/yugnormand/fstream
 #
 # *********************************************************************************************************************
 

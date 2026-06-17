@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# fStream https://github.com/yugnormand/fstream
 from resources.lib.util import urlEncode, Unquote, cUtil
 
 class cOutputParameterHandler:

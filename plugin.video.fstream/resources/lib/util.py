@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# https://github.com/Kodi-fstream/venom-xbmc-addons
+# https://github.com/Kodi-vStream/venom-xbmc-addons
 from resources.lib.comaddon import isMatrix
 
 try:        # python 2
@@ -77,15 +77,15 @@ class cUtil:
             if not bMatrix:
                 try:
                     # converti en unicode pour aider aux convertions
-                    text = text.decode('utf8', 'ignore')    
+                    text = text.decode('utf8', 'ignore')
                 except Exception as e:
                     pass
-                
+
             try:
                 text = unicodedata.normalize('NFD', text).encode('ascii', 'ignore')
             except Exception as e:
                 pass
-            
+
             if bMatrix:
                 try:
                     text = text.decode('utf8', 'ignore')
@@ -107,11 +107,11 @@ class cUtil:
                 i += 5
             ret = ret + c
             i += 1
-    
+
         return ret
-    
+
     def unescape(self, text):
-        # determine si conversion en unicode nécessaire        
+        # determine si conversion en unicode nécessaire
         isStr = isinstance(text, str)
 
         def fixup(m):

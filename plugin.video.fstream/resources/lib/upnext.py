@@ -274,7 +274,7 @@ class UpNext:
                 "id": 1,
                 "method": "JSONRPC.NotifyAll",
                 "params": {
-                    "sender": "%s.SIGNAL" % 'plugin.video.fstream',
+                    "sender": "%s.SIGNAL" % 'plugin.video.fStream',
                     "message": 'upnext_data',
                     "data": [data],
                 }

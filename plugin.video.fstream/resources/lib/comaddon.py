@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# fStream https://github.com/yugnormand/fstream
 
 import time
 import json
@@ -78,13 +78,13 @@ class dialog:
     def __init__(self):
         self.DIALOG = xbmcgui.Dialog()
 
-    def VSok(self, desc, title='fstream'):
+    def VSok(self, desc, title='fStream'):
         return self.DIALOG.ok(title, desc)
 
-    def VSyesno(self, desc, title='fstream'):
+    def VSyesno(self, desc, title='fStream'):
         return self.DIALOG.yesno(title, desc)
 
-    def VSselect(self, desc, title='fstream'):
+    def VSselect(self, desc, title='fStream'):
         return self.DIALOG.select(title, desc)
 
     def numeric(self, dialogType, heading, defaultt):
@@ -105,16 +105,21 @@ class dialog:
             return list_url[ret]
         return ''
 
-    def VSinfo(self, desc, title='fstream', iseconds=1, sound=False):
+    def VSinfo(self, desc, title='fStream', iseconds=0, sound=False):
+        if (iseconds == 0):
+            iseconds = 1000
+        else:
+            iseconds = iseconds * 1000
+
         if (addon().getSetting('Block_Noti_sound') == 'true'):
             sound = True
 
-        return self.DIALOG.notification(str(title), str(desc), xbmcgui.NOTIFICATION_INFO, iseconds*1000, sound)
+        return self.DIALOG.notification(str(title), str(desc), xbmcgui.NOTIFICATION_INFO, iseconds, sound)
 
     def VSerror(self, e):
-        return self.DIALOG.notification('fstream', 'Erreur: ' + str(e), xbmcgui.NOTIFICATION_ERROR, 2000), VSlog('Erreur: ' + str(e))
+        return self.DIALOG.notification('fStream', 'Erreur: ' + str(e), xbmcgui.NOTIFICATION_ERROR, 2000), VSlog('Erreur: ' + str(e))
 
-    def VStextView(self, desc, title='fstream'):
+    def VStextView(self, desc, title='fStream'):
         return self.DIALOG.textviewer(title, desc)
 
 
@@ -243,7 +248,7 @@ class progress:
     def VScreate(self, title='', desc='', large=False):
         # l'option "large" permet de forcer un sablier large, seul le sablier large peut être annulé.
 
-        # Ne pas afficher le sablier si nous ne sommes pas dans un menu fstream
+        # Ne pas afficher le sablier si nous ne sommes pas dans un menu fStream
         currentWindow = xbmcgui.getCurrentWindowId()
         if currentWindow != 10025 and currentWindow != 10028:  # 10025 = videonav, 10000 = home
             return empty()
@@ -365,7 +370,7 @@ def VSlog(e, level=xbmc.LOGDEBUG):
                 level = xbmc.LOGINFO
             else:
                 level = xbmc.LOGNOTICE
-        xbmc.log('\t[PLUGIN] fstream: ' + str(e), level)
+        xbmc.log('\t[PLUGIN] fStream: ' + str(e), level)
 
     except:
         pass
@@ -542,7 +547,8 @@ class siteManager:
     def setProperty(self, sourceName, propName, value):
         sourceData = self._getDataSource(sourceName)
         if sourceData:
-            if propName not in sourceData or sourceData[propName] != value:
+            oldValue = sourceData[propName]
+            if oldValue != value:
                 sourceData[propName] = str(value)
                 self.save()
 

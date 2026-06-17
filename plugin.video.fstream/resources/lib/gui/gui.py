@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
 import copy
 import json
 import threading
@@ -119,7 +119,7 @@ class cGui:
                         oInputParameterHandler = cInputParameterHandler()
                     sTmdbId = oInputParameterHandler.getValue('sTmdbId')
                     sMetaParent = oInputParameterHandler.getValue('sMeta')
-                    if sMetaParent and sMetaParent != '8' and sTmdbId:  # Ne pas prendre l'id si on vient d'un diffuseur 
+                    if sMetaParent and sMetaParent != '8' and sTmdbId:  # Ne pas prendre l'id si on vient d'un diffuseur
                         oOutputParameterHandler.addParameter('sTmdbId', sTmdbId)
 
         oOutputParameterHandler.addParameter('sFav', sFunction)
@@ -308,7 +308,7 @@ class cGui:
         oGuiElement = cGuiElement()
         oGuiElement.setSiteName(sId)
         oGuiElement.setFunction(sFunction)
-        
+
         sDecoColor = self.ADDON.getSetting('deco_color')
 
         oGuiElement.setRawTitle('[COLOR %s]%s >[/COLOR]' % (sDecoColor, sLabel))
@@ -355,9 +355,9 @@ class cGui:
 
         # Des infos a rajouter ?
         params = {'siteUrl': oGuiElement.setSiteUrl,
-                  'sTmdbId': oGuiElement.setTmdbId,
-                  'sYear': oGuiElement.setYear,
-                  'sRes': oGuiElement.setRes}
+                    'sTmdbId': oGuiElement.setTmdbId,
+                    'sYear': oGuiElement.setYear,
+                    'sRes': oGuiElement.setRes}
 
         try:  # Py2
             for sParam, callback in params.iteritems():
@@ -463,7 +463,7 @@ class cGui:
             except:
                 data['title'] = itemTitle
                 pass
-            
+
             # release du lien
             if sMediaUrl:
                 if self.ADDON.getSetting('display_info_file') == 'true':
@@ -474,7 +474,7 @@ class cGui:
             if sMediaUrl:   # release du lien
                 if self.ADDON.getSetting('display_info_file') == 'true':
                     data['tagline'] = sMediaUrl
-            
+
     # affiche tag HD
         # https://alwinesch.github.io/group__python__xbmcgui__listitem.html#ga99c7bf16729b18b6378ea7069ee5b138
         sRes = oGuiElement.getRes()
@@ -509,7 +509,7 @@ class cGui:
             elif '480' in sRes:
                 width = 720
                 height = 576
-            
+
         if not isNexus():
             # voir : https://kodi.wiki/view/InfoLabels
             oListItem.setInfo(oGuiElement.getType(), data)
@@ -524,7 +524,7 @@ class cGui:
             videoInfoTag.setTvShowTitle(data.get('tvshowtitle', ''))
             # oListItem.setInfo(oGuiElement.getType(), data)
 
-            # ID TMDB, pour les films et les séries 
+            # ID TMDB, pour les films et les séries
             tmdbID = oGuiElement.getTmdbId()
             if tmdbID not in (None, '', 0, '0'):
                 try:
@@ -534,7 +534,7 @@ class cGui:
                     pass  # En cas de type exotique, on évite de faire planter le thread
 
             # On RENSEIGNE TOUJOURS les métadonnées, même si un ID TMDb est présent
-            # => le synopsis/local data de fstream/pastebin reste utilisable.
+            # => le synopsis/local data de vStream/pastebin reste utilisable.
             videoInfoTag.setOriginalTitle(data.get('originaltitle', ""))
             videoInfoTag.setPlot(data.get('plot', ""))
             videoInfoTag.setPlotOutline(data.get('tagline', ""))
@@ -544,7 +544,7 @@ class cGui:
             videoInfoTag.setMpaa(data.get('mpaa', ""))
             videoInfoTag.setDuration(int(data.get('duration', 0)))
             videoInfoTag.setPlaycount(int(data.get('playcount', 0)))
-            # inutilisé ? et fragile 
+            # inutilisé ? et fragile
             # videoInfoTag.setCountries(data.get('country', ['']))
             videoInfoTag.setTrailer(data.get('trailer', ""))
             videoInfoTag.setTagLine(data.get('tagline', ""))
@@ -554,22 +554,22 @@ class cGui:
             videoInfoTag.setGenres(''.join(data.get('genre', [""])).split('/'))
             videoInfoTag.setResumePoint(float(data.get('resumetime', 0.0)), float(data.get('totaltime', 0.0)))
             videoInfoTag.setCast(data.get('cast', []))
-        
+
             if width:
                 # [width, height, aspect, duration, codec, stereoMode, language])
                 videoStreamDetail = xbmc.VideoStreamDetail(width=width, height=height)
                 videoInfoTag.addVideoStream(videoStreamDetail)
 
-    
+
         art = {
-               'poster': oGuiElement.getPoster(),
-               'thumb': oGuiElement.getThumbnail(),
-               'icon': oGuiElement.getIcon(),
-               # FANART = backdrop (idéalement sans texte)
-               'fanart': oGuiElement.getFanart(),
-               # LANDSCAPE = backdrop "avec texte" (langue TMDb, fallback EN)
-               'landscape': oGuiElement.getItemValue('landscape_path')
-              }
+                'poster': oGuiElement.getPoster(),
+                'thumb': oGuiElement.getThumbnail(),
+                'icon': oGuiElement.getIcon(),
+                # FANART = backdrop (idéalement sans texte)
+                'fanart': oGuiElement.getFanart(),
+                # LANDSCAPE = backdrop "avec texte" (langue TMDb, fallback EN)
+                'landscape': oGuiElement.getItemValue('landscape_path')
+                }
 
         clearlogo_url = oGuiElement.getItemValue('clearlogo') or oGuiElement.getItemValue('tvshow.clearlogo') or oGuiElement.getItemValue('logo_path')
         if clearlogo_url:
@@ -584,7 +584,7 @@ class cGui:
         aProperties = oGuiElement.getItemProperties()
         for sPropertyKey, sPropertyValue in aProperties.items():
             oListItem.setProperty(sPropertyKey, str(sPropertyValue))
-        
+
         return oListItem
 
     # Marquer vu/Non vu
@@ -844,11 +844,11 @@ class cGui:
 
         oInputParameterHandler = cInputParameterHandler()
         if oInputParameterHandler.exist('sFileName'):
-            sCleanTitle = oInputParameterHandler.getValue('sFileName') 
+            sCleanTitle = oInputParameterHandler.getValue('sFileName')
         else:
             sCleanTitle = oInputParameterHandler.getValue('sTitle') if oInputParameterHandler.exist('sTitle') else xbmc.getInfoLabel('ListItem.Title')
             # sCleanTitle = oUtil.titleWatched(sCleanTitle)
-            
+
         sCat = oInputParameterHandler.getValue('sCat') if oInputParameterHandler.exist('sCat') else xbmc.getInfoLabel('ListItem.Property(sCat)')
 
         oOutputParameterHandler = cOutputParameterHandler()
@@ -921,7 +921,7 @@ class cGui:
 
     def setWatched(self):
         if True:
-            # Use fstream database
+            # Use vStream database
             oInputParameterHandler = cInputParameterHandler()
             sSite = oInputParameterHandler.getValue('sId')
             sSiteUrl = oInputParameterHandler.getValue('siteUrl')
@@ -933,7 +933,7 @@ class cGui:
             sTmdbId = oInputParameterHandler.getValue('sTmdbId')
             sSeasonUrl = oInputParameterHandler.getValue('saisonUrl')
             sSeasonFunc = oInputParameterHandler.getValue('nextSaisonFunc')
-            
+
             if not sTitle:
                 return
 
@@ -948,7 +948,7 @@ class cGui:
             meta['seasonUrl'] = sSeasonUrl
             meta['seasonFunc'] = sSeasonFunc
             meta['tmdbId'] = sTmdbId
-             
+
             from resources.lib.db import cDb
             with cDb() as db:
                 row = db.get_watched(meta)
@@ -990,7 +990,7 @@ class cGui:
     def openSettings(self):
         return False
 
-    def showNofication(self, sDesc, sTitle='fstream', iSeconds=3):
+    def showNofication(self, sDesc, sTitle='vStream', iSeconds=3):
         # Pas de notif  lors des recherches globales
         if window(10101).getProperty('search') == 'true':
             return
@@ -1021,11 +1021,10 @@ class cGui:
             cGui.searchResults[searchSiteId] = []
 
         cGui.searchResults[searchSiteId].append({'guiElement': oGuiElement,
-                                                 'params': copy.deepcopy(oOutputParameterHandler)})
+                                                    'params': copy.deepcopy(oOutputParameterHandler)})
         cGui.searchResultsSemaphore.release()
 
     def resetSearchResult(self):
         cGui.searchResultsSemaphore.acquire()
         cGui.searchResults = {}
         cGui.searchResultsSemaphore.release()
-

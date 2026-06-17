@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# fStream https://github.com/yugnormand/fstream
 from resources.lib.comaddon import addon, VSlog, siteManager
 from resources.lib.db import cDb
 

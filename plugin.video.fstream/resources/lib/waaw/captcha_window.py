@@ -12,17 +12,14 @@ import xbmc
 import xbmcvfs
 from xbmcgui import Control
 
-CAPTCHA_IMAGE_PATH = 'special://home/userdata/addon_data/plugin.video.fstream/Captcha.png'
-CADRE_ROUGE = "special://home/addons/plugin.video.fstream/resources/lib/waaw/resources/media/border90.png"
-
 
 class CaptchaWindow(xbmcgui.WindowDialog):
 #    def __init__(self, image: bytes, width: int, height: int):
     def __init__(self, image, width, height):
         self.orig_image = BytesIO(image)
-        self.width = int(width)
-        self.height = int(height)
-        self.create_temp_image()
+        self.width = width
+        self.height = height
+        self.temp_file = self.create_temp_image()
         self.border_img = None
         self.frame_x = (self.getWidth() - self.width) // 2  # Centered horizontally
         self.frame_y = (self.getHeight() - self.height) // 2  # Centered vertically
@@ -37,12 +34,13 @@ class CaptchaWindow(xbmcgui.WindowDialog):
         self.add_controls()
 
     def create_temp_image(self):
-
-        downloaded_image = xbmcvfs.File(CAPTCHA_IMAGE_PATH, 'wb')
+        
+        filePath = 'special://home/userdata/addon_data/plugin.video.fstream/Captcha.raw'
+        downloaded_image = xbmcvfs.File(filePath, 'wb')
         downloaded_image.write(self.orig_image.read())
         downloaded_image.close()
         return ""
-
+        
         #temp_file = NamedTemporaryFile(suffix=".jpg")
         #self.orig_image.seek(0)
         #temp_file.write(self.orig_image.read())
@@ -51,10 +49,11 @@ class CaptchaWindow(xbmcgui.WindowDialog):
 
     @property
     def border_img_path(self):
+        path = "special://home/addons/plugin.video.fstream/resources/lib/waaw/resources/media/border90.png"
         if isMatrix():
-            path = xbmcvfs.translatePath(CADRE_ROUGE)
+            path = xbmcvfs.translatePath(path)
         else:
-            path = xbmc.translatePath(CADRE_ROUGE)
+            path = xbmc.translatePath(path)
         return path
 
     @property
@@ -96,7 +95,13 @@ class CaptchaWindow(xbmcgui.WindowDialog):
             textOffsetY = (height - 12) // 2  # Center text vertically
 
             button = xbmcgui.ControlButton(
-                int(x), int(y), width, height, label, textColor='0xFF9FFB05', alignment=6
+                x,
+                y,
+                width,
+                height,
+                label,
+                textOffsetX=textOffsetX,
+                textOffsetY=textOffsetY,
             )
 
             # Add arrow button
@@ -110,41 +115,34 @@ class CaptchaWindow(xbmcgui.WindowDialog):
             elif direction == "right":
                 self.right_arrow = button
 
-        # Ajout de l'image
-        captcha_image = xbmcgui.ControlImage(self.frame_x, self.frame_y, self.width, self.height, CAPTCHA_IMAGE_PATH)
+        captcha_image = xbmcgui.ControlImage(
+            #self.frame_x, self.frame_y, self.width, self.height, self.temp_file.name
+            self.frame_x, self.frame_y, self.width, self.height, 'special://home/userdata/addon_data/plugin.video.fstream/Captcha.raw'
+        )
         self.addControl(captcha_image)
 
-        # Ajout d'un texte
-        fadelabel = xbmcgui.ControlFadeLabel(
-            x = (self.getWidth() - 500) // 2,
-            y = (self.getHeight() - 550) // 2 - 50,
-            width=500,
-            height=50,
-            textColor='0xFF9FFB05'
-        )
-        self.addControl(fadelabel)
-        fadelabel.addLabel("Deplacez le carre sur l'icone et validez")
-
         # Calculate the position of the Submit button
-        submit_button_width = 250
+        submit_button_width = 200
         submit_button_height = 100
-        submit_button_x = self.frame_x + (self.width - submit_button_width) // 2
-        submit_button_y = self.frame_y + (self.height - submit_button_height) // 2
-        # submit_button_y = 450
+        submit_button_x = self.frame_x + self.width - submit_button_width//4
+        submit_button_y = self.frame_y + self.height - submit_button_height//4
+        textOffsetX = (
+            submit_button_width - len("VALIDER") * 14
+        ) // 2  # Center text horizontally
+        textOffsetY = (submit_button_height - 12) // 2  # Center text vertically
 
         submit_button = xbmcgui.ControlButton(
             submit_button_x,
             submit_button_y,
             submit_button_width,
             submit_button_height,
-            "Valider",
-            textColor='0xFF9FFB05',
-            alignment=6
+            " VALIDER",
+            textOffsetX=textOffsetX,
+            textOffsetY=textOffsetY,
         )
         self.addControl(submit_button)
         self.submit_button = submit_button
 
-        # Cadre rouge mobile
         self.border_img = xbmcgui.ControlImage(
             self.frame_x, self.frame_y, 90, 90, self.border_img_path
         )
@@ -155,6 +153,7 @@ class CaptchaWindow(xbmcgui.WindowDialog):
         self.border_img.setPosition(self.frame_x + x, self.frame_y + y)
 
     def _close_dialog(self):
+        #self.temp_file.close()
         return self.close()
 
     def onControl(self, control):
