@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 import re
 
 from resources.lib.comaddon import siteManager
@@ -26,7 +26,7 @@ SERIE_SERIES = ('seriestreaming/', 'showMenuTvShows')
 SERIE_NEWS = ('seriestreaming/', 'showMovies')
 SERIE_GENRES = (SERIE_SERIES[0] , 'showSerieGenres')
 
-URL_SEARCH = (False, 'showMovies')
+URL_SEARCH = ('', 'showMovies')
 URL_SEARCH_MOVIES = ('search/%s&cat=movie', 'showMovies')
 URL_SEARCH_SERIES = ('search/%s&cat=tv', 'showMovies')
 URL_SEARCH_ANIMS = ('search/%s&cat=anime', 'showMovies')

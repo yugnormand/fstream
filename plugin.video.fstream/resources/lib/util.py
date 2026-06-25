@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# https://github.com/Kodi-vStream/venom-xbmc-addons
+# https://github.com/Kodi-fstream/venom-xbmc-addons
 from resources.lib.comaddon import isMatrix
 
 try:        # python 2

@@ -56,6 +56,11 @@
             "active": "False",
             "url": "https://cinemay.li/"
         },
+        "cinestream": {
+            "label": "cinestream",
+            "active": "True",
+            "url": "https://cinestream.info/"
+        },
         "cloudproxy": {
             "label": "Proxy cloudflare",
             "active": "True",
@@ -69,6 +74,7 @@
         "cpasmal": {
             "label": "CpasMal",
             "active": "True",
+            "cloudflare": "False",
             "url": "https://www.cpasmal.rip/"
         },
         "cpasmieux": {
@@ -384,7 +390,7 @@
         "wiflix": {
             "label": "WiFlix",
             "active": "True",
-            "cloudflare": "False",
+            "cloudflare": "True",
             "site_info": "https://www.wiflix-nouvelle-adresse.site/",
             "url": "https://flemmix.cafe/"
         },

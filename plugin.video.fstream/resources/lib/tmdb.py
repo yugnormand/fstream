@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Code de depart par AnthonyBloomer
-# Modif pour vStream
-# https://github.com/Kodi-vStream/venom-xbmc-addons/
+# Modif pour fstream
+# https://github.com/Kodi-fstream/venom-xbmc-addons/
 import re
 import string
 import xbmcvfs
@@ -59,7 +59,7 @@ class cTMDb:
 
     URL = 'https://api.themoviedb.org/%d/'
     URL_TRAILER = 'plugin://plugin.video.youtube/play/?video_id=%s' # ancien : 'plugin://plugin.video.youtube/?action=play_video&videoid=%s'
-    CACHE = 'special://home/userdata/addon_data/plugin.video.vstream/video_cache.db'
+    CACHE = 'special://home/userdata/addon_data/plugin.video.fstream/video_cache.db'
     TMDB_CACHE_SCHEMA = 2
     LOGO_TMDB_SIZE = 'original'
 
@@ -137,7 +137,7 @@ class cTMDb:
         if stored < self.TMDB_CACHE_SCHEMA:
             if self.purge_cache(log=False):
                 self.ADDON.setSetting('tmdb_cache_schema', str(self.TMDB_CACHE_SCHEMA))
-                VSlog("VSTREAM TMDB : Purge automatique du cache exécutée (mise à jour du schéma %s -> %s)" % (stored, self.TMDB_CACHE_SCHEMA))
+                VSlog("fstream TMDB : Purge automatique du cache exécutée (mise à jour du schéma %s -> %s)" % (stored, self.TMDB_CACHE_SCHEMA))
 
     def __createdb(self, dropTable=''):
         try:
@@ -349,8 +349,8 @@ class cTMDb:
                 import qrcode
                 from resources.lib.librecaptcha.gui import cInputWindowYesNo
                 qr = qrcode.make(url + result['request_token'])
-                qr.save(VSPath('special://home/userdata/addon_data/plugin.video.vstream/qrcode.png'), scale=5)
-                oSolver = cInputWindowYesNo(captcha='special://home/userdata/addon_data/plugin.video.vstream/qrcode.png', msg="Scanner le QRCode pour acceder au lien d'autorisation", roundnum=1)
+                qr.save(VSPath('special://home/userdata/addon_data/plugin.video.fstream/qrcode.png'), scale=5)
+                oSolver = cInputWindowYesNo(captcha='special://home/userdata/addon_data/plugin.video.fstream/qrcode.png', msg="Scanner le QRCode pour acceder au lien d'autorisation", roundnum=1)
                 retArg = oSolver.get()
                 if retArg == "N":
                     return False

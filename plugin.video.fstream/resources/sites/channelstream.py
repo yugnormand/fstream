@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
+# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 # Arias800
 import re
 import time
@@ -23,7 +23,7 @@ HEURE_HIVER = False
 
 SITE_IDENTIFIER = 'channelstream'
 SITE_NAME = 'Channel Stream'
-SITE_DESC = 'Chaines TV en directs'
+SITE_DESC = 'Chaines TV en direct'
 
 URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)
 SPORT_SPORTS = (True, 'load')
@@ -416,7 +416,7 @@ def getHosterIframe(url, referer):
         return False
 
     # import xbmcvfs
-    # f = xbmcvfs.File('special://userdata/addon_data/plugin.video.fStream/test.txt','w')
+    # f = xbmcvfs.File('special://userdata/addon_data/plugin.video.fstream/test.txt','w')
     # f.write(sHtmlContent)
     # f.close()
     
