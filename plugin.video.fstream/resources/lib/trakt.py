@@ -5,6 +5,7 @@ import re
 import time
 import unicodedata
 import xbmc
+import json
 
 from resources.lib.comaddon import addon, dialog, addonManager, VSlog
 from resources.lib.db import cDb
@@ -52,7 +53,7 @@ class cTrakt:
         oRequestHandler = cRequestHandler(URL_API + 'oauth/device/code')
         oRequestHandler.setRequestType(1)
         oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-        oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+        oRequestHandler.addHeaderEntry('User-Agent', 'vStream')
         oRequestHandler.addJSONEntry('client_id', API_KEY)
         sHtmlContent = oRequestHandler.request(jsonDecode=True)
 
@@ -71,7 +72,7 @@ class cTrakt:
                     oRequestHandler = cRequestHandler(URL_API + 'oauth/device/token')
                     oRequestHandler.setRequestType(1)
                     oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-                    oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+                    oRequestHandler.addHeaderEntry('User-Agent', 'vStream')
                     oRequestHandler.addJSONEntry('client_id', API_KEY)
                     oRequestHandler.addJSONEntry('client_secret', API_SECRET)
                     oRequestHandler.addJSONEntry('code', sHtmlContent['device_code'])
@@ -87,7 +88,7 @@ class cTrakt:
                         self.ADDON.setSetting('token_time', str(time.time()))
                         self.DIALOG.VSinfo(self.ADDON.VSlang(30000))
 
-                        # si l'addon est installé, le lier et désactiver le suivi fStream  
+                        # si l'addon est installé, le lier et désactiver le suivi vStream
                         if addonManager().isAddonExists('script.trakt'):
                             self.ADDON.setSetting('install_trakt_addon', 'true')
                             self.ADDON.setSetting('trakt_movies_activate_scrobbling', 'false')
@@ -107,7 +108,7 @@ class cTrakt:
         """
         Rafraîchit l'access token en utilisant le refresh token.
         """
-        
+
         # vérifier si necéssaire
         if not self.isTokenExpired():
             return
@@ -121,7 +122,7 @@ class cTrakt:
             oRequestHandler = cRequestHandler(URL_API + 'oauth/token')
             oRequestHandler.setRequestType(1)  # POST
             oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-            oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+            oRequestHandler.addHeaderEntry('User-Agent', 'vStream')
             oRequestHandler.addJSONEntry('refresh_token', refresh_token)
             oRequestHandler.addJSONEntry('client_id', API_KEY)
             oRequestHandler.addJSONEntry('client_secret', API_SECRET)
@@ -165,7 +166,7 @@ class cTrakt:
             try:
                 oRequestHandler = cRequestHandler(URL_API + 'users/me')
                 oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-                oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+                oRequestHandler.addHeaderEntry('User-Agent', 'vStream')
                 oRequestHandler.addHeaderEntry('trakt-api-key', API_KEY)
                 oRequestHandler.addHeaderEntry('trakt-api-version', API_VERS)
                 oRequestHandler.addHeaderEntry('Authorization', 'Bearer %s' % bstoken)
@@ -192,7 +193,7 @@ class cTrakt:
 
             # oOutputParameterHandler.addParameter('siteUrl', URL_API + 'oauth/revoke')
             # oGui.addDir(SITE_IDENTIFIER, 'getCalendrier', self.ADDON.VSlang(30331), 'annees.png', oOutputParameterHandler)
-            
+
             oOutputParameterHandler.addParameter('siteUrl', URL_API + 'oauth/revoke')
             oGui.addDir(SITE_IDENTIFIER, 'getBsout', '[COLOR red]' + self.ADDON.VSlang(30309) + '[/COLOR]', 'trakt.png', oOutputParameterHandler)
 
@@ -208,7 +209,7 @@ class cTrakt:
 
         oOutputParameterHandler.addParameter('siteUrl', 'users/likes/lists')
         oOutputParameterHandler.addParameter('sCat', '1')
-        oGui.addDir(SITE_IDENTIFIER, 'getLists', 'Mes listes aimées', 'listes.png', oOutputParameterHandler)  
+        oGui.addDir(SITE_IDENTIFIER, 'getLists', 'Mes listes aimées', 'listes.png', oOutputParameterHandler)
 
         oOutputParameterHandler.addParameter('siteUrl', 'lists/popular')
         oGui.addDir(SITE_IDENTIFIER, 'getLists', "Listes populaires", 'listes.png', oOutputParameterHandler)
@@ -216,7 +217,7 @@ class cTrakt:
         oOutputParameterHandler.addParameter('siteUrl', 'lists/trending')
         oGui.addDir(SITE_IDENTIFIER, 'getLists', "Listes tendances", 'listes.png', oOutputParameterHandler)
 
-        oGui.setEndOfDirectory() 
+        oGui.setEndOfDirectory()
 
 #    def getCalendrier(self):
 #        oGui = cGui()
@@ -275,7 +276,7 @@ class cTrakt:
         # Listes aimées
         oOutputParameterHandler.addParameter('siteUrl', 'users/likes/lists')
         oOutputParameterHandler.addParameter('sCat', '1')
-        oGui.addDir(SITE_IDENTIFIER, 'getLists', 'Mes listes aimées', 'listes.png', oOutputParameterHandler)  
+        oGui.addDir(SITE_IDENTIFIER, 'getLists', 'Mes listes aimées', 'listes.png', oOutputParameterHandler)
 
         # recommandés
         oOutputParameterHandler.addParameter('siteUrl', 'recommendations/movies?ignore_collected=true&ignore_watchlisted=true&limit=100')
@@ -291,9 +292,9 @@ class cTrakt:
 
         # Visionnage en cours, NON, pas interessant d'avoir la liste des épisodes non terminés
         # liste.append([self.ADDON.VSlang(30125), URL_API + 'sync/playback/episodes?type=episodes'])
-        
+
         # visionnage en cours
-        oOutputParameterHandler.addParameter('siteUrl', 'sync/watched/shows?type=show')
+        oOutputParameterHandler.addParameter('siteUrl', 'sync/watched/shows?extended=progress')
         oOutputParameterHandler.addParameter('sCat', '2')
         oGui.addDir(SITE_IDENTIFIER, 'getTrakt', self.ADDON.VSlang(30125), 'vod.png', oOutputParameterHandler)
 #            liste.append([self.ADDON.VSlang(30125), URL_API + 'sync/watched/shows?type=show'])
@@ -325,7 +326,7 @@ class cTrakt:
 
         oOutputParameterHandler.addParameter('siteUrl', 'users/likes/lists')
         oOutputParameterHandler.addParameter('sCat', '2')
-        oGui.addDir(SITE_IDENTIFIER, 'getLists', 'Mes listes aimées', 'listes.png', oOutputParameterHandler)  
+        oGui.addDir(SITE_IDENTIFIER, 'getLists', 'Mes listes aimées', 'listes.png', oOutputParameterHandler)
 
         # liste.append([self.ADDON.VSlang(30318), URL_API + 'users/me/watchlist/seasons'])
         # liste.append([self.ADDON.VSlang(30319), URL_API + 'users/me/watchlist/episodes'])
@@ -359,7 +360,7 @@ class cTrakt:
 
     def showSearchList(self):
         oGui = cGui()
-    
+
         sSearchText = oGui.showKeyBoard()
         if sSearchText:
             oInputParameterHandler = cInputParameterHandler()
@@ -369,7 +370,7 @@ class cTrakt:
 
 
     def searchList(self, sSearchText="", sCat=""):
-        
+
         oGui = cGui()
 
         if not sSearchText:
@@ -379,16 +380,16 @@ class cTrakt:
         sUrl = URL_API + 'search/list?query=' + sSearchText
         oRequestHandler = cRequestHandler(sUrl)
         oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-        oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+        oRequestHandler.addHeaderEntry('User-Agent', 'vStream')
         oRequestHandler.addHeaderEntry('trakt-api-key', API_KEY)
         oRequestHandler.addHeaderEntry('trakt-api-version', API_VERS)
-        
+
         listes = oRequestHandler.request(jsonDecode=True)
         oOutputParameterHandler = cOutputParameterHandler()
-        
+
         listes = sorted(listes, key=lambda liste: liste['list']['likes'])
 
-        
+
         for item in listes[::-1]:
             liste = item['list']
             itemCount = liste['item_count']
@@ -397,17 +398,17 @@ class cTrakt:
             sTitle = '%s (%s)' % (liste['name'], itemCount)
             desc = liste['description']
             sUrl = '/lists/%d/items' % liste['ids']['trakt']
-            
+
             oOutputParameterHandler.addParameter('siteUrl', sUrl)
             oOutputParameterHandler.addParameter('sCat', sCat)
             oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
             oGui.addDir(SITE_IDENTIFIER, 'getTrakt', sTitle, 'library.png', oOutputParameterHandler, desc)
-            
+
         oGui.setEndOfDirectory()
 
 
     def getLists(self, count = 0, sPage=None):
-        
+
         self.refreshToken() # renouveller le token si nécessaire
 
         oGui = cGui()
@@ -416,7 +417,7 @@ class cTrakt:
         sCat = oInputParameterHandler.getValue('sCat')
         siteUrl = oInputParameterHandler.getValue('siteUrl')
         if not sPage:
-            sPage = oInputParameterHandler.getValue('sPage') 
+            sPage = oInputParameterHandler.getValue('sPage')
         if not sPage:
             sPage = '1'
 
@@ -425,13 +426,13 @@ class cTrakt:
 
         oRequestHandler = cRequestHandler(URL_API + sUrl)
         oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-        oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+        oRequestHandler.addHeaderEntry('User-Agent', 'vStream')
         oRequestHandler.addHeaderEntry('trakt-api-key', API_KEY)
         oRequestHandler.addHeaderEntry('trakt-api-version', API_VERS)
         if 'users/' in sUrl or '/sync/' in sUrl:
             oRequestHandler.addHeaderEntry('Authorization', 'Bearer %s' % self.ADDON.getSetting('bstoken'))
         listes = oRequestHandler.request(jsonDecode=True)
-        
+
         if len(listes):
 
             # trie de la liste par alpha
@@ -439,7 +440,7 @@ class cTrakt:
                 listes = sorted(listes, key=lambda liste: liste['name'])
             # elif 'likes/' in sUrl:
             #     listes = sorted(listes, key=lambda liste: liste['list']['name'])
-            
+
             for liste in listes:
                 if '/me/' in sUrl:
                     sUrl = 'users/me/lists/' + liste['ids']['slug'] + '/items'
@@ -461,7 +462,7 @@ class cTrakt:
                         if movieType in listNameUpper:
                             found = True
                             break
-                
+
                 # détecter si liste de films ou séries selon le nom
                 if sCat == '2':
                     searchTypeMovie = ('SERIE', 'SÉRIE')
@@ -469,13 +470,13 @@ class cTrakt:
                         if movieType in listNameUpper:
                             found = True
                             break
-                
-                
+
+
                 # détecter si liste de films ou séries selon le contenu
                 if not found:
                     oRequestHandler = cRequestHandler(URL_API + sUrl)
                     oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-                    oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+                    oRequestHandler.addHeaderEntry('User-Agent', 'vStream')
                     oRequestHandler.addHeaderEntry('trakt-api-key', API_KEY)
                     oRequestHandler.addHeaderEntry('trakt-api-version', API_VERS)
                     oRequestHandler.addHeaderEntry('Authorization', 'Bearer %s' % self.ADDON.getSetting('bstoken'))
@@ -495,22 +496,22 @@ class cTrakt:
                     oOutputParameterHandler.addParameter('siteUrl', sUrl)
                     oOutputParameterHandler.addParameter('sCat', sCat)
                     oGui.addDir(SITE_IDENTIFIER, 'getTrakt', sTitle, 'library.png', oOutputParameterHandler, liste['description'])
-    
-    
+
+
             if 'me/' not in siteUrl:
                 iPage = int(sPage)
-#                ratio = 5+count/ iPage  # pour arreter si trop de pages sans résultats  
+#                ratio = 5+count/ iPage  # pour arreter si trop de pages sans résultats
                 sNextPage =str(iPage + 1)
-                
+
                 if count < int(MAXRESULT):# and ratio > 3.0:
                     self.getLists(count, sNextPage)
-                else:  
+                else:
                     oOutputParameterHandler = cOutputParameterHandler()
                     oOutputParameterHandler.addParameter('siteUrl', siteUrl)
                     oOutputParameterHandler.addParameter('sCat', sCat)
                     oOutputParameterHandler.addParameter('sPage', sNextPage)
                     oGui.addNext(SITE_IDENTIFIER, 'getLists', 'Page suivante', oOutputParameterHandler)
-    
+
 
         if bNext:
             oGui.setEndOfDirectory()
@@ -524,7 +525,7 @@ class cTrakt:
 
         oRequestHandler = cRequestHandler(sUrl)
         oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-        oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+        oRequestHandler.addHeaderEntry('User-Agent', 'vStream')
         oRequestHandler.addHeaderEntry('trakt-api-key', API_KEY)
         oRequestHandler.addHeaderEntry('trakt-api-version', API_VERS)
         oRequestHandler.addHeaderEntry('Authorization', 'Bearer %s' % self.ADDON.getSetting('bstoken'))
@@ -568,7 +569,7 @@ class cTrakt:
         siteUrl = oInputParameterHandler.getValue('siteUrl')
         traktUrl = sUrl = URL_API + siteUrl
         if not sPage:
-            sPage = oInputParameterHandler.getValue('sPage') 
+            sPage = oInputParameterHandler.getValue('sPage')
         if not sPage:
             sPage = 1
 
@@ -577,20 +578,23 @@ class cTrakt:
 
         oRequestHandler = cRequestHandler(traktUrl)
         oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-        oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+        oRequestHandler.addHeaderEntry('User-Agent', 'vStream')
         oRequestHandler.addHeaderEntry('trakt-api-key', API_KEY)
         oRequestHandler.addHeaderEntry('trakt-api-version', API_VERS)
         if '/users/' in sUrl or '/sync/' in sUrl or '/my/' in sUrl or '/recommendations/' in sUrl:
             self.refreshToken() # renouveller le token si nécessaire
             oRequestHandler.addHeaderEntry('Authorization', 'Bearer %s' % self.ADDON.getSetting('bstoken'))
-        sHtmlContent = oRequestHandler.request(jsonDecode=True)
-        sHeaders = oRequestHandler.getResponseHeader()
+        sHtmlContent = oRequestHandler.request()
+        if not sHtmlContent.startswith('['):
+            sHtmlContent = ''
+        else:
+            sHtmlContent = json.loads(sHtmlContent)
 
         # tri inverse pour certaines listes
         if 'sync/collection/movies' in sUrl:
-            sHtmlContent = sHtmlContent[::-1] 
+            sHtmlContent = sHtmlContent[::-1]
 
-
+        sHeaders = oRequestHandler.getResponseHeader()
         if 'X-Pagination-Page' in sHeaders:
             sPage = sHeaders['X-Pagination-Page']
         iPage = int(sPage)
@@ -619,9 +623,9 @@ class cTrakt:
         sOldDate = None
         tmdbIds = set()
         saisonsWatched = list()
-        
+
         if (total > 0):
-            
+
             # synchroniser avec trakt les medias entamés seulement lorsqu'on arrive sur la premiere page
             if '/watched/' in sUrl:
                 if sCurrentLimit == 0 and iPage == 1 :
@@ -648,7 +652,7 @@ class cTrakt:
                         movie = i['movie']
                         sTitle = self.getLocalizedTitle(movie, 'movies')
                         sTrakt, sYear, sImdb, sTmdb = movie['ids']['trakt'], movie['year'], movie['ids']['imdb'], movie['ids']['tmdb']
-                        
+
                     sFunction = 'showSearch'
                     sId = 'globalSearch'
                     sTitle = self.decode(sTitle)
@@ -683,7 +687,7 @@ class cTrakt:
                         count = count +1    # compte quand même pour ne pas passer à la page suivante
                         continue
                     tmdbIds.add(sTmdb)
-                    
+
                     sTitle = self.decode(sTitle, Unicode=True)
                     searchtext = sTitle
                     sFile = sTitle
@@ -742,11 +746,11 @@ class cTrakt:
 
                     # récuperer les points de lecture
                     progress = i['progress']
-                    
+
                     # au moins 5% de lecture pour proposer le film
                     if progress < 5:
                         continue
-                    
+
                     self.setMediaProgress(sTmdb, sTitle, sSeason, sEpisode, progress)
 
                     if sTitle:
@@ -766,7 +770,7 @@ class cTrakt:
                         cTrakt.CONTENT = '2'
 #                        sFunction = 'getBseasons'
                         #media['episode']['season'], media['episode']['number']
-                        
+
                         # Indicateur VU
                         saisonsWatched.append(i)
 
@@ -873,7 +877,7 @@ class cTrakt:
                         sTitle = self.getLocalizedTitle(show, 'shows')
                         sTrakt, sYear, sImdb, sTmdb = show['ids']['trakt'], show['year'], show['ids']['imdb'], show['ids']['tmdb']
                         cTrakt.CONTENT = '2'
-                        
+
                     sTitle = self.decode(sTitle)
                     searchtext = sTitle
                     sFile = sTitle
@@ -930,18 +934,18 @@ class cTrakt:
                         oOutputParameterHandler.addParameter('ResumeTime', progress)
                         oOutputParameterHandler.addParameter('TotalTime', '100')
 
-                    
+
                     self.getFolder(oGui, sId, sTitle, sFile, sFunction, sImdb, sTmdb, oOutputParameterHandler)
                     sKey += 1
                     count = count +1
                     if count >= maxResult:
                         break
-    
+
 
 
             # indicateur VU sur les saisons
-            for saisonWtached in saisonsWatched[::-1]:
-                self.setSaisonWatched(saisonWtached)
+            for saisonWatched in saisonsWatched[::-1]:
+                self.setSaisonWatched(saisonWatched)
 
 
             if iPage < iMaxPage:
@@ -950,18 +954,18 @@ class cTrakt:
                 oOutputParameterHandler.addParameter('siteUrl', siteUrl)
                 oOutputParameterHandler.addParameter('sCat', sCat)
                 oOutputParameterHandler.addParameter('sPage', sNextPage)
-                
+
                 if count < maxResult:
                     self.getTrakt(count, sNextPage)
                 else:
-                    oGui.addNext(SITE_IDENTIFIER, 'getTrakt', 'Page suivante', oOutputParameterHandler)  
-                
+                    oGui.addNext(SITE_IDENTIFIER, 'getTrakt', 'Page suivante', oOutputParameterHandler)
+
             elif not 'X-Pagination-Page-Count' in sHeaders and len(sHtmlContent) > maxResult:
                 oOutputParameterHandler = cOutputParameterHandler()
                 oOutputParameterHandler.addParameter('siteUrl', siteUrl)
                 oOutputParameterHandler.addParameter('sCat', sCat)
                 oOutputParameterHandler.addParameter('limite', int(sCurrentLimit) + maxResult)
-                oGui.addNext(SITE_IDENTIFIER, 'getTrakt', 'Page suivante', oOutputParameterHandler)  
+                oGui.addNext(SITE_IDENTIFIER, 'getTrakt', 'Page suivante', oOutputParameterHandler)
 
         if bNext:
             oGui.setEndOfDirectory()
@@ -976,12 +980,12 @@ class cTrakt:
         # oRequestHandler = cRequestHandler(URL_API + 'sync/playback/' + ('movies' if sCat == '1' else 'episodes'))
         oRequestHandler = cRequestHandler(URL_API + 'sync/playback/episodes')
         oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-        oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+        oRequestHandler.addHeaderEntry('User-Agent', 'vStream')
         oRequestHandler.addHeaderEntry('trakt-api-key', API_KEY)
         oRequestHandler.addHeaderEntry('trakt-api-version', API_VERS)
         oRequestHandler.addHeaderEntry('Authorization', 'Bearer %s' % self.ADDON.getSetting('bstoken'))
         playbackHistory = oRequestHandler.request(jsonDecode=True)
-        
+
         if len(playbackHistory) == 0:
             return
 
@@ -994,7 +998,7 @@ class cTrakt:
             for media in playbackHistory:
                 # if media['show']['ids']['tmdb'] != int(sTmdb):
                 #     continue
-                
+
                 sTitle = media['show']['title']
                 sSaison = media['episode']['season']
                 tvShowTitleWatched = util.titleWatched(sTitle)
@@ -1003,12 +1007,12 @@ class cTrakt:
 
 
                 # Point de reprise vidéo d'un épisode
-                       
+
                 # il faut au moins 5% de lecture pour proposer la reprise
                 if progress < 5:
                     continue
 
-                # en pourcentage                
+                # en pourcentage
                 totalTime = 1
                 progress = progress/100
 
@@ -1019,11 +1023,11 @@ class cTrakt:
                 meta['point'] = progress
                 meta['total'] = totalTime
                 db.insert_resume(meta)
-                
+
                 # On met la saison "En cours de lecture"
                 if tvShowTitleWatched not in titleList:
                     titleList.add(tvShowTitleWatched)
-                
+
                     sTmdbId = media['show']['ids']['tmdb']
                     meta['cat'] = '4'  # saison
                     meta['tmdbId'] = sTmdbId
@@ -1042,7 +1046,7 @@ class cTrakt:
 
                     # On met la saison "VU"
                     db.insert_watched(meta)
-            
+
         return
 
 
@@ -1076,10 +1080,10 @@ class cTrakt:
 
                 # On met la saison "EN COURS" et "VU" (pour l'indicateur)
                 # NON, on n'a pas d'url de reprise db.insert_viewing(meta)
-                
+
                 # On met la saison "VU" (pour l'indicateur)
                 db.insert_watched(meta)
-            
+
                 episodes = saison['episodes']
                 for episode in episodes:
                     numEp = episode['number']
@@ -1088,18 +1092,18 @@ class cTrakt:
                     meta['titleWatched'] = '%sE%02d' % (saisonTitleWatched, numEp)
                     # On met l'épisode "VU"
                     db.insert_watched(meta)
-            
+
         return
 
 
-    # progression dans le cache fStream selon l'état dans trakt
+    # progression dans le cache vStream selon l'état dans trakt
     def setMediaProgress(self, sTmdb, sTitle, sSeason, sEpisode, progress):
         # il faut au moins 5% de lecture pour proposer la reprise
         if progress < 5:
             return
 
         util = cUtil()
-        # en pourcentage                
+        # en pourcentage
         totalTime = 1
         progress = progress/100
 
@@ -1117,8 +1121,8 @@ class cTrakt:
             db.insert_resume(meta)
 
         # On met le media "EN COURS"
-        
-        
+
+
         return
 
 
@@ -1135,7 +1139,7 @@ class cTrakt:
 
         oRequestHandler = cRequestHandler(sUrl)
         oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-        oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+        oRequestHandler.addHeaderEntry('User-Agent', 'vStream')
         oRequestHandler.addHeaderEntry('trakt-api-key', API_KEY)
         oRequestHandler.addHeaderEntry('trakt-api-version', API_VERS)
         oRequestHandler.addHeaderEntry('Authorization', 'Bearer %s' % self.ADDON.getSetting('bstoken'))
@@ -1187,7 +1191,7 @@ class cTrakt:
         title = grab.get_namebyid(sType, item['ids']['tmdb'])
         return title if title else item['title']
 
-    
+
     def getBepisodes(self):
         self.refreshToken() # renouveller le token si nécessaire
 
@@ -1205,7 +1209,7 @@ class cTrakt:
 
         oRequestHandler = cRequestHandler(sUrl)
         oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-        oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+        oRequestHandler.addHeaderEntry('User-Agent', 'vStream')
         oRequestHandler.addHeaderEntry('trakt-api-key', API_KEY)
         oRequestHandler.addHeaderEntry('trakt-api-version', API_VERS)
         oRequestHandler.addHeaderEntry('Authorization', 'Bearer %s' % self.ADDON.getSetting('bstoken'))
@@ -1259,11 +1263,11 @@ class cTrakt:
             oGuiElement.setIcon('trakt.png')
             oGuiElement.setImdbId(sImdb)
             oGuiElement.setTmdbId(sTmdb)
-            
+
             # Récupérer les valeurs des images si elles sont définies
             sPoster = oOutputParameterHandler.getValue('poster')
             sFanart = oOutputParameterHandler.getValue('backdrop')  # Utiliser 'backdrop' pour l'arrière-plan
-            
+
             if sPoster:
                 oGuiElement.setThumbnail(sPoster)
             if sFanart:
@@ -1371,7 +1375,7 @@ class cTrakt:
             if sTraktType == "shows":
                 if self.ADDON.getSetting('trakt_tvshows_activate_scrobbling') == 'false':
                     return
-                
+
                 sTitle = oInputParameterHandler.getValue('tvShowTitle')
                 sSeason = oInputParameterHandler.getValue('sSeason')
                 if not sSeason:
@@ -1405,7 +1409,7 @@ class cTrakt:
 
             if not sTMDB:
                 return
-            
+
             sPost = {sTraktType: [{'ids': {'tmdb': sTMDB}}]}
             if sSeason:
                 sPost = {sTraktType: [{'ids': {'tmdb': sTMDB}, 'seasons': [{'number': int(sSeason)}]}]}
@@ -1428,51 +1432,54 @@ class cTrakt:
         oRequestHandler = cRequestHandler(sAction)
         oRequestHandler.setRequestType(requestType)
         oRequestHandler.addHeaderEntry('Content-Type', 'application/json')
-        oRequestHandler.addHeaderEntry('User-Agent', 'fStream')
+        oRequestHandler.addHeaderEntry('User-Agent', 'vStream')
         oRequestHandler.addHeaderEntry('trakt-api-key', API_KEY)
         oRequestHandler.addHeaderEntry('trakt-api-version', API_VERS)
         oRequestHandler.addHeaderEntry('Authorization', 'Bearer %s' % self.ADDON.getSetting('bstoken'))
         for a in sPost:
             oRequestHandler.addJSONEntry(a, sPost[a])
-        
-        jsonDecode = requestType in [cRequestHandler.REQUEST_TYPE_POST, cRequestHandler.REQUEST_TYPE_GET]
-        sHtmlContent = oRequestHandler.request(jsonDecode = jsonDecode)
+
+        sHtmlContent = oRequestHandler.request()
 
         sText = "Aucune action réalisée"
-        
-        if sHtmlContent == '':
-            sText = ''
-            
-        try:
-            # point de reprise
-            if sHtmlContent['action'] == 'pause':
-                sText = 'Progression enregistrée'
-        except:
-            pass
+        if sHtmlContent != '':
+            jsonDecode = requestType in [cRequestHandler.REQUEST_TYPE_POST, cRequestHandler.REQUEST_TYPE_GET]
+            if jsonDecode:
+                try:
+                    sHtmlContent = json.loads(sHtmlContent)
+                except:
+                    pass
 
-        try:
-            if sHtmlContent['added']['movies'] > 0 or sHtmlContent['added']['episodes'] > 0 or sHtmlContent['added']['shows'] > 0:
-                sText = 'Ajouté avec succès'
-        except:
-            pass
+            try:
+                # point de reprise
+                if sHtmlContent['action'] == 'pause':
+                    sText = 'Progression enregistrée'
+            except:
+                pass
 
-        try:
-            if sHtmlContent['updated']['movies'] > 0 or sHtmlContent['updated']['episodes'] > 0 or sHtmlContent['updated']['shows'] > 0:
-                sText = 'Mise à jour avec succès'
-        except:
-            pass
+            try:
+                if sHtmlContent['added']['movies'] > 0 or sHtmlContent['added']['episodes'] > 0 or sHtmlContent['added']['shows'] > 0:
+                    sText = 'Ajouté avec succès'
+            except:
+                pass
 
-        try:
-            if sHtmlContent['deleted']['movies'] > 0 or sHtmlContent['deleted']['episodes'] > 0:
-                sText = 'Supprimé avec succès'
-        except:
-            pass
+            try:
+                if sHtmlContent['updated']['movies'] > 0 or sHtmlContent['updated']['episodes'] > 0 or sHtmlContent['updated']['shows'] > 0:
+                    sText = 'Mise à jour avec succès'
+            except:
+                pass
 
-        try:
-            if sHtmlContent['existing']['movies'] > 0 or sHtmlContent['existing']['episodes'] > 0 or sHtmlContent['existing']['seasons'] > 0 or sHtmlContent['existing']['shows'] > 0:
-                sText = 'Entrée déjà présente'
-        except:
-            pass
+            try:
+                if sHtmlContent['deleted']['movies'] > 0 or sHtmlContent['deleted']['episodes'] > 0:
+                    sText = 'Supprimé avec succès'
+            except:
+                pass
+
+            try:
+                if sHtmlContent['existing']['movies'] > 0 or sHtmlContent['existing']['episodes'] > 0 or sHtmlContent['existing']['seasons'] > 0 or sHtmlContent['existing']['shows'] > 0:
+                    sText = 'Entrée déjà présente'
+            except:
+                pass
 
 
         bReload = oInputParameterHandler.exist('sReload')
@@ -1484,19 +1491,19 @@ class cTrakt:
                 # suppression du point de reprise dans trakt
                 self.getAction(URL_API + 'sync/playback/' + sID, requestType = cRequestHandler.REQUEST_TYPE_DELETE)
                 sText = 'Supprimé avec succès'
-           
-            # suppression du point de reprise dans fStream
+
+            # suppression du point de reprise dans vStream
             cViewing().delViewing()
-                
-            # suppression de l'indicateur VU dans fStream
+
+            # suppression de l'indicateur VU dans vStream
             meta = {}
             meta['titleWatched'] = oInputParameterHandler.getValue('sTitleWatched')
             meta['tmdbId'] = sTMDB
             with cDb() as db:
                 db.del_watched(meta)
-            
+
         elif 'sync/history' in sAction:    # ajout du marqueur VU
-            # Ajout de l'indicateur VU dans fStream
+            # Ajout de l'indicateur VU dans vStream
             if sType == '1':    # seulement pour les films
                 bReload = True
 
@@ -1512,14 +1519,14 @@ class cTrakt:
                 meta['cat'] = sType
                 with cDb() as db:
                     db.insert_watched(meta)
-            
+
         if sText:
             self.DIALOG.VSinfo(sText, 'trakt')
 
         if bReload:
             xbmc.executebuiltin('Container.Refresh')
         return
-    
+
 
     def getTmdbInfo(self, sTmdb, oGuiElement):
 

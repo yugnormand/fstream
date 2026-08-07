@@ -180,7 +180,7 @@
             "label": "French-stream",
             "active": "True",
             "site_info": "https://fstream.info/",
-            "url": "https://fs15.lol/"
+            "url": "https://fs16.lol/"
         },
         "french_stream_lol": {
             "label": "French-stream-lol",
@@ -392,7 +392,7 @@
             "active": "True",
             "cloudflare": "True",
             "site_info": "https://www.wiflix-nouvelle-adresse.site/",
-            "url": "https://flemmix.fast/"
+            "url": "https://flemmix.men/"
         },
         "wilifilm": {
             "label": "Wilifilm",

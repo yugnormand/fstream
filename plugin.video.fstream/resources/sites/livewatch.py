@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # fstream https://github.com/Kodi-fstream/venom-xbmc-addons
 import re
-import time
-import datetime
+# import time
+# import datetime
 
 from resources.lib.comaddon import siteManager
 from resources.lib.gui.gui import cGui
@@ -20,7 +20,7 @@ URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)
 URL_API = siteManager().getDefaultProperty(SITE_IDENTIFIER, 'url_api')
 
 SPORT_SPORTS = ('sport', 'showGenresTV')
-SPORT_GENRES = ('/api/sports', 'showGenres')
+#SPORT_GENRES = ('/api/sports', 'showGenres')
 #SPORT_LIVE = ('json.php', 'showMovies')
 SPORT_TV = ('sport', 'showGenresTV')
 DOC_TV = ('doc', 'showGenresTV')
@@ -98,7 +98,7 @@ def showGenresTV():
     oGui = cGui()
     oInputParameterHandler = cInputParameterHandler()
     sUrl = oInputParameterHandler.getValue('siteUrl')
-    
+
     if 'sport' in sUrl:
         chaines = channelsSport
     else:
@@ -134,12 +134,12 @@ def showTV():
     oOutputParameterHandler = cOutputParameterHandler()
     for channel in sorted(links['channels'], key=channelSort):
         sTitle = channel['name']
-        
+
         if ('!' in sGenreTitle and sGenreTitle.replace('!', '') == sTitle) or sGenreTitle in sTitle.replace(' ', ''):
-            
+
             if 'PPV' in sTitle:
                 continue
-            
+
             sDesc = sTitle
             # EPG
 #             sDesc = epgs.get(sTitle)
@@ -159,12 +159,12 @@ def showTV():
 #                         sDesc = '%s - %s' % (current.get('title', ''), current.get('desc', ''))
 #                         sDesc = ('%s - %s') % (sDate, sDesc)
 #                 epgs[sTitle] = sDesc
-            
+
             sDisplayTitle = sTitle
             source = channel.get('source', '')
             quality = channel.get('quality', '')
             sDisplayTitle += ' [%s %s]' % (source.capitalize() if source else '', quality if quality else '')
-            
+
             sHostUrl = 'stream/' + channel['id']
             sThumb = channel['logo']
             oOutputParameterHandler.addParameter('siteUrl', sHostUrl)
@@ -212,7 +212,7 @@ def showLinks():
         sportId = sports['id']
         if sTitleId != sportId:
             continue
-        
+
         for source in sports['sources']:
             sourceName = source['source']
             hostId = source['id']
@@ -256,7 +256,7 @@ def showHoster():
     sThumb = oInputParameterHandler.getValue('sThumb')
     sDesc = oInputParameterHandler.getValue('sDesc')
     sMovieTitle = oInputParameterHandler.getValue('sMovieTitle')
-    
+
     sUrl = URL_API + sUrl
     oRequestHandler = cRequestHandler(sUrl)
     links = oRequestHandler.request(jsonDecode=True)

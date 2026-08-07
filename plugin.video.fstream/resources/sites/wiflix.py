@@ -45,9 +45,9 @@ def getUrlMain():
             if not sUrl.endswith('/'):
                 sUrl = sUrl + '/'
             return sUrl
-    
+
     return siteManager().getUrlMain(SITE_IDENTIFIER)
-    
+
 
 
 def load():
@@ -161,15 +161,16 @@ def showMovies(sSearch=''):
     oGui = cGui()
     oParser = cParser()
     URL_MAIN = getUrlMain()
+
     if sSearch:
         oUtil = cUtil()
         sSearchText = oUtil.CleanName(sSearch.replace('%20', ' '))
-
 
         # requete sur la home pour obtenir le cookie
         oRequest = cRequestHandler(URL_MAIN)
         oRequest.addHeaderEntry('Referer', URL_MAIN)
         oRequest.request()
+
         cookie = oRequest.GetCookies()
         cookie += ';h_check=25'
 
@@ -189,7 +190,7 @@ def showMovies(sSearch=''):
 
         sHtmlContent = oParser.abParse(sHtmlContent, '</script></form>')
         sPattern = 'mov clearfix.+?src="([^"]*)" *alt="([^"]*).+?link="([^"]+).+?(?:|bloc1">([^<]+).+?)(?:|bloc2">([^<]*).+?)'
-        sPattern += 'ml-desc"> (?:([0-9]+)| )</div.+?Synopsis:.+?ml-desc">(.*?)</div'
+        sPattern += 'ml-desc"> (?:([0-9]+)| ).+?Synopsis:.+?ml-desc">(.*?)<\/div'
         aResult = oParser.parse(sHtmlContent, sPattern)
 
         if not aResult[0]:
@@ -207,7 +208,7 @@ def showMovies(sSearch=''):
         sHtmlContent = oRequestHandler.request()
 
         sPattern = 'mov clearfix.+?src="([^"]*)" *alt="([^"]*).+?link="([^"]+).+?(?:|bloc1">([^<]+).+?)(?:|bloc2">([^<]*).+?)'
-        sPattern += 'ml-desc"> (?:([0-9]+)| )</div.+?Synopsis:.+?ml-desc">(.*?)</div'
+        sPattern += 'ml-desc"> (?:([0-9]+)| ).+?Synopsis:.+?ml-desc">(.*?)<\/div'
         aResult = oParser.parse(sHtmlContent, sPattern)
 
     if aResult[0]:
@@ -295,17 +296,28 @@ def showSeries(sSearch=''):
         sSearchText = oUtil.CleanName(sSearch.replace('%20', ' '))
         sUrl = sSearch.replace(' ', '+')
 
-        pdata = 'do=search&subaction=search&story=' + sUrl + '&titleonly=3&all_word_search=1&catlist[]=31&catlist[]=35&sortby=title&resorder=asc'
+        # requete sur la home pour obtenir le cookie
+        oRequest = cRequestHandler(URL_MAIN)
+        oRequest.addHeaderEntry('Referer', URL_MAIN)
+        oRequest.request()
+
+        cookie = oRequest.GetCookies()
+        cookie += ';h_check=25'
 
         oRequest = cRequestHandler(URL_MAIN + URL_SEARCH[0])
-        # oRequest.setRequestType(1)
+        pdata = 'do=search&subaction=search&story=' + sUrl + '&titleonly=3&all_word_search=1&catlist[]=31&catlist[]=35&sortby=title&resorder=asc'
+
+        oRequest.addHeaderEntry('Cookie', cookie)
+        oRequest.setRequestType(1)
         oRequest.addHeaderEntry('User-Agent', UA)
-        oRequest.addHeaderEntry('Referer', URL_MAIN)
+        oRequest.addHeaderEntry('Referer', URL_MAIN + URL_SEARCH[0])
+        oRequest.addHeaderEntry('Origin', URL_MAIN)
         oRequest.addHeaderEntry('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
         oRequest.addHeaderEntry('Accept-Language', 'fr,fr-FR;q=0.8,en-US;q=0.5,en;q=0.3')
-        oRequest.addHeaderEntry('Content-Type', 'application/json')
+        oRequest.addHeaderEntry('Content-Type', 'application/x-www-form-urlencoded')
         oRequest.addParametersLine(pdata)
         sHtmlContent = oRequest.request()
+
     else:
         oInputParameterHandler = cInputParameterHandler()
         sUrl = oInputParameterHandler.getValue('siteUrl')
@@ -316,7 +328,7 @@ def showSeries(sSearch=''):
 
     sPattern = 'mov clearfix.+?src="([^"]+)" *alt="([^"]+).+?data-link="([^"]+)'
     aResult = oParser.parse(sHtmlContent, sPattern)
-    
+
     if aResult[0]:
         oOutputParameterHandler = cOutputParameterHandler()
 
@@ -326,11 +338,11 @@ def showSeries(sSearch=''):
                 sThumb = URL_MAIN[:-1] + aEntry[0]
 
             sTitle = aEntry[1].replace('- Saison ', 'S').replace('wiflix', '').replace('flemmix', '').strip()
-            
+
             # Filtre de recherche
             if sSearch and not oUtil.CheckOccurence(sSearchText, sTitle):
                 continue
-            
+
             sDisplayTitle = sTitle
             sUrl = aEntry[2]
 
@@ -385,7 +397,7 @@ def showEpisodes():
                 oOutputParameterHandler.addParameter('siteUrl', '%s|%s' % (sUrl, aEntry[0]))
                 oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
                 oOutputParameterHandler.addParameter('sThumb', sThumb)
-    
+
                 oGui.addEpisode(SITE_IDENTIFIER, 'showHostersEpisode', sDisplayTitle, '', sThumb, '', oOutputParameterHandler)
 
     oGui.setEndOfDirectory()
