@@ -42,7 +42,7 @@
         },
         "buzzmonclick_com": {
             "label": "BuzzMonClick",
-            "active": "True",
+            "active": "False",
             "url": "https://buzzmonclick.io/category/replay-tv/"
         },
         "channelstream": {
@@ -68,13 +68,13 @@
         },
         "coflix": {
             "label": "Coflix",
-            "active": "True",
+            "active": "False",
             "url": "https://coflix.band/"
         },
         "cpasmal": {
             "label": "CpasMal",
             "active": "True",
-            "cloudflare": "False",
+            "cloudflare": "True",
             "url": "https://www.cpasmal.rip/"
         },
         "cpasmieux": {
@@ -89,7 +89,7 @@
         },
         "darkiworld": {
             "label": "darkiworld",
-            "active": "True",
+            "active": "False",
             "url": "https://hydracker.com/"
         },
         "debrid_link": {
@@ -105,7 +105,7 @@
         "direct_stream": {
             "label": "direct-streamfr",
             "active": "True",
-            "url": "https://play.frembed.sbs/"
+            "url": "https://frembed.casa/"
         },
         "dnspython": {
             "label": "DNS Python",
@@ -141,9 +141,9 @@
         },
         "filmoflix": {
             "label": "Filmoflix",
-            "active": "False",
+            "active": "True",
             "cloudflare": "True",
-            "url": "https://www.wishflix.icu/"
+            "url": "https://filmoflixi.online/"
         },
         "filmsetvideos": {
             "label": "filmsetvideos",
@@ -169,7 +169,7 @@
         "frembed_life": {
             "label": "Frembed",
             "active": "True",
-            "url": "https://frembed.life"
+            "url": "https://frembed.casa"
         },
         "french_stream_com": {
             "label": "French Stream",
@@ -184,7 +184,7 @@
         },
         "french_stream_lol": {
             "label": "French-stream-lol",
-            "active": "True",
+            "active": "False",
             "cloudflare": "True",
             "url": "https://vvw.french-stream.one/"
         },
@@ -200,12 +200,12 @@
         },
         "gum_gum_streaming_com": {
             "label": "Gum-Gum-Streaming",
-            "active": "True",
+            "active": "False",
             "url": "https://gum-gum-streaming.com/"
         },
         "ianime": {
             "label": "Ianime",
-            "active": "True",
+            "active": "False",
             "cloudflare": "False",
             "url": "https://www.ianimes.one/"
         },
@@ -232,7 +232,7 @@
         },
         "livetv": {
             "label": "Live TV",
-            "active": "True",
+            "active": "False",
             "url": "https://livetv901.me/"
         },
         "livewatch": {
@@ -294,7 +294,7 @@
         },
         "pluto_tv": {
             "label": "Pluto TV",
-            "active": "True",
+            "active": "False",
             "url": "https://api.pluto.tv"
         },
         "radio": {
@@ -341,7 +341,7 @@
         },
         "toonanime": {
             "label": "Toonanime",
-            "active": "True",
+            "active": "False",
             "url": "https://toonanimetv.com/"
         },
         "topimdb": {
@@ -378,19 +378,19 @@
         },
         "vostfree": {
             "label": "Vostfree",
-            "active": "True",
+            "active": "False",
             "url": "https://vostfree.ws/"
         },
         "wawacity": {
             "label": "Wawacity",
-            "active": "true",
+            "active": "False",
             "cloudflare": "True",
             "url": "https://www.wawacity.win/"
         },
         "wiflix": {
             "label": "WiFlix",
             "active": "True",
-            "cloudflare": "True",
+            "cloudflare": "False",
             "site_info": "https://www.wiflix-nouvelle-adresse.site/",
             "url": "https://flemmix.men/"
         },
@@ -400,9 +400,9 @@
             "url": "https://wilifilm.info/"
         },
         "witv": {
-            "label": "Coupe du Monde 2026 - WiTV",
+            "label": "Foot Direct - WiTV",
             "active": "True",
-            "url": "https://witv.team/"
+            "url": "https://witv.football/"
         },
         "youtitou_com": {
             "label": "YouTitou (Anim\u00e9s)",

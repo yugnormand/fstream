@@ -828,19 +828,101 @@ def showYears(movie = False):
 def showSeriesNetworks():
     oGui = cGui()
 
+    for netID, name in sorted(DIFFUSEURS.items(), key=lambda diff: diff[1]):
+        oOutputParameterHandler = cOutputParameterHandler()  # Pas de lien après 2022
+        oOutputParameterHandler.addParameter('sTmdbId', netID)    # Utilisé par TMDB
+
+        oGui.addNetwork(SITE_IDENTIFIER, 'showNetworkMenu', name, 'host.png', oOutputParameterHandler)
+    oGui.setEndOfDirectory()
+
+
+def _networkTerm(netID):
+    # Filtre commun "diffuseur" réutilisé par les entrées du sous-menu Diffuseurs
     term = 'with_original_language=en|fr&'
     term += '&without_genres=10767|10763|10764'
     term += '&with_status=3|4'
-    term += '&with_networks=%d'
+    term += '&with_networks=%s&' % netID
+    return term
 
-    for netID, name in sorted(DIFFUSEURS.items(), key=lambda diff: diff[1]):
-        oOutputParameterHandler = cOutputParameterHandler()  # Pas de lien après 2022
-        oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
-        oOutputParameterHandler.addParameter('term', term % netID)
-        oOutputParameterHandler.addParameter('sTmdbId', netID)    # Utilisé par TMDB
-#        oOutputParameterHandler.addParameter('network', netID)    # Utilisé par TMDB
 
-        oGui.addNetwork(SITE_IDENTIFIER, 'showSeries', name, 'host.png', oOutputParameterHandler)
+# Sous-menu affiché après avoir choisi un diffuseur (ex: Netflix) dans "Diffuseurs"
+def showNetworkMenu():
+    oGui = cGui()
+    oInputParameterHandler = cInputParameterHandler()
+    netID = oInputParameterHandler.getValue('sTmdbId')
+
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('sTmdbId', netID)
+    oGui.addDir(SITE_IDENTIFIER, 'showNetworkNews', 'Nouveautés', 'news.png', oOutputParameterHandler)
+
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('sTmdbId', netID)
+    oGui.addDir(SITE_IDENTIFIER, 'showNetworkSeries', 'Séries', 'series.png', oOutputParameterHandler)
+
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('siteUrl', 'genre/tv/list')
+    oOutputParameterHandler.addParameter('sTmdbId', netID)
+    oGui.addDir(SITE_IDENTIFIER, 'showNetworkGenres', 'Genres', 'genres.png', oOutputParameterHandler)
+
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('sTmdbId', netID)
+    oGui.addDir(SITE_IDENTIFIER, 'showNetworkTop', 'Les mieux notées', 'notes.png', oOutputParameterHandler)
+
+    oGui.setEndOfDirectory()
+
+
+# Nouveautés du diffuseur choisi
+def showNetworkNews():
+    oInputParameterHandler = cInputParameterHandler()
+    netID = oInputParameterHandler.getValue('sTmdbId')
+    term = _networkTerm(netID) + 'sort_by=first_air_date.desc&'
+    showSeries(term=term)
+
+
+# Toutes les séries du diffuseur choisi
+def showNetworkSeries():
+    oInputParameterHandler = cInputParameterHandler()
+    netID = oInputParameterHandler.getValue('sTmdbId')
+    term = _networkTerm(netID)
+    showSeries(term=term)
+
+
+# Séries les mieux notées du diffuseur choisi
+def showNetworkTop():
+    oInputParameterHandler = cInputParameterHandler()
+    netID = oInputParameterHandler.getValue('sTmdbId')
+    term = _networkTerm(netID) + 'sort_by=vote_average.desc&vote_count.gte=50&'
+    showSeries(term=term)
+
+
+# Genres disponibles pour le diffuseur choisi
+def showNetworkGenres():
+    oGui = cGui()
+    grab = cTMDb()
+
+    oInputParameterHandler = cInputParameterHandler()
+    sUrl = oInputParameterHandler.getValue('siteUrl')
+    netID = oInputParameterHandler.getValue('sTmdbId')
+
+    ignoredGenres = (10763, 10764, 10767)
+    term = _networkTerm(netID)
+    term += 'with_genres=%d'
+
+    result = grab.getUrl(sUrl)
+    total = len(result)
+    if total > 0:
+        oOutputParameterHandler = cOutputParameterHandler()
+        for i in result['genres']:
+            sId, sTitle = i['id'], i['name']
+            if sId in ignoredGenres:
+                continue
+
+            if not isMatrix():
+                sTitle = sTitle.encode("utf-8")
+            oOutputParameterHandler.addParameter('siteUrl', 'discover/tv')
+            oOutputParameterHandler.addParameter('term', term % sId)
+            oGui.addGenre(SITE_IDENTIFIER, 'showSeries', sTitle, oOutputParameterHandler)
+
     oGui.setEndOfDirectory()
 
 # Dernieres séries selon la date de sortie

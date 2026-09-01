@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
 # http://uqload.com/embed-xxx.html
 from resources.lib.handler.requestHandler import cRequestHandler
 from resources.lib.parser import cParser
@@ -40,7 +40,7 @@ class cHoster(iHoster):
 
                 sUnpacked = cPacker().unpack(aResult[1][0])
                 sHtmlContent = sUnpacked
-                
+
                 sPattern1 = 'file:"([^"]+)"'
                 aResult = oParser.parse(sHtmlContent, sPattern1)
                 if aResult[0] is True:

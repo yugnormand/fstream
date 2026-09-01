@@ -95,6 +95,38 @@ def showMenuSeries():
     oGui.setEndOfDirectory()
 
 
+def _tmdbList(oTmdb, url, term=''):
+    """
+    Interroge l'API TMDB (via le vrai client cTMDb du projet) et renvoie une
+    liste de dicts {title, year, tmdb_id, cover_url, overview}, au format
+    déjà attendu par le reste de ce module.
+
+    NOTE: la version précédente appelait cTMDb(SITE_IDENTIFIER, SITE_NAME)
+    puis des méthodes comme getMovieSearch()/getMoviePopular()/getTvInfo()
+    qui n'existent pas dans resources/lib/tmdb.py -> AttributeError à chaque
+    clic, donc la source ne fonctionnait plus du tout. On repasse ici par
+    cTMDb().getUrl() + cTMDb()._format(), exactement comme le fait déjà
+    resources/sites/themoviedb_org.py.
+    """
+    aOut = []
+    result = oTmdb.getUrl(url, 1, term)
+    if not result:
+        return aOut
+
+    media_type = 'tv' if url.startswith('tv/') or url.startswith('search/tv') else 'movie'
+
+    for item in result.get('results', []):
+        meta = oTmdb._format(item, '', media_type)
+        aOut.append({
+            'title': meta['title'],
+            'year': meta['year'],
+            'tmdb_id': meta['tmdb_id'],
+            'cover_url': meta['poster_path'],
+            'overview': meta['plot'],
+        })
+    return aOut
+
+
 def showSearchMovie():
     """Recherche de film"""
     oGui = cGui()
@@ -105,8 +137,8 @@ def showSearchMovie():
         return
 
     # Recherche via TMDB
-    oTmdb = cTMDb(SITE_IDENTIFIER, SITE_NAME)
-    aResult = oTmdb.getMovieSearch(sSearchText)
+    oTmdb = cTMDb()
+    aResult = _tmdbList(oTmdb, 'search/movie', 'query=' + sSearchText.replace(' ', '+'))
 
     if aResult:
         oOutputParameterHandler = cOutputParameterHandler()
@@ -142,8 +174,8 @@ def showSearchSerie():
         return
 
     # Recherche via TMDB
-    oTmdb = cTMDb(SITE_IDENTIFIER, SITE_NAME)
-    aResult = oTmdb.getTvSearch(sSearchText)
+    oTmdb = cTMDb()
+    aResult = _tmdbList(oTmdb, 'search/tv', 'query=' + sSearchText.replace(' ', '+'))
 
     if aResult:
         oOutputParameterHandler = cOutputParameterHandler()
@@ -175,16 +207,14 @@ def showMoviesFromTMDB():
     oInputParameterHandler = cInputParameterHandler()
     sType = oInputParameterHandler.getValue('siteUrl')
 
-    oTmdb = cTMDb(SITE_IDENTIFIER, SITE_NAME)
+    oTmdb = cTMDb()
 
-    if sType == 'tmdb_popular':
-        aResult = oTmdb.getMoviePopular()
-    elif sType == 'tmdb_top':
-        aResult = oTmdb.getMovieTopRated()
-    elif sType == 'tmdb_upcoming':
-        aResult = oTmdb.getMovieUpcoming()
-    else:
-        aResult = []
+    endpoints = {
+        'tmdb_popular': 'movie/popular',
+        'tmdb_top': 'movie/top_rated',
+        'tmdb_upcoming': 'movie/upcoming',
+    }
+    aResult = _tmdbList(oTmdb, endpoints.get(sType, 'movie/popular'))
 
     if aResult:
         oOutputParameterHandler = cOutputParameterHandler()
@@ -216,16 +246,14 @@ def showSeriesFromTMDB():
     oInputParameterHandler = cInputParameterHandler()
     sType = oInputParameterHandler.getValue('siteUrl')
 
-    oTmdb = cTMDb(SITE_IDENTIFIER, SITE_NAME)
+    oTmdb = cTMDb()
 
-    if sType == 'tmdb_popular':
-        aResult = oTmdb.getTvPopular()
-    elif sType == 'tmdb_top':
-        aResult = oTmdb.getTvTopRated()
-    elif sType == 'tmdb_airing':
-        aResult = oTmdb.getTvAiringToday()
-    else:
-        aResult = []
+    endpoints = {
+        'tmdb_popular': 'tv/popular',
+        'tmdb_top': 'tv/top_rated',
+        'tmdb_airing': 'tv/airing_today',
+    }
+    aResult = _tmdbList(oTmdb, endpoints.get(sType, 'tv/popular'))
 
     if aResult:
         oOutputParameterHandler = cOutputParameterHandler()
@@ -260,15 +288,17 @@ def showSeasons():
     sThumb = oInputParameterHandler.getValue('sThumb')
     sTmdbId = oInputParameterHandler.getValue('sTmdbId')
 
-    oTmdb = cTMDb(SITE_IDENTIFIER, SITE_NAME)
-    # Récupérer les infos de la série pour avoir le nombre de saisons
-    aSerieInfo = oTmdb.getTvInfo(int(sTmdbId))
+    oTmdb = cTMDb()
+    # Détails de la série (vrai endpoint TMDB /tv/{id}), pour la liste réelle des saisons
+    aSerieInfo = oTmdb.search_tvshow_id(int(sTmdbId))
+    aSeasons = aSerieInfo.get('seasons', []) if aSerieInfo else []
+    # on ignore la saison 0 (spéciaux)
+    aSeasons = [s for s in aSeasons if s.get('season_number', 0) > 0]
 
-    if aSerieInfo and 'seasons' in aSerieInfo:
-        nbSeasons = aSerieInfo['seasons']
+    if aSeasons:
         oOutputParameterHandler = cOutputParameterHandler()
-
-        for iSeason in range(1, nbSeasons + 1):
+        for aSeason in aSeasons:
+            iSeason = aSeason.get('season_number')
             sSeasonTitle = '%s - Saison %d' % (sMovieTitle, iSeason)
             oOutputParameterHandler.addParameter('siteUrl', sUrl)
             oOutputParameterHandler.addParameter('sMovieTitle', sMovieTitle)
@@ -292,8 +322,10 @@ def showEpisodes():
     sSeason = oInputParameterHandler.getValue('sSeason')
     sTmdbId = oInputParameterHandler.getValue('sTmdbId')
 
-    oTmdb = cTMDb(SITE_IDENTIFIER, SITE_NAME)
-    aEpisodes = oTmdb.getTvEpisodes(int(sTmdbId), int(sSeason))
+    oTmdb = cTMDb()
+    # Vrai endpoint TMDB /tv/{id}/season/{season} -> dict avec 'episodes'
+    aSeasonInfo = oTmdb.search_season_id(int(sTmdbId), int(sSeason))
+    aEpisodes = aSeasonInfo.get('episodes', []) if aSeasonInfo else []
 
     if aEpisodes:
         oOutputParameterHandler = cOutputParameterHandler()

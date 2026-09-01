@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fStream https://github.com/Kodi-fStream/venom-xbmc-addons.
+# vStream https://github.com/Kodi-vStream/venom-xbmc-addons.
 import re
 
 from resources.lib.gui.hoster import cHosterGui
@@ -77,12 +77,12 @@ def showSearch():
 def showSeriesGenres():
     oGui = cGui()
     listeGenre = [['Action', 'action_s'], ['Animation', 'animation_s'], ['Aventure', 'aventure_s'],
-                  ['Biopic', 'biopic-s'], ['Comédie', 'comedie_s'], ['Documentaire', 'documentaire-s'],
-                  ['Drame', 'drame_s'], ['Famille', 'famille-s'],['Fantastique', 'fantastique_s'],
-                  ['Guerre', 'guerre_s'], ['Historique', 'historique_s'], ['Horreur', 'horreur_s'],
-                  ['Judiciaire', 'judiciare-s'], ['Musique', 'musical_s'], ['Policier', 'policier_s'],
-                  ['Romance', 'romance_s'], ['Science-Fiction', 'science_fiction_s'], ['Thriller', 'thriller_s'],
-                  ['western', 'western_s']]
+                    ['Biopic', 'biopic-s'], ['Comédie', 'comedie_s'], ['Documentaire', 'documentaire-s'],
+                    ['Drame', 'drame_s'], ['Famille', 'famille-s'],['Fantastique', 'fantastique_s'],
+                    ['Guerre', 'guerre_s'], ['Historique', 'historique_s'], ['Horreur', 'horreur_s'],
+                    ['Judiciaire', 'judiciare-s'], ['Musique', 'musical_s'], ['Policier', 'policier_s'],
+                    ['Romance', 'romance_s'], ['Science-Fiction', 'science_fiction_s'], ['Thriller', 'thriller_s'],
+                    ['western', 'western_s']]
 
     oOutputParameterHandler = cOutputParameterHandler()
     for sTitle, sUrl in listeGenre:
@@ -290,7 +290,7 @@ def showSerieLinks():
     sHtmlContent = oRequestHandler.request()
     cook = oRequestHandler.GetCookies()
 
-    sPattern = "class=\"lien.+?playEpisode.+?\'([^\']*).+?'([^\']*)"
+    sPattern = 'fx-row" onclick="getxfield\(this, \'(\d+)\', \'(.+?)\', \'(.+?)\''
     aResult = oParser.parse(sHtmlContent, sPattern)
 
     if aResult[0]:

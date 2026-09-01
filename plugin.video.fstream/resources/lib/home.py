@@ -1102,6 +1102,32 @@ class cHome:
 
         oGui.setEndOfDirectory()
 
+    def showDocsSearch(self):
+        oGui = cGui()
+        oOutputParameterHandler = cOutputParameterHandler()
+
+        # recherche directe
+        oOutputParameterHandler.addParameter("sCat", "5")
+        oGui.addDir(
+            SITE_IDENTIFIER,
+            "showSearchText",
+            self.addons.VSlang(30076),
+            "search-divers.png",
+            oOutputParameterHandler,
+        )
+
+        if self.addons.getSetting("history-view") == "true":
+            oOutputParameterHandler.addParameter("sCat", "5")
+            oGui.addDir(
+                SITE_IDENTIFIER,
+                "showHistory",
+                self.addons.VSlang(30308),
+                "history.png",
+                oOutputParameterHandler,
+            )
+
+        oGui.setEndOfDirectory()
+
     def showSearchText(self):
         oGui = cGui()
         oInputParameterHandler = cInputParameterHandler()
