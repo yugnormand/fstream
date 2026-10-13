@@ -2,6 +2,8 @@
 # fStream https://github.com/Kodi-fStream/venom-xbmc-addons
 import re
 import datetime
+import base64
+import json
 
 from resources.lib.packer import cPacker
 from resources.lib.comaddon import isMatrix, siteManager, VSlog
@@ -13,7 +15,7 @@ from resources.lib.handler.requestHandler import cRequestHandler
 
 
 SITE_IDENTIFIER = 'elitegol'
-SITE_NAME = 'Favoris Sport 1'
+SITE_NAME = 'Elitegol'
 SITE_DESC = 'Chaines TV en directs'
 
 URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)
@@ -47,13 +49,13 @@ channels = {
     # : ['Canal+ décalé', 'https://thumb.canalplus.pro/http/unsafe/epg.canal-plus.com/mycanal/img/CHN43FN/PNG/213X160/CHN43FB_257.PNG'],
     15: ['eurosport 1', 'https://2.bp.blogspot.com/-qEkUoydNN-E/WvMoKma36fI/AAAAAAAAG_0/ov-d571uhZ443Nai7gdU9sSIV2IBOkquQCLcBGAs/s1600/europsort-1-HD.jpg'],
     16: ['eurosport 2', 'https://4.bp.blogspot.com/-1bHZ8b5ZnW0/VzDh6KfzayI/AAAAAAAABsI/lKDWcPmyBSk7etoAj2DVr7nvQ5SsMPwzgCLcB/s1600/fhuxmcp92wg1w4y9pd2v4zjz3xs1vmjm.jpg'],
-    17: ['RMC Sport 1', 'https://i0.wp.com/www.planetecsat.com/wp-content/uploads/2018/07/RMC_SPORT1_PNG_500x500px.png?w=500&ssl=1'],
-    18: ['RMC Sport 2', 'https://i0.wp.com/www.planetecsat.com/wp-content/uploads/2018/07/RMC_SPORT2_PNG_500x500px.png?fit=500%2C500&ssl=1'],
+    17: ['RMC Sport 1', 'https://archive.org/download/logostvfr/rmc-sport-1.png'],
+    18: ['RMC Sport 2', 'https://archive.org/download/logostvfr/rmc-sport-2.png'],
     19: ['L\'equipe', 'https://www.cse.fr/wp-content/uploads/2016/02/LEquipe_logo-300x200-300x150.png'],
-    23: ['Automoto', 'https://moto-station.com/wp-content/uploads/2021/05/05/Automoto-La-Chaine-logo_0.png.jpg'],
-    31: ['Canal+ Live 1', 'https://www.lyngsat.com/logo/tv/cc/canal-plus-live-1-fr.png'],
-    32: ['Canal+ Live 2', 'https://www.lyngsat.com/logo/tv/cc/canal-plus-live-2-fr.png'],
-    33: ['Canal+ Live 3', 'https://www.lyngsat.com/logo/tv/cc/canal-plus-live-3-fr.png'],
+    23: ['Automoto', 'https://dn711502.ca.archive.org/0/items/logostvfr/automoto-la-chaine.png'],
+    31: ['Canal+ Live 1', 'https://archive.org/download/logostvfr/canal-plus-live-1.png'],
+    32: ['Canal+ Live 2', 'https://archive.org/download/logostvfr/canal-plus-live-2.png'],
+    33: ['Canal+ Live 3', 'https://archive.org/download/logostvfr/canal-plus-live-3.png'],
     2: ['bein Sports 2', 'https://r2.thesportsdb.com/images/media/channel/logo/BeIn_Sports_2_Australia.png'],
     3: ['bein Sports 3', 'https://r2.thesportsdb.com/images/media/channel/logo/BeIn_Sports_3_Australia.png'],
     4: ['bein Sports MAX 4', 'https://r2.thesportsdb.com/images/media/channel/logo/BeIn_Sports_Max_4.png'],
@@ -69,7 +71,7 @@ channels = {
     # 34: ['multisport+ 4', 'https://thumb.canalplus.pro/http/unsafe/epg.canal-plus.com/mycanal/img/CHN43FN/PNG/213X160/CHN43FB_562.PNG'],
     # 35: ['multisport+ 5', 'https://thumb.canalplus.pro/http/unsafe/epg.canal-plus.com/mycanal/img/CHN43FN/PNG/213X160/CHN43FB_562.PNG'],
     # 36: ['multisport+ 6', 'https://thumb.canalplus.pro/http/unsafe/epg.canal-plus.com/mycanal/img/CHN43FN/PNG/213X160/CHN43FB_562.PNG'],
-    24: ['TF1', 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/TF1_logo_2013.png/800px-TF1_logo_2013.png'],
+    # 24: ['TF1', 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/TF1_logo_2013.png/800px-TF1_logo_2013.png'],
     # 25: ['TMC', ''],
     # 26: ['M6', ''],
     # 27: ['W9', ''],
@@ -113,7 +115,7 @@ def showGenres():
         oOutputParameterHandler.addParameter('siteUrl', sUrl)
         oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
         oOutputParameterHandler.addParameter('sDesc', sTitle)
-        
+
         oGui.addDir(SITE_IDENTIFIER, 'showMovies', sDiplayTitle, "sport.png", oOutputParameterHandler)
 
     oGui.setEndOfDirectory()
@@ -122,8 +124,8 @@ def showGenres():
 def showTV():
     oGui = cGui()
 
-    chaines = [20, 21, 22, 39, 40, 11, 12, 13, 14, 17, 18, 15, 16, 19, 23, 24, 31, 32, 33, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    
+    chaines = [20, 21, 22, 39, 40, 11, 12, 13, 14, 17, 18, 15, 16, 19, 23, 31, 32, 33, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
     # if 'sport' in sUrl:
     # chaines = [1, 4, 21, 20, 5, 6, 7, 8, 18, 19, 9, 2, 3, 10, 11, 12, 13, 14, 15, 16, 22, 23, 24, 25, 26, 27, 28, 37, 31, 32, 33, 34, 35, 36]
     # else: # Chaines ciné
@@ -178,27 +180,27 @@ def showMovies():
         sType = link['type']
         if sSearchType and sType.capitalize() != sSearchType:  # filtrage du genre recherché
             continue
-        
+
         time = link['time']
         home = link['home']
         away = link['away']
         league = link['league']
-        
+
         time = datetime.datetime.fromtimestamp(int(time)/1000)
 #        time = datetime.datetime.strftime(time, '%d/%m/%Y %H:%M:%S')
         time = datetime.datetime.strftime(time, '%H:%M:%S')
-        
+
         if away:
             sTitle = '%s - %s / %s (%s)' % (time, home, away, league)
         else:
             sTitle = '%s - %s (%s)' % (time, home, league)
-        
+
         oOutputParameterHandler.addParameter('siteUrl', sUrl)
         oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
         oOutputParameterHandler.addParameter('sDesc', sTitle)
 
         oGui.addDir(SITE_IDENTIFIER, 'showMovieLinks', sTitle, "sport.png", oOutputParameterHandler)
-        
+
     oGui.setEndOfDirectory()
 
 
@@ -217,33 +219,33 @@ def showMovieLinks():
         home = link['home']
         away = link['away']
         league = link['league']
-        
+
         time = datetime.datetime.fromtimestamp(int(time)/1000)
 #        time = datetime.datetime.strftime(time, '%d/%m/%Y %H:%M:%S')
         time = datetime.datetime.strftime(time, '%H:%M:%S')
-        
+
         if away:
             sTitle = '%s - %s / %s (%s)' % (time, home, away, league)
         else:
             sTitle = '%s - %s (%s)' % (time, home, league)
-        
+
         if sSearchTitle != sTitle:  # le titre recherché
             continue
-        
+
         for streams in link['streams']:
             channel = streams['ch']
             sHostUrl = '%s/%s' % (URL_LINK, channel)
 
             lang = streams['lang']
             sDisplayTitle = '%s [%s]' % (sTitle, lang.upper())
-            
+
             oOutputParameterHandler.addParameter('siteUrl', sHostUrl)
             oOutputParameterHandler.addParameter('sMovieTitle', sDisplayTitle)
             oOutputParameterHandler.addParameter('sDesc', sDisplayTitle)
             oOutputParameterHandler.addParameter('sThumb', 'sport.png')
-    
+
             oGui.addDir(SITE_IDENTIFIER, 'showLink', sDisplayTitle, 'sport.png', oOutputParameterHandler)
-        
+
     oGui.setEndOfDirectory()
 
 
@@ -254,7 +256,7 @@ def showLink():
     sMovieTitle = oInputParameterHandler.getValue('sMovieTitle')
     sThumb = oInputParameterHandler.getValue('sThumb')
 
-    allUrls = [(sUrl % a) for a in (2, 4, 3, 1)]
+    allUrls = [(sUrl % a) for a in (4, 3, 1, 2)]
     numLien = 1
     oOutputParameterHandler = cOutputParameterHandler()
     for sHostUrl in allUrls:  # on parcourt les liens à l'envers car le premier n'est pas le meilleur
@@ -293,23 +295,22 @@ def showHoster():
 
 # Traitement générique
 def getHosterIframe(url, referer):
-    
+
     if 'youtube.com' in url:
         return None
 
     if not url.startswith('http'):
         url = URL_MAIN + url
 
-    oRequestHandler = cRequestHandler(url)
+    oRequestHandler = cRequestHandler(url, forceDNS = True)
     if referer:
         oRequestHandler.addHeaderEntry('Referer', referer)
-        oRequestHandler.addHeaderEntry('User-Agent', UA)
+    oRequestHandler.addHeaderEntry('User-Agent', UA)
     sHtmlContent = str(oRequestHandler.request())
     if not sHtmlContent or sHtmlContent == 'False':
         return False
 
     referer = oRequestHandler.getRealUrl()
-    
     return getUrl(sHtmlContent, referer)
 
 
@@ -341,7 +342,7 @@ def getUrl(sHtmlContent, referer):
                     return code + '|Referer=' + referer
             except Exception as e:
                 pass
-    
+
     sPattern = r'<iframe.+?src=["\']([^"\']+)["\']'
     aResult = re.findall(sPattern, sHtmlContent)
     if aResult:
@@ -366,7 +367,25 @@ def getUrl(sHtmlContent, referer):
             sHosterUrl = aResult[0].replace('"', '').replace(',', '').replace('\\', '').replace('////', '//')
             return sHosterUrl + '|referer=' + referer
 
-    sPattern = r'var.+?src=*= *["\']([^"\']+)["\']'
+    sPattern = r"window\._econfig\s*=\s*['\"]([^'\"]+)['\"]"
+    aResult = re.findall(sPattern, sHtmlContent)
+    if aResult:
+        config = decode_econfig(aResult[0])
+        url = config.get("stream_url_nop2p", None)
+        if not url:
+            url = config.get("stream_url", None)
+        if url:
+            return url + '|Referer=' + referer
+
+    sPattern = r'streamUrls *= *(\[.+?\])'
+    aResult = re.findall(sPattern, sHtmlContent)
+    if aResult:
+        links = eval(aResult[0])
+        for url in links:
+            if '.m3u8' in url:
+                return url + '|Referer=' + referer
+
+    sPattern = r'var.+?src *= *["\']([^"\']+)["\']'
     aResult = re.findall(sPattern, sHtmlContent)
     if aResult:
         for url in aResult:
@@ -411,7 +430,7 @@ def getUrl(sHtmlContent, referer):
     if aResult:
         sHosterUrl = 'https://%s/hls/%s/live.m3u8' % (aResult[0][1], aResult[0][0])
         return sHosterUrl + '|referer=' + referer
-    
+
     sPattern = r"new Player\('(.+?=)'\)"
     aResult = re.findall(sPattern, sHtmlContent.replace('\\', ''))
     if aResult:
@@ -425,11 +444,11 @@ def getUrl(sHtmlContent, referer):
     if aResult:
         sHosterUrl = r'https://%s/player/%s' % (aResult[0][0], aResult[0][1])
         return getHosterIframe(sHosterUrl, referer)
-    
+
     decoded = reveal_pipe_split(sHtmlContent)
     if decoded:
         return getUrl(decoded, referer)
-    
+
     decoded = reveal_char_by_char_url(sHtmlContent)
     if decoded and '.m3u8' in decoded:
         return decoded + '|referer=' + referer
@@ -451,16 +470,16 @@ def reveal_pipe_split(html):
     pattern = r"return p\}(\(.*),'(.*?)'.split\('\|'\)"
     html = html.replace('\\', '')
     results = re.findall(pattern, html)
-    
+
     if not results:
         return
-    
+
     def is_numeric_mode():
         for char in list('abcdefghij'):
             if not re.search(r"\b{}\b".format(char), html):
                 return True
         return False
-    
+
     numeric_mode = is_numeric_mode()
 
     def tokenToInt(token):
@@ -473,7 +492,7 @@ def reveal_pipe_split(html):
         elif len(token) == 1:                         # 0-9
             return int(token)        # -> 0-9
         return int(token) + 52   # -> 62-151
-    
+
     def replaceNumber(match):
         token = match.group(0)
         num = tokenToInt(token)
@@ -484,10 +503,40 @@ def reveal_pipe_split(html):
             else:
                 return token
         return token
-    
+
     text = ''
     for result in results:
         mask = result[0]
         keywords = result[1].split('|')
         text += re.sub('([0-9a-zA-Z]+)',replaceNumber, mask)
     return text
+
+
+def decode_econfig(encoded):
+    # 1. Premier Base64
+    data = base64.b64decode(encoded).decode("utf-8")
+
+    # 2. Découpage en 4 parties
+    chunk_size = (len(data) + 3) // 4
+    chunks = [
+        data[i * chunk_size:(i + 1) * chunk_size]
+        for i in range(4)
+    ]
+
+    # 3. Suppression du 4e caractère de chaque partie
+    #    puis Base64 individuel
+    order = [2, 0, 3, 1]
+    decoded_chunks = [None] * 4
+    for i in range(4):
+        chunk = chunks[i]
+        chunk = chunk[:3] + chunk[4:]
+        decoded_chunks[order[i]] = base64.b64decode(chunk).decode("utf-8")
+
+    # 4. Concaténation
+    data = "".join(decoded_chunks)
+
+    # 5. Dernier Base64
+    data = base64.b64decode(data).decode("utf-8")
+
+    # 6. JSON
+    return json.loads(data)

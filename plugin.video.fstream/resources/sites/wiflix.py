@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
 
 from resources.lib.comaddon import siteManager
 from resources.lib.gui.hoster import cHosterGui
@@ -47,7 +47,6 @@ def getUrlMain():
             return sUrl
 
     return siteManager().getUrlMain(SITE_IDENTIFIER)
-
 
 
 def load():
@@ -207,8 +206,9 @@ def showMovies(sSearch=''):
         oRequestHandler = cRequestHandler(sUrl)
         sHtmlContent = oRequestHandler.request()
 
-        sPattern = 'mov clearfix.+?src="([^"]*)" *alt="([^"]*).+?link="([^"]+).+?(?:|bloc1">([^<]+).+?)(?:|bloc2">([^<]*).+?)'
-        sPattern += 'ml-desc"> (?:([0-9]+)| ).+?Synopsis:.+?ml-desc">(.*?)<\/div'
+        sPattern = 'mov clearfix.+?src="([^"]*)" *alt="([^"]*).+?link="([^"]+)'
+        sPattern += '.+?bloc1">([^<]+).+?bloc2">([^<]*).+?Synopsis:.+?ml-desc">([^<]*)</div'
+
         aResult = oParser.parse(sHtmlContent, sPattern)
 
     if aResult[0]:
@@ -219,19 +219,18 @@ def showMovies(sSearch=''):
             if sThumb.startswith('/'):
                 sThumb = URL_MAIN[:-1] + aEntry[0]
             sTitle = aEntry[1].replace(' wiflix', '').replace(' flemmix', '')
+            if 'serie-en-streaming' in aEntry[2]:
+                sTitle = sTitle.replace(' - ', '')
             sUrl = aEntry[2]
             sLang = aEntry[3]
             sQual = aEntry[4]
-            sYear = aEntry[5]
-            if sYear in sTitle:  # double affichage de l'année
-                sTitle = re.sub('\(' + sYear + '\)', '', sTitle)
 
             # Filtre de recherche
             if sSearch and not oUtil.CheckOccurence(sSearchText, sTitle):
                 continue
 
             # Nettoyage du synopsis
-            sDesc = str(aEntry[6])
+            sDesc = str(aEntry[5])
             sDesc = sDesc.replace('en streaming ', '')
             sDesc = sDesc.replace('Regarder film ' + sTitle + ';', '')
             sDesc = sDesc.replace('Regarder film ' + sTitle + ':', '')
@@ -253,7 +252,6 @@ def showMovies(sSearch=''):
             oOutputParameterHandler.addParameter('siteUrl', sUrl)
             oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
             oOutputParameterHandler.addParameter('sThumb', sThumb)
-            oOutputParameterHandler.addParameter('sYear', sYear)
 
             if 'serie-en-streaming' in sUrl:
                 oGui.addSeason(SITE_IDENTIFIER, 'showEpisodes', sDisplayTitle, '', sThumb, sDesc, oOutputParameterHandler)
@@ -286,7 +284,7 @@ def __checkForNextPage(sHtmlContent):
     return False, 'none'
 
 
-def showSeries(sSearch=''):
+def showSeries(sSearch='', searchTitle = 3):
     oGui = cGui()
     oParser = cParser()
     URL_MAIN = getUrlMain()
@@ -305,7 +303,7 @@ def showSeries(sSearch=''):
         cookie += ';h_check=25'
 
         oRequest = cRequestHandler(URL_MAIN + URL_SEARCH[0])
-        pdata = 'do=search&subaction=search&story=' + sUrl + '&titleonly=3&all_word_search=1&catlist[]=31&catlist[]=35&sortby=title&resorder=asc'
+        pdata = 'do=search&subaction=search&story=%s&titleonly=%d&all_word_search=1&catlist[]=31&catlist[]=35&sortby=title&resorder=asc' % (sUrl, searchTitle)
 
         oRequest.addHeaderEntry('Cookie', cookie)
         oRequest.setRequestType(1)
@@ -317,7 +315,6 @@ def showSeries(sSearch=''):
         oRequest.addHeaderEntry('Content-Type', 'application/x-www-form-urlencoded')
         oRequest.addParametersLine(pdata)
         sHtmlContent = oRequest.request()
-
     else:
         oInputParameterHandler = cInputParameterHandler()
         sUrl = oInputParameterHandler.getValue('siteUrl')
@@ -329,6 +326,7 @@ def showSeries(sSearch=''):
     sPattern = 'mov clearfix.+?src="([^"]+)" *alt="([^"]+).+?data-link="([^"]+)'
     aResult = oParser.parse(sHtmlContent, sPattern)
 
+    hasResult = False
     if aResult[0]:
         oOutputParameterHandler = cOutputParameterHandler()
 
@@ -343,6 +341,7 @@ def showSeries(sSearch=''):
             if sSearch and not oUtil.CheckOccurence(sSearchText, sTitle):
                 continue
 
+            hasResult = True
             sDisplayTitle = sTitle
             sUrl = aEntry[2]
 
@@ -356,6 +355,10 @@ def showSeries(sSearch=''):
             oOutputParameterHandler = cOutputParameterHandler()
             oOutputParameterHandler.addParameter('siteUrl', sNextPage)
             oGui.addNext(SITE_IDENTIFIER, 'showSeries', 'Page ' + sPaging, oOutputParameterHandler)
+
+    #pas de résultats de recherche d'apres les articles, recherche dans les titres d'articles
+    if sSearch and not hasResult and searchTitle == 3:
+        showSeries(sSearch, searchTitle = 0)
 
     if not sSearch:
         oGui.setEndOfDirectory()
@@ -418,22 +421,22 @@ def showHostersEpisode():
     sEnd = '</div>'
     sHtmlContent = oParser.abParse(sHtmlContent, sStart, sEnd)
 
-
-    sPattern = "loadVideo\('([^']+)"
+    sPattern = '<a data-v="([^"]+)'
     aResult = oParser.parse(sHtmlContent, sPattern)
-
-
     if aResult[0]:
+        import base64
+        import codecs
         for aEntry in aResult[1]:
-            sDisplayTitle = sMovieTitle
-            sHosterUrl = aEntry
+            link = base64.b64decode(aEntry)
+            sHosterUrl = codecs.decode(str(link), 'rot13').strip("o'")
             oHoster = cHosterGui().checkHoster(sHosterUrl)
             if oHoster:
-                oHoster.setDisplayName(sDisplayTitle)
+                oHoster.setDisplayName(sMovieTitle)
                 oHoster.setFileName(sMovieTitle)
                 cHosterGui().showHoster(oGui, oHoster, sHosterUrl, sThumb)
 
     oGui.setEndOfDirectory()
+
 
 def showHosters():
     oGui = cGui()
@@ -445,16 +448,19 @@ def showHosters():
     oParser = cParser()
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
-    sPattern = "loadVideo\('([^']+)"
+    sPattern = '<a data-v="([^"]+)".+?span>([^<]+)'
     aResult = oParser.parse(sHtmlContent, sPattern)
 
     if aResult[0]:
+        import base64
+        import codecs
         for aEntry in aResult[1]:
-            sDisplayTitle = sMovieTitle
-            sHosterUrl = aEntry
-            oHoster = cHosterGui().checkHoster(sHosterUrl)
+            sHoster = aEntry[1]
+            oHoster = cHosterGui().checkHoster(sHoster)
             if oHoster:
-                oHoster.setDisplayName(sDisplayTitle)
+                link = base64.b64decode(aEntry[0])
+                sHosterUrl = codecs.decode(str(link), 'rot13').strip("o'")
+                oHoster.setDisplayName(sMovieTitle)
                 oHoster.setFileName(sMovieTitle)
                 cHosterGui().showHoster(oGui, oHoster, sHosterUrl, sThumb)
 

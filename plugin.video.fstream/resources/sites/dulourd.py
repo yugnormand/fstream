@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons.
+# fStream https://github.com/Kodi-fStream/venom-xbmc-addons.
 import re
 
 from resources.lib.gui.hoster import cHosterGui
@@ -201,6 +201,8 @@ def showSaisons():
     sMovieTitle = oInputParameterHandler.getValue('sMovieTitle')
     sThumb = oInputParameterHandler.getValue('sThumb')
 
+    if not sUrl.startswith('http'):
+        sUrl = URL_MAIN + sUrl
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
 
@@ -245,6 +247,9 @@ def showEpisodes():
     sMovieTitle = oInputParameterHandler.getValue('sMovieTitle')
     sThumb = oInputParameterHandler.getValue('sThumb')
     sDesc = oInputParameterHandler.getValue('sDesc')
+
+    if not sUrl.startswith('http'):
+        sUrl = URL_MAIN + sUrl
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
 
@@ -339,6 +344,18 @@ def showSerieHosters():
     sThumb = oInputParameterHandler.getValue('sThumb')
     referer = oInputParameterHandler.getValue('referer')
     postdata = oInputParameterHandler.getValue('postdata')
+
+
+    sUrlHoster = URL_MAIN + 'engine/ajax/controller.php?mod=getxfield'
+    oRequest = cRequestHandler(sUrlHoster)
+    oRequest.addHeaderEntry('Referer', referer)
+    oRequest.addHeaderEntry('X-Requested-With', 'XMLHttpRequest')
+    oRequest.addHeaderEntry('Content-Type', 'application/x-www-form-urlencoded')
+    postdata += '&type=episode'
+    oRequest.addParametersLine(postdata)
+    sHtmlContent = oRequest.request()
+#    {id: id, xfield: xfield, type: type, page_token: xfPageToken, g_recaptcha_response: token, user_hash: dle_login_hash}
+
 
     oRequest = cRequestHandler(sUrl)
     oRequest.setRequestType(1)

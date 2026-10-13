@@ -30,7 +30,7 @@ headers = {'User-Agent': USER_AGENT, 'Accept': '*/*', 'Connection': 'keep-alive'
 
 icon = 'tv.png'
 # sRootArt = cConfig().getRootArt()
-sRootArt = 'special://home/addons/plugin.video.fStream/resources/art/tv'
+sRootArt = 'special://home/addons/plugin.video.fstream/resources/art/tv'
 
 
 class track:
@@ -78,7 +78,7 @@ def showGenres():
 def parseWebM3U():  # Traite les m3u
     playlist = []
     # song = track(None, None, None, None)
-    sFile = 'special://home/addons/plugin.video.fStream/resources/extra/radio.xspf'
+    sFile = 'special://home/addons/plugin.video.fstream/resources/extra/radio.xspf'
 
     if not xbmcvfs.exists(sFile):
         return

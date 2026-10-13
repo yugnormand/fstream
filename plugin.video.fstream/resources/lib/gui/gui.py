@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
 import copy
 import json
 import threading
@@ -534,7 +534,7 @@ class cGui:
                     pass  # En cas de type exotique, on évite de faire planter le thread
 
             # On RENSEIGNE TOUJOURS les métadonnées, même si un ID TMDb est présent
-            # => le synopsis/local data de fstream/pastebin reste utilisable.
+            # => le synopsis/local data de fStream/pastebin reste utilisable.
             videoInfoTag.setOriginalTitle(data.get('originaltitle', ""))
             videoInfoTag.setPlot(data.get('plot', ""))
             videoInfoTag.setPlotOutline(data.get('tagline', ""))
@@ -898,9 +898,8 @@ class cGui:
                 sTest = '%s?site=%s&function=%s&%s' % (sPluginPath, sId, sFunction, sParams)
                 xbmc.executebuiltin('Container.Update(%s)' % sTest)
             except:
-                return False
+                pass
 
-        return False
 
     def selectPage2(self):
         sPluginPath = cPluginHandler().getPluginPath()
@@ -921,7 +920,7 @@ class cGui:
 
     def setWatched(self):
         if True:
-            # Use fstream database
+            # Use fStream database
             oInputParameterHandler = cInputParameterHandler()
             sSite = oInputParameterHandler.getValue('sId')
             sSiteUrl = oInputParameterHandler.getValue('siteUrl')
@@ -990,7 +989,7 @@ class cGui:
     def openSettings(self):
         return False
 
-    def showNofication(self, sDesc, sTitle='fstream', iSeconds=3):
+    def showNofication(self, sDesc, sTitle='fStream', iSeconds=3):
         # Pas de notif  lors des recherches globales
         if window(10101).getProperty('search') == 'true':
             return

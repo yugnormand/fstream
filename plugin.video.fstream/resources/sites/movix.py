@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
 
-from resources.lib import util
 from resources.lib.gui.hoster import cHosterGui
 from resources.lib.gui.gui import cGui
 from resources.lib.handler.inputParameterHandler import cInputParameterHandler
@@ -46,12 +45,12 @@ def load():
     oGui = cGui()
 
     oOutputParameterHandler = cOutputParameterHandler()
-    oGui.addDir(SITE_IDENTIFIER, 'showMenuMovies', 'Films', 'films.png', oOutputParameterHandler)
+    oGui.addDir(SITE_IDENTIFIER, 'showMenuMovies', 'Films', 'films.png', oOutputParameterHandler)    
 #    oOutputParameterHandler.addParameter('siteUrl', 'http://venom/')
     oGui.addDir(SITE_IDENTIFIER, 'showMenuSeries', 'Séries', 'series.png', oOutputParameterHandler)
 
     oGui.setEndOfDirectory()
-
+   
 def showMenuMovies():
     oGui = cGui()
     addons = addon()
@@ -68,14 +67,14 @@ def showMenuMovies():
 
     # ne fonctionne pas sur le site
     # oOutputParameterHandler.addParameter('siteUrl', MOVIE_ANNEES[0])
-    # oGui.addDir(SITE_IDENTIFIER, MOVIE_ANNEES[1], addons.VSlang(30106), 'annees.png', oOutputParameterHandler)
-
+    # oGui.addDir(SITE_IDENTIFIER, MOVIE_ANNEES[1], addons.VSlang(30106), 'annees.png', oOutputParameterHandler)    
+   
     oOutputParameterHandler.addParameter('siteUrl', MOVIE_GENRES[0])
     oGui.addDir(SITE_IDENTIFIER, MOVIE_GENRES[1], addons.VSlang(30105), 'genres.png', oOutputParameterHandler)
-
+        
     oOutputParameterHandler.addParameter('siteUrl', MOVIE_PAYS[0])
     oGui.addDir(SITE_IDENTIFIER, MOVIE_PAYS[1], 'Pays', 'host.png', oOutputParameterHandler)
-
+       
     oGui.setEndOfDirectory()
 
 def showMenuSeries():
@@ -102,7 +101,7 @@ def showSearchMovies():
     oInputParameterHandler = cInputParameterHandler()
     sUrl = oInputParameterHandler.getValue('siteUrl')
     sSearchText = oGui.showKeyBoard()
-    if sSearchText:
+    if sSearchText:   
         sUrl = URL_SEARCH[0] + sSearchText.replace('%20', ' ')
         showMovies(sUrl)
         oGui.setEndOfDirectory()
@@ -113,7 +112,7 @@ def showSearchSeries():
     oInputParameterHandler = cInputParameterHandler()
     sUrl = oInputParameterHandler.getValue('siteUrl')
     sSearchText = oGui.showKeyBoard()
-    if sSearchText:
+    if sSearchText:   
         sUrl = URL_SEARCH[0] + sSearchText.replace('%20', ' ')
         showSeries(sUrl)
         oGui.setEndOfDirectory()
@@ -126,7 +125,7 @@ def showGenres():
     liste.append(['Action', 1])
     liste.append(['Aventure', 35])
     liste.append(['Animation', 3])
-    liste.append(['Comédie', 22])
+    liste.append(['Comédie', 22])  
     liste.append(['Crime', 5])
     liste.append(['Documentaire', 25])
     liste.append(['Drame', 20])
@@ -142,7 +141,7 @@ def showGenres():
     liste.append(['Téléfilm', 34])
     liste.append(['Thriller', 17])
     liste.append(['Western', 19])
-
+   
     oOutputParameterHandler = cOutputParameterHandler()
     for sTitle, sGenre in liste:
         oOutputParameterHandler.addParameter('siteUrl', MOVIE_GENRES[0] % sGenre)
@@ -152,11 +151,11 @@ def showGenres():
 
 def showSeriesGenres():
     oGui = cGui()
-
+ 
     liste = []
     liste.append(['Action & Adventure', 26])
     liste.append(['Animation', 3])
-    liste.append(['Comédie', 22])
+    liste.append(['Comédie', 22])  
     liste.append(['Crime', 5])
     liste.append(['Documentaire', 25])
     liste.append(['Drame', 20])
@@ -174,15 +173,15 @@ def showSeriesGenres():
         oOutputParameterHandler.addParameter('siteUrl', SERIE_GENRES[0] % sGenre)
         oGui.addGenre(SITE_IDENTIFIER, 'showSeries', sTitle, oOutputParameterHandler)
 
-    oGui.setEndOfDirectory()
+    oGui.setEndOfDirectory() 
 
 def showMovieCountry():
     oGui = cGui()
-
+ 
     liste = []
     liste.append(['Allemagne', 86])
     liste.append(['Argentine', 10])
-    liste.append(['Autriche', 14])
+    liste.append(['Autriche', 14])  
     liste.append(['Belgique', 22])
     liste.append(['Brésil', 31])
     liste.append(['Canada', 41])
@@ -201,7 +200,7 @@ def showMovieCountry():
     liste.append(['Romanie', 191])
     liste.append(['Royaume-Uni', 249])
     liste.append(['Russie', 192])
-    liste.append(['Suède', 224])
+    liste.append(['Suède', 224])   
     liste.append(['Thaïlande', 231])
     liste.append(['Turquie', 238])
 
@@ -210,7 +209,7 @@ def showMovieCountry():
         oOutputParameterHandler.addParameter('siteUrl', MOVIE_PAYS[0] % iGenre)
         oGui.addDir(SITE_IDENTIFIER, 'showMovies', sTitle, 'host.png', oOutputParameterHandler)
 
-    oGui.setEndOfDirectory()
+    oGui.setEndOfDirectory() 
 
 def showMovieYears():
     import datetime
@@ -249,7 +248,7 @@ def showMovies(sSearch=''):
 #    sPattern = '<div class="relative group overflow-hidden">.+?<a href="([^"]+)">.+?data-src="([^"]+)".+?<span>([^<]+)</span>.+?>([^<]+)</h3>'
     sPattern = 'overflow-hidden">.+?href="([^"]+)".+?data-src="([^"]+)" alt="([^"]+)".+?<span>([^<]+)<\/span> *<!--\[if ENDBLOCK\]><!\[endif\]--> *<\/div>.+?ml-auto">([^<>]+)'
 
-    aResult = oParser.parse(sHtmlContent, sPattern)
+    aResult = oParser.parse(sHtmlContent, sPattern)            
     if aResult[0]:
         oOutputParameterHandler = cOutputParameterHandler()
 
@@ -272,7 +271,7 @@ def showMovies(sSearch=''):
             oOutputParameterHandler.addParameter('sYear', sYear)
             oGui.addMovie(SITE_IDENTIFIER, 'showHosters', sTitle, 'films.png', sThumb, '', oOutputParameterHandler)
 
-    if not sSearch:
+    if not sSearch:      
         if sPage:
             sPage = str(int(sPage)+1)
         else:
@@ -284,7 +283,7 @@ def showMovies(sSearch=''):
         oGui.addNext(SITE_IDENTIFIER, 'showMovies', 'Page ' + sPage, oOutputParameterHandler)
         oGui.setEndOfDirectory()
 
-
+        
 def showSeries(sSearch=''):
     oGui = cGui()
     oParser = cParser()
@@ -294,7 +293,6 @@ def showSeries(sSearch=''):
         sSearchText = '/'.join(sSearch.split('/')[-1:])
         sSearchText = oUtil.CleanName(sSearchText)
         sUrl = sSearch
-
     else:
         oInputParameterHandler = cInputParameterHandler()
         siteUrl = sUrl = oInputParameterHandler.getValue('siteUrl')
@@ -304,47 +302,65 @@ def showSeries(sSearch=''):
                 sUrl += '&page=' + sPage
             else:
                 sUrl += '?page=' + sPage
-
+                
     oRequestHandler = cRequestHandler(URL_MAIN + sUrl)
     sHtmlContent = oRequestHandler.request()
     sPattern = 'overflow-hidden">.+?href="([^"]+)".+?data-src="([^"]+)" alt="([^"]+)".+?<span>([^<]+)<\/span> *<!--\[if ENDBLOCK\]><!\[endif\]--> *<\/div>.+?ml-auto">([^<>]+)'
     aResult = oParser.parse(sHtmlContent, sPattern)
+    
     if aResult[0]:
         oOutputParameterHandler = cOutputParameterHandler()
 
         for aEntry in aResult[1]:
             sThumb = aEntry[1]
             sType = aEntry[4]
-            if not 'TV' in sType:
+            if not 'TV' in sType and not 'télé' in sType:
                 continue
-
+            
             sTitle = aEntry[2]
-
+            
             # Filtre de recherche
             if sSearch and not oUtil.CheckOccurence(sSearchText, sTitle):
                 continue
-
+            
             sUrl2 = aEntry[0]
             sYear = aEntry[3]
-            sTitle = re.sub('\(' + sYear + '\)', '', sTitle)
+            sTitle = re.sub('\(' + sYear + '\)', '', sTitle)            
             oOutputParameterHandler.addParameter('siteUrl', sUrl2)
             oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
             oOutputParameterHandler.addParameter('sThumb', sThumb)
-            oOutputParameterHandler.addParameter('sYear', sYear)
-            oGui.addTV(SITE_IDENTIFIER, 'showSaisons', sTitle, '', sThumb, '', oOutputParameterHandler)
+            oOutputParameterHandler.addParameter('sYear', sYear) 
+            oGui.addTV(SITE_IDENTIFIER, 'showSaisons', sTitle, '', sThumb, '', oOutputParameterHandler)            
+    elif sSearch:   # test si l'url direct de la série existe
+            sUrl2 = URL_MAIN + 'tv-show/' + sSearchText.replace(' ', '-')
+            oRequestHandler = cRequestHandler(sUrl2)
+            sHtmlContent = oRequestHandler.request()
+            sPattern = '"flex-1"> *<h3.+?>([^<]+).+?span>(\d+).+?img src="([^"]+)'
+            aResult = oParser.parse(sHtmlContent, sPattern)
+            if aResult[0]:
+                oOutputParameterHandler = cOutputParameterHandler()
+                aEntry = aResult[1][0]
+                sTitle = aEntry[0]
+                sYear = aEntry[1]
+                sThumb = aEntry[2]
+                oOutputParameterHandler.addParameter('siteUrl', sUrl2)
+                oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
+                oOutputParameterHandler.addParameter('sThumb', sThumb)
+                oOutputParameterHandler.addParameter('sYear', sYear)
+                oGui.addTV(SITE_IDENTIFIER, 'showSaisons', sTitle, '', sThumb, '', oOutputParameterHandler)            
 
     if not sSearch:
         if sPage:
             sPage = str(int(sPage)+1)
         else:
             sPage = '2'
-
+  
         oOutputParameterHandler = cOutputParameterHandler()
         oOutputParameterHandler.addParameter('siteUrl', siteUrl)
         oOutputParameterHandler.addParameter('sPage', sPage)
         oGui.addNext(SITE_IDENTIFIER, 'showSeries', 'Page ' + sPage, oOutputParameterHandler)
         oGui.setEndOfDirectory()
-
+                     
 def showSaisons():
     oGui = cGui()
     oParser = cParser()
@@ -363,7 +379,7 @@ def showSaisons():
     if aResult[0]:
         oOutputParameterHandler = cOutputParameterHandler()
 #        for aEntry in aResult[1][::-1]:
-        for aEntry in sorted(aResult[1], key=lambda saison: saison[0]):
+        for aEntry in sorted(aResult[1], key=lambda saison: int(saison[0])):
             sSaison = aEntry[1].strip()
             sTitle = sDisplayTitle = sMovieTitle + ' ' + sSaison
             if 'saison' not in sSaison and 'season' not in sSaison:
@@ -375,6 +391,7 @@ def showSaisons():
                 sTitle = sDisplayTitle = '%s Saison %s' % (sMovieTitle, numSaison)
             oOutputParameterHandler.addParameter('siteUrl', sUrl)
             oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
+            oOutputParameterHandler.addParameter('sThumb', sThumb)
             oOutputParameterHandler.addParameter('sYear', sYear)
             oGui.addSeason(SITE_IDENTIFIER, 'showEpisodes', sDisplayTitle, '', sThumb, '', oOutputParameterHandler)
 
@@ -388,8 +405,8 @@ def showEpisodes():
     sUrl = oInputParameterHandler.getValue('siteUrl')
     sMovieTitle = oInputParameterHandler.getValue('sMovieTitle')
     sThumb = oInputParameterHandler.getValue('sThumb')
-    sYear = oInputParameterHandler.getValue('sYear')
-
+    sYear = oInputParameterHandler.getValue('sYear')    
+        
     sUrl = ('%sepisode/%s/%s-1') % (URL_MAIN, sUrl.split('/')[-1], sMovieTitle.split(' ')[-1])
     # url title
     oRequestHandler = cRequestHandler(sUrl)
@@ -401,9 +418,9 @@ def showEpisodes():
         for aEntry in aResult[1]:
             sUrl = aEntry[0]
             sTitle = sMovieTitle + ' ' + aEntry[1].replace('#', '')
-            #sDesc = aEntry[0].strip()
+            #sDesc = aEntry[0].strip() 
             oOutputParameterHandler.addParameter('siteUrl', sUrl)
-            oOutputParameterHandler.addParameter('sMovieTitle', sTitle.split(' ')[0])
+            oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
             oOutputParameterHandler.addParameter('sThumb', sThumb)
             oOutputParameterHandler.addParameter('sYear', sYear)
             oGui.addEpisode(SITE_IDENTIFIER, 'showHosters', sTitle, '', sThumb, '', oOutputParameterHandler)

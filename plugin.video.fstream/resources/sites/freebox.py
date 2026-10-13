@@ -30,7 +30,7 @@ CHAINE_TV = (URL_WEB, 'showWeb')
 UA = 'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/48.0.2564.116 Chrome/48.0.2564.116 Safari/537.36'
 
 icon = 'tv.png'
-sRootArt = 'special://home/addons/plugin.video.fStream/resources/art/tv'
+sRootArt = 'special://home/addons/plugin.video.fstream/resources/art/tv'
 ADDON = addon()
 
 

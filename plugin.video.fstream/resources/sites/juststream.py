@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# fstream https://github.com/Kodi-fstream/venom-xbmc-addons
+# fStream https://github.com/Kodi-fStream/venom-xbmc-addons
 # Nouvelle source de streaming FILMS ET SÉRIES
 import re
 
@@ -23,16 +23,16 @@ key_search_movies = '#searchsomemovies'
 key_search_series = '#searchsomeseries'
 
 # Pour les Films
-MOVIE_NEWS = (URL_MAIN + 'films-gratos/', 'showMovies')
+MOVIE_NEWS = (URL_MAIN + 'films-en-stream/', 'showMovies')
 MOVIE_VIEWS = (URL_MAIN + key_popular_movies, 'showMovies')
-MOVIE_GENRES = (URL_MAIN + 'films-gratos/', 'showGenres')
+MOVIE_GENRES = (URL_MAIN + 'films-en-stream/', 'showGenres')
 MOVIE_ANNEES = (True, 'showMovieYears')
 
 # Pour les Series
-SERIE_NEWS = (URL_MAIN + 'series-gratos/', 'showMovies')
-SERIE_GENRES = (URL_MAIN + 'series-gratos/', 'showSeriesGenres')
-SERIE_VF = (URL_MAIN + 'series-gratos/series-vf/', 'showMovies')
-SERIE_VOSTFR = (URL_MAIN + 'series-gratos/series-vostfr/', 'showMovies')
+SERIE_NEWS = (URL_MAIN + 'series-en-stream/', 'showMovies')
+SERIE_GENRES = (URL_MAIN + 'series-en-stream/', 'showSeriesGenres')
+SERIE_VF = (URL_MAIN + 'series-en-stream/series-vf/', 'showMovies')
+SERIE_VOSTFR = (URL_MAIN + 'series-en-stream/series-vostfr/', 'showMovies')
 SERIE_ANNEES = (True, 'showSerieYears')
 
 URL_SEARCH = (URL_MAIN + 'index.php?do=search', 'showMovies')
@@ -138,11 +138,11 @@ def showSearch():
 def showGenres():
     oGui = cGui()
     listeGenre = [['Action', 'action'], ['Animation', 'animation'], ['Aventure', 'aventure'],
-                  ['Biopic', 'biopic'], ['Comédie', 'comedie'], ['Documentaire', 'documentaire'],
-                  ['Drame', 'drame'], ['Famille', 'famille'], ['Fantastique', 'fantastique'],
-                  ['Guerre', 'guerre'], ['Historique', 'historique'], ['Epouvante et Horreur', 'epouvante-horreur'],
-                  ['Espionnage', 'espionnage'], ['Policier', 'policier'], ['Romance', 'romance'],
-                  ['Science-Fiction', 'science-fiction'], ['Thriller', 'thriller'], ['western', 'western']]
+                    ['Biopic', 'biopic'], ['Comédie', 'comedie'], ['Documentaire', 'documentaire'],
+                    ['Drame', 'drame'], ['Famille', 'famille'], ['Fantastique', 'fantastique'],
+                    ['Guerre', 'guerre'], ['Historique', 'historique'], ['Epouvante et Horreur', 'epouvante-horreur'],
+                    ['Espionnage', 'espionnage'], ['Policier', 'policier'], ['Romance', 'romance'],
+                    ['Science-Fiction', 'science-fiction'], ['Thriller', 'thriller'], ['western', 'western']]
 
     oOutputParameterHandler = cOutputParameterHandler()
     for sTitle, sUrl in listeGenre:
@@ -168,12 +168,12 @@ def showMovieYears():
 def showSeriesGenres():
     oGui = cGui()
     listeGenre = [['Action', 'action-s'], ['Animation', 'animation-s'], ['Aventure', 'aventure-s'],
-                  ['Biopic', 'biopic-s'], ['Comédie', 'comedie-s'], ['Documentaire', 'documentaire-s'],
-                  ['Drame', 'drame-s'], ['Famille', 'famille-s'], ['Fantastique', 'fantastique-s'],
-                  ['Guerre', 'guerre-s'], ['Historique', 'historique-s'], ['Horreur', 'horreur-s'],
-                  ['Judiciaire', 'judiciare-s'], ['Musique', 'musical-s'], ['Policier', 'policier-s'],
-                  ['Romance', 'romance-s'], ['Science-Fiction', 'science-fiction-s'], ['Thriller', 'thriller-s'],
-                  ['western', 'western-s']]
+                    ['Biopic', 'biopic-s'], ['Comédie', 'comedie-s'], ['Documentaire', 'documentaire-s'],
+                    ['Drame', 'drame-s'], ['Famille', 'famille-s'], ['Fantastique', 'fantastique-s'],
+                    ['Guerre', 'guerre-s'], ['Historique', 'historique-s'], ['Horreur', 'horreur-s'],
+                    ['Judiciaire', 'judiciare-s'], ['Musique', 'musical-s'], ['Policier', 'policier-s'],
+                    ['Romance', 'romance-s'], ['Science-Fiction', 'science-fiction-s'], ['Thriller', 'thriller-s'],
+                    ['western', 'western-s']]
 
     oOutputParameterHandler = cOutputParameterHandler()
     for sTitle, sUrl in listeGenre:
@@ -558,7 +558,7 @@ def showHosters():
     oRequest.addParametersLine(postData)
     if cook:
         oRequest.addHeaderEntry('Cookie', cook)
-        
+
     sHosterUrl = oRequest.request()
 
     oHoster = cHosterGui().checkHoster(sHosterUrl)
@@ -580,19 +580,19 @@ function getxfield(obj, id, xfield, type) {
     $('.player-box').addClass('d-none');
     $('.embed-col, .embed-captcha').removeClass('d-none');
     $('html, body').animate({    scrollTop: $(".fplayer").offset().top - 40 }, 600);
-    if(turnstileInstance) turnstile.remove(turnstileInstance);    
-    turnstileInstance = turnstile.render('#xf_lock', 
+    if(turnstileInstance) turnstile.remove(turnstileInstance);
+    turnstileInstance = turnstile.render('#xf_lock',
                         {
                             sitekey: '0x4AAAAAAAW5Nb89XiWWbc9g',
-                            callback: function (token) 
-                            {    
-                                challengeCompleted=true;   
-                                $('.spinner').addClass('d-none');    
+                            callback: function (token)
+                            {
+                                challengeCompleted=true;
+                                $('.spinner').addClass('d-none');
                                 $.ajax(
                                     {
-                                        type: 'POST', 
+                                        type: 'POST',
                                         url: dle_root + "engine/ajax/controller.php?mod=getxfield",
-                                        data: 
+                                        data:
                                             {
                                                 id: id,
                                                 xfield: xfield,
@@ -600,15 +600,15 @@ function getxfield(obj, id, xfield, type) {
                                                 g_recaptcha_response: token,
                                                 user_hash: dle_login_hash
                                             },
-                                        beforeSend: function () 
+                                        beforeSend: function ()
                                             {
                                                 $('.insideIframe').remove();
-                                                $('.player-box').addClass('d-none');    
-                                                $('.embed-col, .embed-captcha').removeClass('d-none');   
-                                            }, 
-                                        success: function (data) 
+                                                $('.player-box').addClass('d-none');
+                                                $('.embed-col, .embed-captcha').removeClass('d-none');
+                                            },
+                                        success: function (data)
                                             {
-                                                if(data == 'error' || data == 'captcha_error') 
+                                                if(data == 'error' || data == 'captcha_error')
                                                 {
                                                     DLEalert('Vous devez résoudre le captcha pour obtenir ce lien.', 'error');    } else {    setTimeout(function(){    $('#videoIframe').html(data);    $("#loaderbt-" + id).remove();    $('.player-box, .media-servers').removeClass('d-none');    $('.embed-col').addClass('d-none');    if(xf_allow.includes(xfield)) {    if (typeof turnstileInstance != "undefined") {    turnstile.remove(turnstileInstance);    turnstileInstance=null;    $('.embed-captcha').addClass('d-none');    $('.spinner').removeClass('d-none'); } } $(obj).parent().addClass('current').siblings().removeClass('current');    }, 500); } } }); } });
 }

@@ -68,8 +68,8 @@
         },
         "coflix": {
             "label": "Coflix",
-            "active": "False",
-            "url": "https://coflix.band/"
+            "active": "True",
+            "url": "https://coflix.esq/"
         },
         "cpasmal": {
             "label": "CpasMal",
@@ -130,7 +130,7 @@
         "elitegol": {
             "label": "Elitegol",
             "active": "True",
-            "url": "https://bolaloca.my/",
+            "url": "https://zonalive.click/",
             "url_link": "player/%d"
         },
         "extreme_down": {
@@ -159,7 +159,7 @@
             "label": "Free Telechargement",
             "active": "False",
             "cloudflare": "True",
-            "url": "https://www.free-telecharger.mom/"
+            "url": "https://www.free-telecharger.skin/"
         },
         "freebox": {
             "label": "Freebox",
@@ -180,13 +180,18 @@
             "label": "French-stream",
             "active": "True",
             "site_info": "https://fstream.info/",
-            "url": "https://fs16.lol/"
+            "url": "https://fs07.lol/"
         },
         "french_stream_lol": {
             "label": "French-stream-lol",
             "active": "False",
             "cloudflare": "True",
             "url": "https://vvw.french-stream.one/"
+        },
+        "french_stream_clone": {
+            "label": "French-stream (Clone)",
+            "active": "True",
+            "url": "https://french-stream.net/"
         },
         "frenchanimes": {
             "label": "French Animes",
@@ -218,12 +223,18 @@
             "label": "JustStream",
             "active": "True",
             "cloudflare": "True",
-            "url": "https://juststream.pics/"
+            "url": "https://juststreami.college/"
         },
         "kepliz_com": {
             "label": "Kepliz",
             "active": "True",
-            "url": "https://kambad.com/"
+            "url": "https://vrobak.com/"
+        },
+        "kzstream": {
+            "label": "kzstream",
+            "active": "True",
+            "url": "https://kzreborn.online/",
+            "url_api": "https://kzreborn.online/api/"
         },
         "les_docus": {
             "label": "Les docus",
@@ -250,7 +261,7 @@
         "movix": {
             "label": "movix",
             "active": "True",
-            "url": "https://movix.bet/"
+            "url": "https://movix.zip/"
         },
         "mysteriam": {
             "label": "MySteriam",
@@ -297,6 +308,13 @@
             "active": "False",
             "url": "https://api.pluto.tv"
         },
+        "purstream": {
+            "label": "Purstream",
+            "active": "True",
+            "site_info": "https://purstream.wiki/",
+            "url_api": "https://api.purstream.ad/api/v1/",
+            "url": "https://purstream.ad/"
+        },
         "radio": {
             "label": "Radio",
             "active": "True",
@@ -306,6 +324,13 @@
             "label": "SeeFrench",
             "active": "False",
             "url": "https://www.seefrench.xyz/"
+        },
+        "rdlive": {
+            "label": "RD Live",
+            "active": "True",
+            "url": "https://rdaily.live/",
+            "url_flashcore": "https://1.newsoccers.one/2/x/feed/",
+            "url_link": "https://netanjahu.hls.st/t/%s/index.m3u8|Referer=https://iplayer.is/"
         },
         "sitedarkibox": {
             "label": "darkiBox",
@@ -349,6 +374,11 @@
             "active": "True",
             "url": "https://www.imdb.com/"
         },
+        "vavoo": {
+            "label": "vavoo",
+            "active": "True",
+            "url": "https://vavoo.to/"
+        },
         "topstream": {
             "label": "top-stream",
             "active": "False",
@@ -385,14 +415,14 @@
             "label": "Wawacity",
             "active": "False",
             "cloudflare": "True",
-            "url": "https://www.wawacity.win/"
+            "url": "https://www.wawacity.skin/"
         },
         "wiflix": {
             "label": "WiFlix",
             "active": "True",
             "cloudflare": "False",
             "site_info": "https://www.wiflix-nouvelle-adresse.site/",
-            "url": "https://flemmix.men/"
+            "url": "https://flemmix.rip/"
         },
         "wilifilm": {
             "label": "Wilifilm",
